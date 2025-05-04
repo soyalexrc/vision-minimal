@@ -45,10 +45,41 @@ export const paths = {
     root: ROOTS.DASHBOARD,
     two: `${ROOTS.DASHBOARD}/two`,
     three: `${ROOTS.DASHBOARD}/three`,
-    group: {
-      root: `${ROOTS.DASHBOARD}/group`,
-      five: `${ROOTS.DASHBOARD}/group/five`,
-      six: `${ROOTS.DASHBOARD}/group/six`,
+    clients: {
+      root: `${ROOTS.DASHBOARD}/clients`,
+      list: `${ROOTS.DASHBOARD}/clients`,
+      create: `${ROOTS.DASHBOARD}/clients/new`,
+    },
+    allies: {
+      root: `${ROOTS.DASHBOARD}/allies`,
+      list: `${ROOTS.DASHBOARD}/allies`,
+      create: `${ROOTS.DASHBOARD}/allies/new`,
+    },
+    users: {
+      root: `${ROOTS.DASHBOARD}/users`,
+      list: `${ROOTS.DASHBOARD}/users`,
+      create: `${ROOTS.DASHBOARD}/users/new`,
+    },
+    externalAdvisers: {
+      root: `${ROOTS.DASHBOARD}/external-advisers`,
+      list: `${ROOTS.DASHBOARD}/external-advisers`,
+      create: `${ROOTS.DASHBOARD}/external-advisers/new`,
+    },
+    properties: {
+      root: `${ROOTS.DASHBOARD}/properties`,
+      list: `${ROOTS.DASHBOARD}/properties`,
+      create: `${ROOTS.DASHBOARD}/properties/new`,
+    },
+    admin: {
+      internal: `${ROOTS.DASHBOARD}/admin-internal`,
+      cashFlow: `${ROOTS.DASHBOARD}/cashFlow`,
+      commissions: `${ROOTS.DASHBOARD}/commissions`,
+      fileManager: `${ROOTS.DASHBOARD}/fileManager`,
+    },
+    owners: {
+      root: `${ROOTS.DASHBOARD}/owners`,
+      list: `${ROOTS.DASHBOARD}/owners`,
+      create: `${ROOTS.DASHBOARD}/owners/new`,
     },
   },
 };

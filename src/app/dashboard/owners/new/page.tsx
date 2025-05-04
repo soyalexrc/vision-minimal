@@ -4,8 +4,8 @@ import { BlankView } from 'src/sections/blank/view';
 
 // ----------------------------------------------------------------------
 
-export const metadata = { title: `Página dos | Panel de control - ${CONFIG.appName}` };
+export const metadata = { title: `Nuevo propietario - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <BlankView title="Página dos" />;
+  return <BlankView title="Nuevo propietario" />;
 }

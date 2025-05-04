@@ -39,6 +39,7 @@ export function NavVertical({
   layoutQuery = 'md',
   ...other
 }: NavVerticalProps) {
+  console.log('isNavMini', isNavMini)
   const renderNavVertical = () => (
     <>
       {slots?.topArea ?? (
@@ -55,7 +56,7 @@ export function NavVertical({
           sx={{ px: 2, flex: '1 1 auto' }}
         />
 
-        {slots?.bottomArea ?? <NavUpgrade />}
+        {/*{slots?.bottomArea ?? <NavUpgrade />}*/}
       </Scrollbar>
     </>
   );
