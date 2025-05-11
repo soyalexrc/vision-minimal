@@ -1,11 +1,11 @@
 import { CONFIG } from 'src/global-config';
 
-import { BlankView } from 'src/sections/blank/view';
+import { AllyListView } from '../../../sections/ally/view/allies-list-view';
 
 // ----------------------------------------------------------------------
 
 export const metadata = { title: `Aliados - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <BlankView title="Aliados" />;
+  return <AllyListView />;
 }

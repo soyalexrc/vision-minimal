@@ -1,0 +1,12 @@
+{
+  "main": ".open-next/worker.js",
+  "name": "vision-admin",
+  "compatibility_date": "2025-05-08",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  }
+}

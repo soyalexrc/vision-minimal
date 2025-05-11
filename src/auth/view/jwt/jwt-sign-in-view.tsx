@@ -51,14 +51,17 @@ export function JwtSignInView() {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const defaultValues: SignInSchemaType = {
-    email: 'demo@minimals.cc',
-    password: '@2Minimal',
-  };
+  // const defaultValues: SignInSchemaType = {
+  //   email: 'demo@minimals.cc',
+  //   password: '@2Minimal',
+  // };
 
   const methods = useForm<SignInSchemaType>({
     resolver: zodResolver(SignInSchema),
-    defaultValues,
+    defaultValues: {
+      email: '',
+      password: '',
+    },
   });
 
   const {
@@ -134,22 +137,22 @@ export function JwtSignInView() {
     <>
       <FormHead
         title="Inicia sesión en tu cuenta"
-        description={
-          <>
-            {`¿No tienes una cuenta? `}
-            <Link component={RouterLink} href={paths.auth.jwt.signUp} variant="subtitle2">
-              Regístrate
-            </Link>
-          </>
-        }
+        // description={
+        //   <>
+        //     {`¿No tienes una cuenta? `}
+        //     <Link component={RouterLink} href={paths.auth.jwt.signUp} variant="subtitle2">
+        //       Regístrate
+        //     </Link>
+        //   </>
+        // }
         sx={{ textAlign: { xs: 'center', md: 'left' } }}
       />
 
-      <Alert severity="info" sx={{ mb: 3 }}>
-        Usa <strong>{defaultValues.email}</strong>
-        {' con la contraseña '}
-        <strong>{defaultValues.password}</strong>
-      </Alert>
+      {/*<Alert severity="info" sx={{ mb: 3 }}>*/}
+      {/*  Usa <strong>{defaultValues.email}</strong>*/}
+      {/*  {' con la contraseña '}*/}
+      {/*  <strong>{defaultValues.password}</strong>*/}
+      {/*</Alert>*/}
 
       {!!errorMessage && (
         <Alert severity="error" sx={{ mb: 3 }}>

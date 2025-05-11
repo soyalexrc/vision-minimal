@@ -1,11 +1,11 @@
 import { CONFIG } from 'src/global-config';
 
-import { BlankView } from 'src/sections/blank/view';
+import { ExternalAdviserListView } from '../../../sections/external-adviser/view/external-adviser-list-view';
 
 // ----------------------------------------------------------------------
 
 export const metadata = { title: `Asesores externos - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <BlankView title="Asesores externos" />;
+  return <ExternalAdviserListView />;
 }

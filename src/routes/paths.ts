@@ -49,11 +49,15 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/clients`,
       list: `${ROOTS.DASHBOARD}/clients`,
       create: `${ROOTS.DASHBOARD}/clients/new`,
+      edit: (id: number | string) => `${ROOTS.DASHBOARD}/clients/update/${id}`,
+      details: (id: number | string) => `${ROOTS.DASHBOARD}/clients/view/${id}`,
     },
     allies: {
       root: `${ROOTS.DASHBOARD}/allies`,
       list: `${ROOTS.DASHBOARD}/allies`,
       create: `${ROOTS.DASHBOARD}/allies/new`,
+      edit: (id: number) => `${ROOTS.DASHBOARD}/allies/update/${id}`,
+      details: (id: number) => `${ROOTS.DASHBOARD}/allies/view/${id}`,
     },
     users: {
       root: `${ROOTS.DASHBOARD}/users`,
