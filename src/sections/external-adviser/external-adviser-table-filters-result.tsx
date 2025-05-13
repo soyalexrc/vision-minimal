@@ -1,4 +1,4 @@
-import type { IUserTableFilters } from 'src/types/user';
+
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
 import type { FiltersResultProps } from 'src/components/filters-result';
 
@@ -8,11 +8,13 @@ import Chip from '@mui/material/Chip';
 
 import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-result';
 
+import type { IExternalAdviserFilters } from '../../types/external-adviser';
+
 // ----------------------------------------------------------------------
 
 type Props = FiltersResultProps & {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IUserTableFilters>;
+  filters: UseSetStateReturn<IExternalAdviserFilters>;
 };
 
 export function ExternalAdviserTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
@@ -28,16 +30,6 @@ export function ExternalAdviserTableFiltersResult({ filters, onResetPage, totalR
     updateFilters({ status: 'all' });
   }, [onResetPage, updateFilters]);
 
-  const handleRemoveRole = useCallback(
-    (inputValue: string) => {
-      const newValue = currentFilters.role.filter((item) => item !== inputValue);
-
-      onResetPage();
-      updateFilters({ role: newValue });
-    },
-    [onResetPage, updateFilters, currentFilters.role]
-  );
-
   const handleReset = useCallback(() => {
     onResetPage();
     resetFilters();
@@ -52,12 +44,6 @@ export function ExternalAdviserTableFiltersResult({ filters, onResetPage, totalR
           onDelete={handleRemoveStatus}
           sx={{ textTransform: 'capitalize' }}
         />
-      </FiltersBlock>
-
-      <FiltersBlock label="Role:" isShow={!!currentFilters.role.length}>
-        {currentFilters.role.map((item) => (
-          <Chip {...chipProps} key={item} label={item} onDelete={() => handleRemoveRole(item)} />
-        ))}
       </FiltersBlock>
 
       <FiltersBlock label="Keyword:" isShow={!!currentFilters.name}>

@@ -2,12 +2,9 @@ import type { IDateValue } from './common';
 
 // ----------------------------------------------------------------------
 
-export type IProductFilters = {
-  rating: string;
-  gender: string[];
-  category: string;
-  colors: string[];
-  priceRange: number[];
+export type IExternalAdviserFilters = {
+  name: string;
+  status: string;
 };
 
 export type IProductTableFilters = {

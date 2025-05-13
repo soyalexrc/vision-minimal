@@ -62,8 +62,12 @@ export const endpoints = {
   },
   externalAdviser: {
     list: '/external-adviser',
-    details: '/ally/details',
-    search: '/ally/search',
+    details: '/external-adviser/details',
+    create: '/external-adviser',
+    edit: '/external-adviser',
+    restore: '/external-adviser/restore',
+    delete: '/external-adviser',
+    search: '/external-adviser/search',
   },
   mail: {
     list: '/api/mail/list',

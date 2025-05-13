@@ -1,6 +1,5 @@
 'use client';
 
-import type { IUserTableFilters } from 'src/types/user';
 import type { TableHeadCellProps } from 'src/components/table';
 
 import { varAlpha } from 'minimal-shared/utils';
@@ -18,7 +17,6 @@ import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -40,18 +38,26 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { getStatus } from '../../../utils/get-status';
 import { ExternalAdviserTableRow } from '../external-adviser-table-row';
-import { useGetExternalAdvisers } from '../../../actions/external-adviser';
 import { ExternalAdviserTableToolbar } from '../external-adviser-table-toolbar';
+import { ExternalAdviserQuickEditForm } from '../external-adviser-quick-edit-form';
 import { ExternalAdviserTableFiltersResult } from '../external-adviser-table-filters-result';
+import {
+  deleteExternalAdviser, restoreExternalAdviser,
+  useGetExternalAdvisers,
+  deleteManyExternalAdvisers,
+} from '../../../actions/external-adviser';
 
-import type { IExternalAdviserItem } from '../../../types/external-adviser';
+import type { GetStatusType } from '../../../utils/get-status';
+import type { IExternalAdviserItem, IExternalAdviserFilters } from '../../../types/external-adviser';
 
 // ----------------------------------------------------------------------
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activos' }, { value: 'deleted', label: 'Eliminados' }];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
+  { id: 'id', label: 'ID' },
   { id: 'name', label: 'Nombre' },
   { id: 'phoneNumber', label: 'Telefono', width: 180 },
   { id: 'realStateCompanyName', label: 'Compania', width: 220 },
@@ -62,18 +68,19 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 // ----------------------------------------------------------------------
 
 export function ExternalAdviserListView() {
-  const table = useTable();
+  const table = useTable({ defaultDense: true, defaultOrderBy: 'id', defaultRowsPerPage: 25 });
+  const quickCreateForm = useBoolean();
 
   const confirmDialog = useBoolean();
-  const { advisers, count, advisersError, advisersValidating, advisersLoading, advisersEmpty } = useGetExternalAdvisers();
+  const { advisers, count, advisersError, advisersValidating, advisersLoading, advisersEmpty, refetch } = useGetExternalAdvisers();
 
-  const [tableData, setTableData] = useState<IExternalAdviserItem[]>([]);
+  const [tableData, setTableData] = useState<IExternalAdviserItem[]>(advisers);
 
   useEffect(() => {
     setTableData(advisers || []);
   }, [advisers]);
 
-  const filters = useSetState<IUserTableFilters>({ name: '', role: [], status: 'all' });
+  const filters = useSetState<IExternalAdviserFilters>({ name: '', status: 'all' });
   const { state: currentFilters, setState: updateFilters } = filters;
 
   const dataFiltered = applyFilter({
@@ -85,32 +92,90 @@ export function ExternalAdviserListView() {
   const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
 
   const canReset =
-    !!currentFilters.name || currentFilters.role.length > 0 || currentFilters.status !== 'all';
+    !!currentFilters.name || currentFilters.status !== 'all';
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
+
   const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id!.toString() !== id);
+    async (id: number) => {
+      // Wait for the toast.promise to resolve (shows loading, then success)
+      toast.promise(
+        (async () => {
+          // Call API to delete selected allies
+          const {data} = await deleteExternalAdviser(id);
 
-      toast.success('Delete success!');
+          if (data.error) {
+            toast.error(data.message);
+            return false;
+          }
 
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+          refetch();
+          return true;
+        })(),
+        {
+          loading: 'Cargando...',
+          success: 'Todo listo! Se elimino el asesor',
+          error: 'Oops! Algo salio mal',
+        }
+      );
     },
-    [dataInPage.length, table, tableData]
+    [table]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id!.toString()));
+  const handleRestoreRow = useCallback(
+    async (id: number) => {
+      // Wait for the toast.promise to resolve (shows loading, then success)
+      toast.promise(
+        (async () => {
+          // Call API to delete selected allies
+          const {data} = await restoreExternalAdviser(id);
 
-    toast.success('Delete success!');
+          if (data.error) {
+            toast.error(data.message);
+            return false;
+          }
 
-    setTableData(deleteRows);
+          refetch();
+          return true;
+        })(),
+        {
+          loading: 'Cargando...',
+          success: 'Todo listo! Se restauro el asesor',
+          error: 'Oops! Algo salio mal',
+        }
+      );
+    },
+    [table]
+  );
 
-    table.onUpdatePageDeleteRows(dataInPage.length, dataFiltered.length);
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  const handleDeleteRows = useCallback(async () => {
+    // Wait for the toast.promise to resolve (shows loading, then success)
+    toast.promise(
+      (async () => {
+        // Call API to delete selected allies
+        const ids = table.selected.map(Number);
+        const {data} = await deleteManyExternalAdvisers(ids);
+
+        if (data.error) {
+          toast.error(data.message);
+          return false;
+        }
+
+        refetch();
+        table.onSelectAllRows(
+          false,
+          dataFiltered.map((row) => row.id!.toString())
+        )
+        return true;
+      })(),
+      {
+        loading: 'Cargando...',
+        success: 'Todo listo! Se eliminaron los asesores',
+        error: 'Oops! Algo salio mal',
+      }
+    );
+  }, [table, refetch]);
 
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
@@ -127,7 +192,7 @@ export function ExternalAdviserListView() {
       title="Eliminar"
       content={
         <>
-          Estas seguro de eliminar <strong> {table.selected.length} </strong> Aliados?
+          Estas seguro de eliminar <strong> {table.selected.length} </strong> Asesores externos?
         </>
       }
       action={
@@ -145,6 +210,14 @@ export function ExternalAdviserListView() {
     />
   );
 
+  const renderQuickCreateForm = () => (
+    <ExternalAdviserQuickEditForm
+      currentExternalAdviser={{ phoneNumber: '', lastname: '', status: 'active', name: '', realStateCompanyName: '', email: '' }}
+      open={quickCreateForm.value}
+      onClose={quickCreateForm.onFalse}
+    />
+  );
+
   return (
     <>
       <DashboardContent>
@@ -157,8 +230,9 @@ export function ExternalAdviserListView() {
           ]}
           action={
             <Button
-              component={RouterLink}
-              href={paths.dashboard.allies.create}
+              // component={RouterLink}
+              // href={paths.dashboard.allies.create}
+              onClick={quickCreateForm.onTrue}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
@@ -191,13 +265,7 @@ export function ExternalAdviserListView() {
                       ((tab.value === 'all' || tab.value === currentFilters.status) && 'filled') ||
                       'soft'
                     }
-                    color={
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
-                      (tab.value === 'deleted' && 'error') ||
-                      'default'
-                    }
+                    color={getStatus(tab.value as GetStatusType).variant}
                   >
                     {['active', 'pending', 'banned', 'rejected', 'deleted'].includes(tab.value)
                       ? tableData.filter((user) => user.status === tab.value).length
@@ -269,9 +337,10 @@ export function ExternalAdviserListView() {
                       <ExternalAdviserTableRow
                         key={row.id}
                         row={row}
+                        onRestore={() => handleRestoreRow(row.id!)}
                         selected={table.selected.includes(row.id!.toString())}
                         onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id!.toString())}
+                        onDeleteRow={() => handleDeleteRow(row.id!)}
                         editHref={paths.dashboard.allies.edit(row.id!)}
                       />
                     ))}
@@ -300,6 +369,7 @@ export function ExternalAdviserListView() {
       </DashboardContent>
 
       {renderConfirmDialog()}
+      {renderQuickCreateForm()}
     </>
   );
 }
@@ -308,12 +378,12 @@ export function ExternalAdviserListView() {
 
 type ApplyFilterProps = {
   inputData: IExternalAdviserItem[];
-  filters: IUserTableFilters;
+  filters: IExternalAdviserFilters;
   comparator: (a: any, b: any) => number;
 };
 
 function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
-  const { name, status, role } = filters;
+  const { name, status } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -332,10 +402,6 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   if (status !== 'all') {
     inputData = inputData.filter((user) => user.status === status);
   }
-
-  // if (role.length) {
-  //   inputData = inputData.filter((user) => role.includes(user.role));
-  // }
 
   return inputData;
 }

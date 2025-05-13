@@ -25,6 +25,7 @@ import { CustomPopover } from 'src/components/custom-popover';
 import { IAllyItem } from '../../types/ally';
 import { ExternalAdviserQuickEditForm } from './external-adviser-quick-edit-form';
 import { IExternalAdviserItem } from '../../types/external-adviser';
+import { getStatus, GetStatusType } from '../../utils/get-status';
 
 // ----------------------------------------------------------------------
 
@@ -33,17 +34,19 @@ type Props = {
   selected: boolean;
   editHref: string;
   onSelectRow: () => void;
-  onDeleteRow: () => void;
+  onDeleteRow: () => Promise<void>;
+  onRestore: () => Promise<void>;
 };
 
-export function ExternalAdviserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow }: Props) {
+export function ExternalAdviserTableRow({ row, selected, editHref, onRestore, onSelectRow, onDeleteRow }: Props) {
   const menuActions = usePopover();
   const confirmDialog = useBoolean();
+  const restoreDialog = useBoolean();
   const quickEditForm = useBoolean();
 
   const renderQuickEditForm = () => (
     <ExternalAdviserQuickEditForm
-      currentAlly={row}
+      currentExternalAdviser={row}
       open={quickEditForm.value}
       onClose={quickEditForm.onFalse}
     />
@@ -57,23 +60,32 @@ export function ExternalAdviserTableRow({ row, selected, editHref, onSelectRow, 
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
-        <li>
-          <MenuItem component={RouterLink} href={editHref} onClick={() => menuActions.onClose()}>
-            <Iconify icon="solar:pen-bold" />
-            Editar
+        {
+          row.status !== 'deleted' &&
+          <MenuItem
+            onClick={() => {
+              confirmDialog.onTrue();
+              menuActions.onClose();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            Eliminar
           </MenuItem>
-        </li>
-
-        <MenuItem
-          onClick={() => {
-            confirmDialog.onTrue();
-            menuActions.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Eliminar
-        </MenuItem>
+        }
+        {
+          row.status === 'deleted' &&
+          <MenuItem
+            onClick={() => {
+              restoreDialog.onTrue();
+              menuActions.onClose();
+            }}
+            sx={{ color: 'info.main' }}
+          >
+            <Iconify icon="solar:restart-bold" />
+            Restaurar
+          </MenuItem>
+        }
       </MenuList>
     </CustomPopover>
   );
@@ -82,11 +94,31 @@ export function ExternalAdviserTableRow({ row, selected, editHref, onSelectRow, 
     <ConfirmDialog
       open={confirmDialog.value}
       onClose={confirmDialog.onFalse}
-      title="Delete"
+      title="Eliminar"
       content="Are you sure want to delete?"
       action={
-        <Button variant="contained" color="error" onClick={onDeleteRow}>
-          Delete
+        <Button variant="contained" color="error" onClick={async () => {
+          await onDeleteRow()
+          confirmDialog.onFalse();
+        }}>
+          Eliminar
+        </Button>
+      }
+    />
+  );
+
+  const renderRestoreDialog = () => (
+    <ConfirmDialog
+      open={restoreDialog.value}
+      onClose={restoreDialog.onFalse}
+      title="Restaurar"
+      content="Seguro que quieres restaurar este asesor?"
+      action={
+        <Button variant="contained" color="info" onClick={async () => {
+          await onRestore()
+          restoreDialog.onFalse();
+        }}>
+          Restaurar
         </Button>
       }
     />
@@ -108,14 +140,16 @@ export function ExternalAdviserTableRow({ row, selected, editHref, onSelectRow, 
           />
         </TableCell>
 
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.id}</TableCell>
         <TableCell>
           <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
             {/*<Avatar alt={row.name} src={row.name} />*/}
 
             <Stack sx={{ typography: 'body2', flex: '1 1 auto', alignItems: 'flex-start' }}>
               <Link
-                component={RouterLink}
-                href={editHref}
+                // component={RouterLink}
+                // href={editHref}
+                onClick={quickEditForm.onTrue}
                 color="inherit"
                 sx={{ cursor: 'pointer' }}
               >
@@ -137,28 +171,30 @@ export function ExternalAdviserTableRow({ row, selected, editHref, onSelectRow, 
           <Label
             variant="soft"
             color={
-              (row.status === 'active' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'banned' && 'error') ||
-              (row.status === 'deleted' && 'error') ||
-              'default'
+              (getStatus(row.status as GetStatusType).variant)
             }
           >
-            {row.status}
+            {getStatus(row.status as GetStatusType).name}
           </Label>
         </TableCell>
 
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Tooltip title="Quick Edit" placement="top" arrow>
-              <IconButton
-                color={quickEditForm.value ? 'inherit' : 'default'}
-                onClick={quickEditForm.onTrue}
-              >
-                <Iconify icon="solar:pen-bold" />
-              </IconButton>
-            </Tooltip>
-
+            {
+              row.status !== 'deleted' &&
+              <Tooltip title="Editar" placement="top" arrow>
+                <IconButton
+                  color={quickEditForm.value ? 'inherit' : 'default'}
+                  onClick={quickEditForm.onTrue}
+                >
+                  <Iconify icon="solar:pen-bold" />
+                </IconButton>
+              </Tooltip>
+            }
+            {
+              row.status === 'deleted' &&
+              <Box width={36} height={36} />
+            }
             <IconButton
               color={menuActions.open ? 'inherit' : 'default'}
               onClick={menuActions.onOpen}
@@ -172,6 +208,7 @@ export function ExternalAdviserTableRow({ row, selected, editHref, onSelectRow, 
       {renderQuickEditForm()}
       {renderMenuActions()}
       {renderConfirmDialog()}
+      {renderRestoreDialog()}
     </>
   );
 }
