@@ -351,7 +351,10 @@ export function OwnerListView() {
                     emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
                   />
 
-                  <TableNoData notFound={notFound} />
+                  {
+                    ownersEmpty &&
+                    <TableNoData notFound={notFound} />
+                  }
                 </TableBody>
               </Table>
             </Scrollbar>
