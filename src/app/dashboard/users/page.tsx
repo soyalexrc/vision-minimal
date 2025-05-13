@@ -1,11 +1,11 @@
 import { CONFIG } from 'src/global-config';
 
-import { BlankView } from 'src/sections/blank/view';
+import { UserListView } from '../../../sections/user/view/user-list-view';
 
 // ----------------------------------------------------------------------
 
 export const metadata = { title: `Usuarios - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <BlankView title="Usuarios" />;
+  return <UserListView />;
 }

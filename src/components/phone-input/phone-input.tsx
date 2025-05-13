@@ -52,6 +52,7 @@ export function PhoneInput({
   }, [defaultCountryCode, selectedCountry]);
 
   const handleClickCountry = (inputValue: Country) => {
+    console.log('inputValue', inputValue);
     startTransition(() => {
       setSelectedCountry(inputValue);
     });
@@ -105,7 +106,7 @@ export function PhoneInput({
         hiddenLabel={!label}
         country={selectedCountry}
         inputComponent={CustomInput}
-        placeholder={placeholder ?? 'Enter phone number'}
+        placeholder={placeholder ?? 'Ingresar numero de telefono'}
         slotProps={{
           inputLabel: { shrink: true },
           input: {

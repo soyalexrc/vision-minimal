@@ -23,8 +23,8 @@ import { CustomPopover } from 'src/components/custom-popover';
 
 import { ClientQuickEditForm } from './client-quick-edit-form';
 
-import type { IClientItem } from '../../../types/client';
-import { fCurrency } from '../../../utils/format-number';
+import type { IClientItem } from '../../types/client';
+import { fCurrency } from '../../utils/format-number';
 
 // ----------------------------------------------------------------------
 
@@ -120,7 +120,7 @@ export function ClientTableRow({ row, selected, editHref, onSelectRow, onDeleteR
                 color="inherit"
                 sx={{ cursor: 'pointer' }}
               >
-                {row.name} {row.lastname}
+                {row.name?.toUpperCase()} {row.lastname?.toUpperCase()}
               </Link>
               <Box component="span" sx={{ color: 'text.disabled' }}>
                 {row.email}
@@ -129,12 +129,12 @@ export function ClientTableRow({ row, selected, editHref, onSelectRow, onDeleteR
           </Box>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phone}</TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.adviserName}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 200 }}>{row.adviserName}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.serviceName}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.propertytype}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.propertyOfInterest}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.contactFrom}</TableCell>
-        <TableCell>
+        <TableCell sx={{ minWidth: 200 }}>
           <Typography variant="caption">{row.specificRequirement}</Typography>
         </TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.requestracking}</TableCell>
@@ -153,7 +153,7 @@ export function ClientTableRow({ row, selected, editHref, onSelectRow, onDeleteR
           </Label>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+        <TableCell sx={{ whiteSpace: 'nowrap', minWidth: 140 }}>
             <Label
               variant="soft"
               color={row.isinwaitinglist ? 'success' : 'error'}

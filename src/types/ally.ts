@@ -10,6 +10,12 @@ export type IProductFilters = {
   priceRange: number[];
 };
 
+export type IAllyTableFilters = {
+  name: string;
+  status: string;
+};
+
+
 export type IProductTableFilters = {
   stock: string[];
   publish: string[];

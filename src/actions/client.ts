@@ -1,4 +1,4 @@
-import type { SWRConfiguration } from 'swr';
+import { mutate, SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
 import useSWR from 'swr';
@@ -36,6 +36,7 @@ export function useGetClients() {
       clientsValidating: isValidating,
       clientsEmpty: !isLoading && !isValidating && !data?.data?.length,
       count: data?.total || 0,
+      refresh: () => mutate(url)
     }),
     [data?.data, error, isLoading, isValidating]
   );

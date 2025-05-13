@@ -1,11 +1,13 @@
 import type { SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import { useMemo } from 'react';
 
 import { fetcher, endpoints } from 'src/lib/axios';
 import { IAllyItem } from '../types/ally';
+import axios from 'src/lib/axios';
+import { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
 
 // ----------------------------------------------------------------------
 
@@ -35,6 +37,7 @@ export function useGetAllies() {
       alliesValidating: isValidating,
       alliesEmpty: !isLoading && !isValidating && !data?.data?.length,
       count: data?.total || 0,
+      refetch: () => mutate(url),
     }),
     [data?.data, error, isLoading, isValidating]
   );
@@ -93,3 +96,31 @@ export function useSearchProducts(query: string) {
 
   return memoizedValue;
 }
+
+// ----------------------------------------------------------------------
+
+export async function deleteAlly(id: number) {
+  const url = `${endpoints.ally.delete}/${id}`;
+  return axios.delete(url);
+}
+
+export async function deleteManyAllies(ids: number[]) {
+  const url = `${endpoints.ally.delete}/many`;
+  return axios.post(url, { ids });
+}
+
+export async function createAlly(payload: AllyQuickEditSchemaType) {
+  const url = `${endpoints.ally.create}`;
+  return axios.post(url, payload);
+}
+
+export async function updateAlly(payload: AllyQuickEditSchemaType, id: number) {
+  const url = `${endpoints.ally.edit}/${id}`;
+  return axios.patch(url, payload);
+}
+
+export async function restoreAlly(id: number) {
+  const url = `${endpoints.ally.restore}`;
+  return axios.post(url, { id });
+}
+

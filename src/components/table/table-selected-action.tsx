@@ -62,7 +62,7 @@ export function TableSelectedAction({
         }}
       />
 
-      <Typography
+        <Typography
         variant="subtitle2"
         sx={{
           ml: 2,
@@ -71,7 +71,9 @@ export function TableSelectedAction({
           ...(dense && { ml: 3 }),
         }}
       >
-        {numSelected} selected
+        {numSelected === 1
+          ? '1 Fila seleccionada'
+          : `${numSelected} Filas seleccionadas`}
       </Typography>
 
       {action && action}

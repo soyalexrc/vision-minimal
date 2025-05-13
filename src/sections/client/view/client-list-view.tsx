@@ -13,6 +13,7 @@ import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 
 import { paths } from 'src/routes/paths';
@@ -37,45 +38,65 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import { AllyTableRow } from '../ally-table-row';
-import { AllyTableToolbar } from '../ally-table-toolbar';
-import { AllyQuickEditForm } from '../ally-quick-edit-form';
-import { AllyTableFiltersResult } from '../ally-table-filters-result';
-import TableBodyCustom from '../../../components/table/custom-body-table';
-import { deleteAlly, useGetAllies, deleteManyAllies, restoreAlly } from '../../../actions/ally';
+import { ClientTableRow } from '../client-table-row';
+import { useGetClients } from '../../../actions/client';
+import { ClientTableToolbar } from '../client-table-toolbar';
+import { LoadingScreen } from '../../../components/loading-screen';
+import { ClientTableFiltersResult } from '../client-table-filters-result';
 
-import type { IAllyItem, IAllyTableFilters } from '../../../types/ally';
-import TableBody from '@mui/material/TableBody';
+import type { IClientItem, IClientDataFilters } from '../../../../types/client';
+
 
 // ----------------------------------------------------------------------
+const PUBLISH_OPTIONS = [
+  { value: 'published', label: 'Published' },
+  { value: 'draft', label: 'Draft' },
+];
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activos' }, { value: 'deleted', label: 'Eliminados' }];
+const HIDE_COLUMNS = { category: false };
+
+const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
+
+const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activo' }, {value: 'concreted', label: 'Concretado'}, {value: 'inactive', label: 'Inactivo'}, { value: 'deleted', label: 'Eliminado' }];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID' },
   { id: 'name', label: 'Nombre' },
-  { id: 'phoneNumber', label: 'Telefono', width: 180 },
+  { id: 'phone', label: 'Telefono', width: 180 },
+  { id: 'adviserName', label: 'Nombre de asesor' },
+  { id: 'serviceName', label: 'Servicio', width: 180 },
+  { id: 'propertytype', label: 'Tipo de inmueble', width: 180 },
+  { id: 'propertyOfInterest', label: 'Inmueble por el cual nos contacta', width: 180 },
+  { id: 'contactFrom', label: 'de donde nos contacta', width: 180 },
+  { id: 'specificRequirement', label: 'Detalle de la solicitud', width: 180 },
+  { id: 'requestracking', label: 'Seguimiento', width: 180 },
   { id: 'status', label: 'Status', width: 100 },
+  { id: 'isinwaitinglist', label: 'Lista de espera', width: 180 },
+  { id: 'isPotentialInvestor', label: 'Potencial inversor', width: 180 },
+  { id: 'budget', label: 'Presupuesto', width: 180 },
+  { id: 'typeOfPerson', label: 'Perfil de cliente', width: 180 },
+  { id: 'allowyounger', label: 'Menores de edad', width: 180 },
+  { id: 'allowpets', label: 'Mascotas', width: 180 },
   { id: '', width: 88 },
 ];
 
 // ----------------------------------------------------------------------
 
-export function AllyListView() {
-  const table = useTable({ defaultDense: true, defaultOrderBy: 'id', defaultRowsPerPage: 25 });
-   const quickCreateForm = useBoolean();
-
+export function ClientListView() {
+  const table = useTable({ defaultDense: true, defaultRowsPerPage: 25, defaultOrderBy: 'id' });
 
   const confirmDialog = useBoolean();
-  const { allies, count, alliesError, alliesValidating, alliesLoading, alliesEmpty, refetch } = useGetAllies();
+  const { clients, refresh, clientsLoading } = useGetClients();
 
-  const [tableData, setTableData] = useState<IAllyItem[]>([]);
+  const [tableData, setTableData] = useState<IClientItem[]>(clients);
 
   useEffect(() => {
-    setTableData(allies || []);
-  }, [allies]);
+    if (clients?.length > 0) {
+      setTableData(clients);
+    }
+  }, [clients]);
 
-  const filters = useSetState<IAllyTableFilters>({ name: '', status: 'all' });
+  const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
   const { state: currentFilters, setState: updateFilters } = filters;
 
   const dataFiltered = applyFilter({
@@ -92,84 +113,27 @@ export function AllyListView() {
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleDeleteRow = useCallback(
-  async (id: number) => {
-    // Wait for the toast.promise to resolve (shows loading, then success)
-    toast.promise(
-      (async () => {
-        // Call API to delete selected allies
-        const {data} = await deleteAlly(id);
+    (id: string) => {
+      const deleteRow = tableData.filter((row) => row.id!.toString() !== id);
 
-        if (data.error) {
-          toast.error(data.message);
-          return false;
-        }
+      toast.success('Delete success!');
 
-        refetch();
-        return true;
-      })(),
-      {
-        loading: 'Cargando...',
-        success: 'Todo listo! Se elimino el aliado',
-        error: 'Oops! Algo salio mal',
-      }
-    );
-  },
-  [table]
-);
+      setTableData(deleteRow);
 
-  const handleRestoreRow = useCallback(
-  async (id: number) => {
-    // Wait for the toast.promise to resolve (shows loading, then success)
-    toast.promise(
-      (async () => {
-        // Call API to delete selected allies
-        const {data} = await restoreAlly(id);
-
-        if (data.error) {
-          toast.error(data.message);
-          return false;
-        }
-
-        refetch();
-        return true;
-      })(),
-      {
-        loading: 'Cargando...',
-        success: 'Todo listo! Se restauro el aliado',
-        error: 'Oops! Algo salio mal',
-      }
-    );
-  },
-  [table]
-);
-
- const handleDeleteRows = useCallback(async () => {
-  // Wait for the toast.promise to resolve (shows loading, then success)
-   toast.promise(
-    (async () => {
-      // Call API to delete selected allies
-      const ids = table.selected.map(Number);
-      const {data} = await deleteManyAllies(ids);
-
-      if (data.error) {
-        toast.error(data.message);
-        return false;
-      }
-
-      refetch();
-      table.onSelectAllRows(
-        false,
-        dataFiltered.map((row) => row.id!.toString())
-      )
-      return true;
-    })(),
-    {
-      loading: 'Cargando...',
-      success: 'Todo listo! Se eliminaron los aliados',
-      error: 'Oops! Algo salio mal',
-    }
+      table.onUpdatePageDeleteRow(dataInPage.length);
+    },
+    [dataInPage.length, table, tableData]
   );
-}, [table, refetch]);
+
+  const handleDeleteRows = useCallback(() => {
+    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id!.toString()));
+
+    toast.success('Delete success!');
+
+    setTableData(deleteRows);
+
+    table.onUpdatePageDeleteRows(dataInPage.length, dataFiltered.length);
+  }, [dataFiltered.length, dataInPage.length, table, tableData]);
 
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
@@ -193,7 +157,7 @@ export function AllyListView() {
         <Button
           variant="contained"
           color="error"
-          onClick={async () => {
+          onClick={() => {
             handleDeleteRows();
             confirmDialog.onFalse();
           }}
@@ -204,30 +168,22 @@ export function AllyListView() {
     />
   );
 
-  const renderQuickCreateForm = () => (
-      <AllyQuickEditForm
-        currentAlly={{ email: '', name: '', lastname: '', phoneNumber: '', status: 'active' }}
-        open={quickCreateForm.value}
-        onClose={quickCreateForm.onFalse}
-      />
-    );
-
   return (
     <>
       <DashboardContent>
         <CustomBreadcrumbs
-          heading="Aliados"
+          heading="Clientes"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Aliados', href: paths.dashboard.allies.root },
+            { name: 'Clientes', href: paths.dashboard.clients.root },
             { name: 'Lista' },
           ]}
           action={
             <Button
               // component={RouterLink}
-              // href={paths.dashboard.allies.create}
+              // href={paths.dashboard.clients.create}
+              onClick={refresh}
               variant="contained"
-              onClick={quickCreateForm.onTrue}
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
               Nuevo aliado
@@ -260,14 +216,13 @@ export function AllyListView() {
                       'soft'
                     }
                     color={
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'banned' && 'error') ||
+                      (tab.value === 'concreted' && 'success') ||
+                      (tab.value === 'active' && 'warning') ||
                       (tab.value === 'deleted' && 'error') ||
                       'default'
                     }
                   >
-                    {['active', 'pending', 'banned', 'rejected', 'deleted'].includes(tab.value)
+                    {['active', 'concreted', 'inactive', 'rejected', 'deleted'].includes(tab.value)
                       ? tableData.filter((user) => user.status === tab.value).length
                       : tableData.length}
                   </Label>
@@ -276,13 +231,13 @@ export function AllyListView() {
             ))}
           </Tabs>
 
-          <AllyTableToolbar
+          <ClientTableToolbar
             filters={filters}
             onResetPage={table.onResetPage}
           />
 
           {canReset && (
-            <AllyTableFiltersResult
+            <ClientTableFiltersResult
               filters={filters}
               totalResults={dataFiltered.length}
               onResetPage={table.onResetPage}
@@ -302,7 +257,7 @@ export function AllyListView() {
                 )
               }
               action={
-                <Tooltip title="Eliminar" arrow>
+                <Tooltip title="Delete">
                   <IconButton color="primary" onClick={confirmDialog.onTrue}>
                     <Iconify icon="solar:trash-bin-trash-bold" />
                   </IconButton>
@@ -310,54 +265,58 @@ export function AllyListView() {
               }
             />
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headCells={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id!.toString())
-                    )
-                  }
-                />
+            {
+              clientsLoading &&
+              <Box sx={{ height: 400, justifyContent: 'center', alignItems: 'center' }}>
+                <LoadingScreen />
+              </Box>
+            }
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <AllyTableRow
-                        key={row.id}
-                        row={row}
-                        onRestore={() => handleRestoreRow(row.id!)}
-                        selected={table.selected.includes(row.id!.toString())}
-                        onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id!)}
-                        editHref={paths.dashboard.allies.edit(row.id!)}
-                      />
-                    ))}
-
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+            {
+              !clientsLoading && clients.length > 0 &&
+              <Scrollbar>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headCells={TABLE_HEAD}
+                    rowCount={dataFiltered.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        dataFiltered.map((row) => row.id!.toString())
+                      )
+                    }
                   />
+                  <TableBody>
+                    {dataFiltered
+                      .slice(
+                        table.page * table.rowsPerPage,
+                        table.page * table.rowsPerPage + table.rowsPerPage
+                      )
+                      .map((row) => (
+                        <ClientTableRow
+                          key={row.id}
+                          row={row}
+                          selected={table.selected.includes(row.id!.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id!.toString())}
+                          onDeleteRow={() => handleDeleteRow(row.id!.toString())}
+                          editHref={paths.dashboard.clients.edit(row.id!)}
+                        />
+                      ))}
 
-                  {
-                    alliesEmpty && (
-                      <TableNoData notFound={notFound} />
-                    )
-                  }
-                </TableBody>
-              </Table>
-            </Scrollbar>
+                    <TableEmptyRows
+                      height={table.dense ? 56 : 56 + 20}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    />
+
+                    <TableNoData notFound={notFound} />
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            }
           </Box>
 
           <TablePaginationCustom
@@ -373,7 +332,6 @@ export function AllyListView() {
       </DashboardContent>
 
       {renderConfirmDialog()}
-      {renderQuickCreateForm()}
     </>
   );
 }
@@ -381,8 +339,8 @@ export function AllyListView() {
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: IAllyItem[];
-  filters: IAllyTableFilters;
+  inputData: IClientItem[];
+  filters: IClientDataFilters;
   comparator: (a: any, b: any) => number;
 };
 
@@ -407,6 +365,9 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
     inputData = inputData.filter((user) => user.status === status);
   }
 
+  // if (role.length) {
+  //   inputData = inputData.filter((user) => role.includes(user.role));
+  // }
+
   return inputData;
 }
-

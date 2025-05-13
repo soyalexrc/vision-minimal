@@ -6,3 +6,12 @@
 .simplebar-scrollbar.simplebar-visible:before {
   opacity: 0.48;
 }
+
+/* grabScroll.css */
+.simplebar-content.active-grab {
+  cursor: grabbing !important;
+  user-select: none;
+}
+.simplebar-content {
+  cursor: grab;
+}

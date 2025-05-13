@@ -19,12 +19,13 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { Iconify } from 'src/components/iconify';
 import { CustomPopover } from 'src/components/custom-popover';
+import { IClientDataFilters } from '../../types/client';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IUserTableFilters>;
+  filters: UseSetStateReturn<IClientDataFilters>;
 };
 
 export function ClientTableToolbar({ filters, onResetPage }: Props) {

@@ -20,6 +20,7 @@ import IconButton from '@mui/material/IconButton';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
+import { _roles } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
@@ -40,52 +41,38 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
-import { ClientTableRow } from '../client-table-row';
-import { useGetClients } from '../../../../actions/client';
-import { ClientTableToolbar } from '../client-table-toolbar';
-import { ClientTableFiltersResult } from '../client-table-filters-result';
+import { UserTableRow } from '../user-table-row';
+import { useGetAllies } from '../../../actions/ally';
+import { UserTableToolbar } from '../user-table-toolbar';
+import { UserTableFiltersResult } from '../user-table-filters-result';
 
-import type { IClientItem } from '../../../../types/client';
-
+import type { IAllyItem } from '../../../types/ally';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activo' }, {value: 'concreted', label: 'Concretado'}, {value: 'inactive', label: 'Inactivo'}, { value: 'deleted', label: 'Eliminado' }];
+const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activos' }, { value: 'deleted', label: 'Eliminados' }];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
-  { id: 'id', label: 'ID' },
   { id: 'name', label: 'Nombre' },
-  { id: 'phone', label: 'Telefono', width: 180 },
-  { id: 'adviserName', label: 'Nombre de asesor' },
-  { id: 'serviceName', label: 'Servicio', width: 180 },
-  { id: 'propertytype', label: 'Tipo de inmueble', width: 180 },
-  { id: 'propertyOfInterest', label: 'Inmueble por el cual nos contacta', width: 180 },
-  { id: 'contactFrom', label: 'de donde nos contacta', width: 180 },
-  { id: 'specificRequirement', label: 'Detalle de la solicitud', width: 180 },
-  { id: 'requestracking', label: 'Seguimiento', width: 180 },
+  { id: 'phoneNumber', label: 'Telefono', width: 180 },
+  // { id: 'company', label: 'Compania', width: 220 },
   { id: 'status', label: 'Status', width: 100 },
-  { id: 'isinwaitinglist', label: 'Lista de espera', width: 180 },
-  { id: 'isPotentialInvestor', label: 'Potencial inversor', width: 180 },
-  { id: 'budget', label: 'Presupuesto', width: 180 },
-  { id: 'typeOfPerson', label: 'Perfil de cliente', width: 180 },
-  { id: 'allowyounger', label: 'Menores de edad', width: 180 },
-  { id: 'allowpets', label: 'Mascotas', width: 180 },
   { id: '', width: 88 },
 ];
 
 // ----------------------------------------------------------------------
 
-export function ClientListView() {
-  const table = useTable({ defaultDense: true, defaultRowsPerPage: 100 });
+export function UserListView() {
+  const table = useTable();
 
   const confirmDialog = useBoolean();
-  const { clients, count, clientsError, clientsValidating, clientsLoading, clientsEmpty } = useGetClients();
+  const { allies, count, alliesError, alliesValidating, alliesLoading, alliesEmpty } = useGetAllies();
 
-  const [tableData, setTableData] = useState<IClientItem[]>([]);
+  const [tableData, setTableData] = useState<IAllyItem[]>([]);
 
   useEffect(() => {
-    setTableData(clients || []);
-  }, [clients]);
+    setTableData(allies || []);
+  }, [allies]);
 
   const filters = useSetState<IUserTableFilters>({ name: '', role: [], status: 'all' });
   const { state: currentFilters, setState: updateFilters } = filters;
@@ -163,20 +150,20 @@ export function ClientListView() {
     <>
       <DashboardContent>
         <CustomBreadcrumbs
-          heading="Clientes"
+          heading="Usuarios"
           links={[
             { name: 'Dashboard', href: paths.dashboard.root },
-            { name: 'Clientes', href: paths.dashboard.clients.root },
+            { name: 'Usuarios', href: paths.dashboard.users.root },
             { name: 'Lista' },
           ]}
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.clients.create}
+              href={paths.dashboard.allies.create}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              Nuevo aliado
+              Nuevo usuario
             </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
@@ -206,13 +193,14 @@ export function ClientListView() {
                       'soft'
                     }
                     color={
-                      (tab.value === 'concreted' && 'success') ||
-                      (tab.value === 'active' && 'warning') ||
+                      (tab.value === 'active' && 'success') ||
+                      (tab.value === 'pending' && 'warning') ||
+                      (tab.value === 'banned' && 'error') ||
                       (tab.value === 'deleted' && 'error') ||
                       'default'
                     }
                   >
-                    {['active', 'concreted', 'inactive', 'rejected', 'deleted'].includes(tab.value)
+                    {['active', 'pending', 'banned', 'rejected', 'deleted'].includes(tab.value)
                       ? tableData.filter((user) => user.status === tab.value).length
                       : tableData.length}
                   </Label>
@@ -221,13 +209,13 @@ export function ClientListView() {
             ))}
           </Tabs>
 
-          <ClientTableToolbar
+          <UserTableToolbar
             filters={filters}
             onResetPage={table.onResetPage}
           />
 
           {canReset && (
-            <ClientTableFiltersResult
+            <UserTableFiltersResult
               filters={filters}
               totalResults={dataFiltered.length}
               onResetPage={table.onResetPage}
@@ -279,13 +267,13 @@ export function ClientListView() {
                       table.page * table.rowsPerPage + table.rowsPerPage
                     )
                     .map((row) => (
-                      <ClientTableRow
+                      <UserTableRow
                         key={row.id}
                         row={row}
                         selected={table.selected.includes(row.id!.toString())}
                         onSelectRow={() => table.onSelectRow(row.id!.toString())}
                         onDeleteRow={() => handleDeleteRow(row.id!.toString())}
-                        editHref={paths.dashboard.clients.edit(row.id!)}
+                        editHref={paths.dashboard.allies.edit(row.id!)}
                       />
                     ))}
 
@@ -320,7 +308,7 @@ export function ClientListView() {
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: IClientItem[];
+  inputData: IAllyItem[];
   filters: IUserTableFilters;
   comparator: (a: any, b: any) => number;
 };

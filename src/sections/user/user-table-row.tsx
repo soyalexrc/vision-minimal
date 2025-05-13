@@ -23,28 +23,25 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { IAllyItem } from '../../types/ally';
-import { AllyQuickEditForm } from './ally-quick-edit-form';
-import { getStatus, GetStatusType } from '../../utils/get-status';
+import { UserQuickEditForm } from './user-quick-edit-form';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   row: IAllyItem;
   selected: boolean;
-  editHref?: string;
+  editHref: string;
   onSelectRow: () => void;
-  onDeleteRow: () => Promise<void>;
-  onRestore: () => Promise<void>;
+  onDeleteRow: () => void;
 };
 
-export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRow }: Props) {
+export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow }: Props) {
   const menuActions = usePopover();
   const confirmDialog = useBoolean();
-  const restoreDialog = useBoolean();
   const quickEditForm = useBoolean();
 
   const renderQuickEditForm = () => (
-    <AllyQuickEditForm
+    <UserQuickEditForm
       currentAlly={row}
       open={quickEditForm.value}
       onClose={quickEditForm.onFalse}
@@ -59,32 +56,23 @@ export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRo
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
-        {
-          row.status !== 'deleted' &&
-            <MenuItem
-              onClick={() => {
-                confirmDialog.onTrue();
-                menuActions.onClose();
-              }}
-              sx={{ color: 'error.main' }}
-            >
-              <Iconify icon="solar:trash-bin-trash-bold" />
-              Eliminar
-            </MenuItem>
-        }
-        {
-          row.status === 'deleted' &&
-            <MenuItem
-              onClick={() => {
-                restoreDialog.onTrue();
-                menuActions.onClose();
-              }}
-              sx={{ color: 'info.main' }}
-            >
-              <Iconify icon="solar:restart-bold" />
-              Restaurar
-            </MenuItem>
-        }
+        <li>
+          <MenuItem component={RouterLink} href={editHref} onClick={() => menuActions.onClose()}>
+            <Iconify icon="solar:pen-bold" />
+            Editar
+          </MenuItem>
+        </li>
+
+        <MenuItem
+          onClick={() => {
+            confirmDialog.onTrue();
+            menuActions.onClose();
+          }}
+          sx={{ color: 'error.main' }}
+        >
+          <Iconify icon="solar:trash-bin-trash-bold" />
+          Eliminar
+        </MenuItem>
       </MenuList>
     </CustomPopover>
   );
@@ -93,32 +81,11 @@ export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRo
     <ConfirmDialog
       open={confirmDialog.value}
       onClose={confirmDialog.onFalse}
-      title="Eliminar"
-      content="Seguro que quieres eliminar este aliado?"
+      title="Delete"
+      content="Are you sure want to delete?"
       action={
-        <Button variant="contained" color="error" onClick={async () => {
-          await onDeleteRow()
-          confirmDialog.onFalse();
-        }}>
-          Eliminar
-        </Button>
-      }
-    />
-  );
-
-
-  const renderRestoreDialog = () => (
-    <ConfirmDialog
-      open={restoreDialog.value}
-      onClose={restoreDialog.onFalse}
-      title="Restaurar"
-      content="Seguro que quieres restaurar este aliado?"
-      action={
-        <Button variant="contained" color="info" onClick={async () => {
-          await onRestore()
-          restoreDialog.onFalse();
-        }}>
-          Restaurar
+        <Button variant="contained" color="error" onClick={onDeleteRow}>
+          Delete
         </Button>
       }
     />
@@ -139,7 +106,6 @@ export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRo
             }}
           />
         </TableCell>
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.id}</TableCell>
 
         <TableCell>
           <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
@@ -147,9 +113,8 @@ export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRo
 
             <Stack sx={{ typography: 'body2', flex: '1 1 auto', alignItems: 'flex-start' }}>
               <Link
-                // component={RouterLink}
-                // href={editHref}
-                onClick={quickEditForm.onTrue}
+                component={RouterLink}
+                href={editHref}
                 color="inherit"
                 sx={{ cursor: 'pointer' }}
               >
@@ -170,30 +135,27 @@ export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRo
           <Label
             variant="soft"
             color={
-              (getStatus(row.status as GetStatusType).variant)
+              (row.status === 'active' && 'success') ||
+              (row.status === 'pending' && 'warning') ||
+              (row.status === 'banned' && 'error') ||
+              (row.status === 'deleted' && 'error') ||
+              'default'
             }
           >
-            {getStatus(row.status as GetStatusType).name}
+            {row.status}
           </Label>
         </TableCell>
 
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            {
-              row.status !== 'deleted' &&
-              <Tooltip title="Editar" placement="top" arrow>
-                <IconButton
-                  color={quickEditForm.value ? 'inherit' : 'default'}
-                  onClick={quickEditForm.onTrue}
-                >
-                  <Iconify icon="solar:pen-bold" />
-                </IconButton>
-              </Tooltip>
-            }
-            {
-              row.status === 'deleted' &&
-              <Box width={36} height={36} />
-            }
+            <Tooltip title="Quick Edit" placement="top" arrow>
+              <IconButton
+                color={quickEditForm.value ? 'inherit' : 'default'}
+                onClick={quickEditForm.onTrue}
+              >
+                <Iconify icon="solar:pen-bold" />
+              </IconButton>
+            </Tooltip>
 
             <IconButton
               color={menuActions.open ? 'inherit' : 'default'}
@@ -208,7 +170,6 @@ export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRo
       {renderQuickEditForm()}
       {renderMenuActions()}
       {renderConfirmDialog()}
-      {renderRestoreDialog()}
     </>
   );
 }

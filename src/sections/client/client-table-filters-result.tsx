@@ -1,4 +1,3 @@
-import type { IAllyTableFilters } from 'src/types/ally';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
 import type { FiltersResultProps } from 'src/components/filters-result';
 
@@ -7,16 +6,17 @@ import { useCallback } from 'react';
 import Chip from '@mui/material/Chip';
 
 import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-result';
-import { getStatus, GetStatusType } from '../../utils/get-status';
+
+import type { IClientDataFilters } from '../../types/client';
 
 // ----------------------------------------------------------------------
 
 type Props = FiltersResultProps & {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IAllyTableFilters>;
+  filters: UseSetStateReturn<IClientDataFilters>;
 };
 
-export function AllyTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
+export function ClientTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
   const { state: currentFilters, setState: updateFilters, resetState: resetFilters } = filters;
 
   const handleRemoveKeyword = useCallback(() => {
@@ -29,6 +29,16 @@ export function AllyTableFiltersResult({ filters, onResetPage, totalResults, sx 
     updateFilters({ status: 'all' });
   }, [onResetPage, updateFilters]);
 
+  // const handleRemoveRole = useCallback(
+  //   (inputValue: string) => {
+  //     const newValue = currentFilters.role.filter((item) => item !== inputValue);
+  //
+  //     onResetPage();
+  //     updateFilters({ role: newValue });
+  //   },
+  //   [onResetPage, updateFilters, currentFilters.role]
+  // );
+
   const handleReset = useCallback(() => {
     onResetPage();
     resetFilters();
@@ -39,13 +49,19 @@ export function AllyTableFiltersResult({ filters, onResetPage, totalResults, sx 
       <FiltersBlock label="Estatus:" isShow={currentFilters.status !== 'all'}>
         <Chip
           {...chipProps}
-          label={getStatus(currentFilters.status as GetStatusType).name}
+          label={currentFilters.status}
           onDelete={handleRemoveStatus}
-          sx={{ textTransform: 'capitalize', color: getStatus(currentFilters.status as GetStatusType).color, bgcolor: getStatus(currentFilters.status as GetStatusType).backgroundColor }}
+          sx={{ textTransform: 'capitalize' }}
         />
       </FiltersBlock>
 
-      <FiltersBlock label="Nombre:" isShow={!!currentFilters.name}>
+      {/*<FiltersBlock label="Role:" isShow={!!currentFilters.role.length}>*/}
+      {/*  {currentFilters.role.map((item) => (*/}
+      {/*    <Chip {...chipProps} key={item} label={item} onDelete={() => handleRemoveRole(item)} />*/}
+      {/*  ))}*/}
+      {/*</FiltersBlock>*/}
+
+      <FiltersBlock label="Keyword:" isShow={!!currentFilters.name}>
         <Chip {...chipProps} label={currentFilters.name} onDelete={handleRemoveKeyword} />
       </FiltersBlock>
     </FiltersResult>

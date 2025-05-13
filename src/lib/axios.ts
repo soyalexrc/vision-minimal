@@ -43,8 +43,12 @@ export const endpoints = {
   },
   ally: {
     list: '/ally',
+    create: '/ally',
+    edit: '/ally',
+    restore: '/ally/restore',
     details: '/ally/details',
     search: '/ally/search',
+    delete: '/ally'
   },
   client: {
     list: '/client',

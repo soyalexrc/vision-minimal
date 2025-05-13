@@ -18,7 +18,7 @@ import { USER_STATUS_OPTIONS } from 'src/_mock';
 import { toast } from 'src/components/snackbar';
 import { Form, Field, schemaHelper } from 'src/components/hook-form';
 
-import { IClientItem } from '../../../types/client';
+import { IClientItem } from '../../types/client';
 
 // ----------------------------------------------------------------------
 
@@ -60,14 +60,13 @@ export function ClientQuickEditForm({ currentclient, open, onClose }: Props) {
     lastname: '',
     email: '',
     phoneNumber: '',
-    status: '',
+    status: 'active',
   };
 
   const methods = useForm<AllyQuickEditSchemaType>({
     mode: 'all',
     resolver: zodResolver(AllyQuickEditSchema),
-    defaultValues,
-    values: currentclient,
+    defaultValues: currentclient ? { ...currentclient } : defaultValues,
   });
 
   const {
@@ -135,7 +134,8 @@ export function ClientQuickEditForm({ currentclient, open, onClose }: Props) {
 
             <Box sx={{ display: { xs: 'none', sm: 'block' } }} />
 
-            <Field.Text name="name" label="Full name" />
+            <Field.Text name="name" label="Nombre" />
+            <Field.Text name="lastanme" label="Apellido" />
             <Field.Text name="email" label="Email address" />
             <Field.Phone name="phoneNumber" label="Phone number" />
 

@@ -15,7 +15,7 @@ type Props = FiltersResultProps & {
   filters: UseSetStateReturn<IUserTableFilters>;
 };
 
-export function ClientTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
+export function UserTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
   const { state: currentFilters, setState: updateFilters, resetState: resetFilters } = filters;
 
   const handleRemoveKeyword = useCallback(() => {
