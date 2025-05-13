@@ -1,4 +1,4 @@
-import type { SWRConfiguration } from 'swr';
+import { mutate, SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
 import useSWR from 'swr';
@@ -7,6 +7,9 @@ import { useMemo } from 'react';
 import { fetcher, endpoints } from 'src/lib/axios';
 
 import type { IOwnerItem } from '../types/owner';
+import axios from '../lib/axios';
+import { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
+import { OwnerQuickEditSchemaType } from '../sections/owner/owner-quick-edit-form';
 
 
 // ----------------------------------------------------------------------
@@ -37,6 +40,7 @@ export function useGetOwners() {
       ownersValidating: isValidating,
       ownersEmpty: !isLoading && !isValidating && !data?.data?.length,
       count: data?.total || 0,
+      refetch: () => mutate(url)
     }),
     [data?.data, error, isLoading, isValidating]
   );
@@ -95,3 +99,29 @@ export function useSearchProducts(query: string) {
 
   return memoizedValue;
 }
+
+export async function deleteOwner(id: number) {
+  const url = `${endpoints.owner.delete}/${id}`;
+  return axios.delete(url);
+}
+
+export async function deleteManyOwners(ids: number[]) {
+  const url = `${endpoints.owner.delete}/delete/many`;
+  return axios.post(url, { ids });
+}
+
+export async function createOwner(payload: OwnerQuickEditSchemaType) {
+  const url = `${endpoints.owner.create}`;
+  return axios.post(url, payload);
+}
+
+export async function updateOwner(payload: OwnerQuickEditSchemaType, id: number) {
+  const url = `${endpoints.owner.edit}/${id}`;
+  return axios.patch(url, payload);
+}
+
+export async function restoreOwner(id: number) {
+  const url = `${endpoints.owner.restore}`;
+  return axios.post(url, { id });
+}
+

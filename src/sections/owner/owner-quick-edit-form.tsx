@@ -1,4 +1,5 @@
-import type { IAllyItem } from 'src/types/ally';
+
+import type { AxiosResponse } from 'axios';
 
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -19,13 +20,19 @@ import { USER_STATUS_OPTIONS } from 'src/_mock';
 import { toast } from 'src/components/snackbar';
 import { Form, Field, schemaHelper } from 'src/components/hook-form';
 
+import { createOwner, updateOwner, useGetOwners } from '../../actions/owner';
+
+import type { IOwnerItem } from '../../types/owner';
+
 // ----------------------------------------------------------------------
 
-export type AllyQuickEditSchemaType = zod.infer<typeof AllyQuickEditSchema>;
+export type OwnerQuickEditSchemaType = zod.infer<typeof OwnerQuickEditSchema>;
 
-export const AllyQuickEditSchema = zod.object({
+export const OwnerQuickEditSchema = zod.object({
   name: zod.string().min(1, { message: 'Nombre is required!' }),
   lastname: zod.string().min(1, { message: 'Apellido is required!' }),
+  isInvestor: zod.boolean(),
+  birthdate: zod.string().optional(),
   email: zod
     .string()
     .min(1, { message: 'Email is required!' })
@@ -50,23 +57,25 @@ export const AllyQuickEditSchema = zod.object({
 type Props = {
   open: boolean;
   onClose: () => void;
-  currentAlly?: IAllyItem;
+  currentOwner?: IOwnerItem;
 };
 
-export function OwnerQuickEditForm({ currentAlly, open, onClose }: Props) {
-  const defaultValues: AllyQuickEditSchemaType = {
+export function OwnerQuickEditForm({ currentOwner, open, onClose }: Props) {
+  const defaultValues: OwnerQuickEditSchemaType = {
     name: '',
     lastname: '',
     email: '',
     phoneNumber: '',
-    status: '',
+    status: 'active',
+    isInvestor: false,
+    birthdate: undefined,
   };
 
-  const methods = useForm<AllyQuickEditSchemaType>({
+  const methods = useForm<OwnerQuickEditSchemaType>({
     mode: 'all',
-    resolver: zodResolver(AllyQuickEditSchema),
+    resolver: zodResolver(OwnerQuickEditSchema),
     defaultValues,
-    values: currentAlly,
+    values: currentOwner?.id ? { ...currentOwner } : defaultValues,
   });
 
   const {
@@ -75,21 +84,35 @@ export function OwnerQuickEditForm({ currentAlly, open, onClose }: Props) {
     formState: { isSubmitting },
   } = methods;
 
+  const { refetch } = useGetOwners();
+
   const onSubmit = handleSubmit(async (data) => {
-    const promise = new Promise((resolve) => setTimeout(resolve, 1000));
+    const promise = await (async () => {
+      let response: AxiosResponse<any>;
+      if (currentOwner?.id) {
+        response = await updateOwner(data, currentOwner.id);
+      } else {
+        response = await createOwner(data);
+      }
+
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
+
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: any) => message || 'Update success!',
+      error: (error) => error || 'Update error!',
+    });
 
     try {
-      reset();
-      onClose();
-
-      toast.promise(promise, {
-        loading: 'Loading...',
-        success: 'Update success!',
-        error: 'Update error!',
-      });
-
       await promise;
-
+      reset();
+      refetch()
+      onClose();
       console.info('DATA', data);
     } catch (error) {
       console.error(error);
@@ -108,13 +131,10 @@ export function OwnerQuickEditForm({ currentAlly, open, onClose }: Props) {
         },
       }}
     >
-      <DialogTitle>Quick update</DialogTitle>
+      <DialogTitle>{currentOwner?.id ? 'Edicion de propietario' : 'Nuevo propietario'}</DialogTitle>
 
       <Form methods={methods} onSubmit={onSubmit}>
-        <DialogContent>
-          <Alert variant="outlined" severity="info" sx={{ mb: 3 }}>
-            Account is waiting for confirmation
-          </Alert>
+        <DialogContent sx={{ pt: 2 }}>
 
           <Box
             sx={{
@@ -124,43 +144,23 @@ export function OwnerQuickEditForm({ currentAlly, open, onClose }: Props) {
               gridTemplateColumns: { xs: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)' },
             }}
           >
-            <Field.Select name="status" label="Status">
-              {USER_STATUS_OPTIONS.map((status) => (
-                <MenuItem key={status.value} value={status.value}>
-                  {status.label}
-                </MenuItem>
-              ))}
-            </Field.Select>
 
-            <Box sx={{ display: { xs: 'none', sm: 'block' } }} />
-
-            <Field.Text name="name" label="Full name" />
-            <Field.Text name="email" label="Email address" />
-            <Field.Phone name="phoneNumber" label="Phone number" />
-
-            <Field.CountrySelect
-              fullWidth
-              name="country"
-              label="Country"
-              placeholder="Choose a country"
-            />
-
-            <Field.Text name="state" label="State/region" />
-            <Field.Text name="city" label="City" />
-            <Field.Text name="address" label="Address" />
-            <Field.Text name="zipCode" label="Zip/code" />
-            <Field.Text name="company" label="Company" />
-            <Field.Text name="role" label="Role" />
+            <Field.Text name="name" label="Nombre" />
+            <Field.Text name="lastname" label="Apellido" />
+            <Field.Text name="email" label="Correo electronico" />
+            <Field.Phone name="phoneNumber" label="Numero de telefono" />
+            <Field.Checkbox label="Es inversor?" name="isInvestor" />
+            <Field.DatePicker name="birthdate" label="Fecha de cumpleanos" />
           </Box>
         </DialogContent>
 
         <DialogActions>
           <Button variant="outlined" onClick={onClose}>
-            Cancel
+            Cancelar
           </Button>
 
           <Button type="submit" variant="contained" loading={isSubmitting}>
-            Update
+            {currentOwner?.id ? 'Actualizar' : 'Crear'}
           </Button>
         </DialogActions>
       </Form>

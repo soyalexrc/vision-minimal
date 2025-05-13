@@ -13,6 +13,7 @@ import Card from '@mui/material/Card';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
+import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 
 import { paths } from 'src/routes/paths';
@@ -41,11 +42,9 @@ import { AllyTableRow } from '../ally-table-row';
 import { AllyTableToolbar } from '../ally-table-toolbar';
 import { AllyQuickEditForm } from '../ally-quick-edit-form';
 import { AllyTableFiltersResult } from '../ally-table-filters-result';
-import TableBodyCustom from '../../../components/table/custom-body-table';
-import { deleteAlly, useGetAllies, deleteManyAllies, restoreAlly } from '../../../actions/ally';
+import { deleteAlly, restoreAlly, useGetAllies, deleteManyAllies } from '../../../actions/ally';
 
 import type { IAllyItem, IAllyTableFilters } from '../../../types/ally';
-import TableBody from '@mui/material/TableBody';
 
 // ----------------------------------------------------------------------
 

@@ -350,7 +350,10 @@ export function ExternalAdviserListView() {
                     emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
                   />
 
-                  <TableNoData notFound={notFound} />
+                  {
+                    advisersEmpty &&
+                    <TableNoData notFound={notFound} />
+                  }
                 </TableBody>
               </Table>
             </Scrollbar>

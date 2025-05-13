@@ -1,6 +1,5 @@
 'use client';
 
-import type { IUserTableFilters } from 'src/types/user';
 import type { TableHeadCellProps } from 'src/components/table';
 
 import { varAlpha } from 'minimal-shared/utils';
@@ -41,15 +40,20 @@ import {
 } from 'src/components/table';
 
 import { OwnerTableRow } from '../owner-table-row';
-import { useGetOwners } from '../../../actions/owner';
 import { OwnerTableToolbar } from '../owner-table-toolbar';
+import { OwnerQuickEditForm } from '../owner-quick-edit-form';
 import { OwnerTableFiltersResult } from '../owner-table-filters-result';
+import { deleteOwner, restoreOwner, useGetOwners, deleteManyOwners } from '../../../actions/owner';
 
-import type { IOwnerItem } from '../../../types/owner';
+import type { IOwnerItem, IOwnerTableFilters } from '../../../types/owner';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activos' }, { value: 'deleted', label: 'Eliminados' }];
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'active', label: 'Activos' },
+  { value: 'deleted', label: 'Eliminados' },
+];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'name', label: 'Nombre' },
@@ -63,18 +67,20 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 // ----------------------------------------------------------------------
 
 export function OwnerListView() {
-  const table = useTable();
+  const table = useTable({ defaultRowsPerPage: 25, defaultOrderBy: 'id', defaultDense: true });
+  const quickCreateForm = useBoolean();
 
   const confirmDialog = useBoolean();
-  const { owners, count, ownersError, ownersValidating, ownersLoading, ownersEmpty } = useGetOwners();
+  const { owners, count, ownersError, ownersValidating, ownersLoading, ownersEmpty, refetch } =
+    useGetOwners();
 
-  const [tableData, setTableData] = useState<IOwnerItem[]>([]);
+  const [tableData, setTableData] = useState<IOwnerItem[]>(owners);
 
   useEffect(() => {
     setTableData(owners || []);
   }, [owners]);
 
-  const filters = useSetState<IUserTableFilters>({ name: '', role: [], status: 'all' });
+  const filters = useSetState<IOwnerTableFilters>({ name: '', status: 'all' });
   const { state: currentFilters, setState: updateFilters } = filters;
 
   const dataFiltered = applyFilter({
@@ -85,33 +91,89 @@ export function OwnerListView() {
 
   const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
 
-  const canReset =
-    !!currentFilters.name || currentFilters.role.length > 0 || currentFilters.status !== 'all';
+  const canReset = !!currentFilters.name || currentFilters.status !== 'all';
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id!.toString() !== id);
+    async (id: number) => {
+      // Wait for the toast.promise to resolve (shows loading, then success)
+      toast.promise(
+        (async () => {
+          // Call API to delete selected allies
+          const { data } = await deleteOwner(id);
 
-      toast.success('Delete success!');
+          if (data.error) {
+            toast.error(data.message);
+            return false;
+          }
 
-      setTableData(deleteRow);
-
-      table.onUpdatePageDeleteRow(dataInPage.length);
+          refetch();
+          return true;
+        })(),
+        {
+          loading: 'Cargando...',
+          success: 'Todo listo! Se elimino el propietario',
+          error: 'Oops! Algo salio mal',
+        }
+      );
     },
-    [dataInPage.length, table, tableData]
+    [table]
   );
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id!.toString()));
+  const handleRestoreRow = useCallback(
+    async (id: number) => {
+      // Wait for the toast.promise to resolve (shows loading, then success)
+      toast.promise(
+        (async () => {
+          // Call API to delete selected allies
+          const { data } = await restoreOwner(id);
 
-    toast.success('Delete success!');
+          if (data.error) {
+            toast.error(data.message);
+            return false;
+          }
 
-    setTableData(deleteRows);
+          refetch();
+          return true;
+        })(),
+        {
+          loading: 'Cargando...',
+          success: 'Todo listo! Se restauro el propietario',
+          error: 'Oops! Algo salio mal',
+        }
+      );
+    },
+    [table]
+  );
 
-    table.onUpdatePageDeleteRows(dataInPage.length, dataFiltered.length);
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+  const handleDeleteRows = useCallback(async () => {
+    // Wait for the toast.promise to resolve (shows loading, then success)
+    toast.promise(
+      (async () => {
+        // Call API to delete selected allies
+        const ids = table.selected.map(Number);
+        const { data } = await deleteManyOwners(ids);
+
+        if (data.error) {
+          toast.error(data.message);
+          return false;
+        }
+
+        refetch();
+        table.onSelectAllRows(
+          false,
+          dataFiltered.map((row) => row.id!.toString())
+        );
+        return true;
+      })(),
+      {
+        loading: 'Cargando...',
+        success: 'Todo listo! Se eliminaron los propietarios',
+        error: 'Oops! Algo salio mal',
+      }
+    );
+  }, [table, refetch]);
 
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
@@ -128,7 +190,7 @@ export function OwnerListView() {
       title="Eliminar"
       content={
         <>
-          Estas seguro de eliminar <strong> {table.selected.length} </strong> Aliados?
+          Estas seguro de eliminar <strong> {table.selected.length} </strong> Propietarios?
         </>
       }
       action={
@@ -146,6 +208,14 @@ export function OwnerListView() {
     />
   );
 
+  const renderQuickCreateForm = () => (
+    <OwnerQuickEditForm
+      currentOwner={{ email: '', name: '', isInvestor: false, birthdate: undefined, lastname: '', phoneNumber: '', status: 'active' }}
+      open={quickCreateForm.value}
+      onClose={quickCreateForm.onFalse}
+    />
+  );
+
   return (
     <>
       <DashboardContent>
@@ -158,8 +228,9 @@ export function OwnerListView() {
           ]}
           action={
             <Button
-              component={RouterLink}
-              href={paths.dashboard.allies.create}
+              // component={RouterLink}
+              // href={paths.dashboard.allies.create}
+              onClick={quickCreateForm.onTrue}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
@@ -209,10 +280,7 @@ export function OwnerListView() {
             ))}
           </Tabs>
 
-          <OwnerTableToolbar
-            filters={filters}
-            onResetPage={table.onResetPage}
-          />
+          <OwnerTableToolbar filters={filters} onResetPage={table.onResetPage} />
 
           {canReset && (
             <OwnerTableFiltersResult
@@ -272,7 +340,8 @@ export function OwnerListView() {
                         row={row}
                         selected={table.selected.includes(row.id!.toString())}
                         onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id!.toString())}
+                        onDeleteRow={() => handleDeleteRow(row.id!)}
+                        onRestore={() => handleRestoreRow(row.id!)}
                         editHref={paths.dashboard.allies.edit(row.id!)}
                       />
                     ))}
@@ -301,6 +370,7 @@ export function OwnerListView() {
       </DashboardContent>
 
       {renderConfirmDialog()}
+      {renderQuickCreateForm()}
     </>
   );
 }
@@ -309,12 +379,12 @@ export function OwnerListView() {
 
 type ApplyFilterProps = {
   inputData: IOwnerItem[];
-  filters: IUserTableFilters;
+  filters: IOwnerTableFilters;
   comparator: (a: any, b: any) => number;
 };
 
 function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
-  const { name, status, role } = filters;
+  const { name, status } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -333,10 +403,6 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   if (status !== 'all') {
     inputData = inputData.filter((user) => user.status === status);
   }
-
-  // if (role.length) {
-  //   inputData = inputData.filter((user) => role.includes(user.role));
-  // }
 
   return inputData;
 }

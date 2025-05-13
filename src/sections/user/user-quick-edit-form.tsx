@@ -59,7 +59,7 @@ export function UserQuickEditForm({ currentAlly, open, onClose }: Props) {
     lastname: '',
     email: '',
     phoneNumber: '',
-    status: '',
+    status: 'active',
   };
 
   const methods = useForm<AllyQuickEditSchemaType>({

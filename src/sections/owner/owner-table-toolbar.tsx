@@ -19,12 +19,13 @@ import InputAdornment from '@mui/material/InputAdornment';
 
 import { Iconify } from 'src/components/iconify';
 import { CustomPopover } from 'src/components/custom-popover';
+import { IOwnerTableFilters } from '../../types/owner';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IUserTableFilters>;
+  filters: UseSetStateReturn<IOwnerTableFilters>;
 };
 
 export function OwnerTableToolbar({ filters, onResetPage }: Props) {
@@ -36,17 +37,6 @@ export function OwnerTableToolbar({ filters, onResetPage }: Props) {
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onResetPage();
       updateFilters({ name: event.target.value });
-    },
-    [onResetPage, updateFilters]
-  );
-
-  const handleFilterRole = useCallback(
-    (event: SelectChangeEvent<string[]>) => {
-      const newValue =
-        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-
-      onResetPage();
-      updateFilters({ role: newValue });
     },
     [onResetPage, updateFilters]
   );

@@ -1,4 +1,3 @@
-import type { IUserTableFilters } from 'src/types/user';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
 import type { FiltersResultProps } from 'src/components/filters-result';
 
@@ -8,11 +7,16 @@ import Chip from '@mui/material/Chip';
 
 import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-result';
 
+import { getStatus } from '../../utils/get-status';
+
+import type { IOwnerTableFilters } from '../../types/owner';
+import type { GetStatusType } from '../../utils/get-status';
+
 // ----------------------------------------------------------------------
 
 type Props = FiltersResultProps & {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IUserTableFilters>;
+  filters: UseSetStateReturn<IOwnerTableFilters>;
 };
 
 export function OwnerTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
@@ -28,16 +32,6 @@ export function OwnerTableFiltersResult({ filters, onResetPage, totalResults, sx
     updateFilters({ status: 'all' });
   }, [onResetPage, updateFilters]);
 
-  const handleRemoveRole = useCallback(
-    (inputValue: string) => {
-      const newValue = currentFilters.role.filter((item) => item !== inputValue);
-
-      onResetPage();
-      updateFilters({ role: newValue });
-    },
-    [onResetPage, updateFilters, currentFilters.role]
-  );
-
   const handleReset = useCallback(() => {
     onResetPage();
     resetFilters();
@@ -48,19 +42,13 @@ export function OwnerTableFiltersResult({ filters, onResetPage, totalResults, sx
       <FiltersBlock label="Estatus:" isShow={currentFilters.status !== 'all'}>
         <Chip
           {...chipProps}
-          label={currentFilters.status}
+          label={getStatus(currentFilters.status as GetStatusType).name}
           onDelete={handleRemoveStatus}
           sx={{ textTransform: 'capitalize' }}
         />
       </FiltersBlock>
 
-      <FiltersBlock label="Role:" isShow={!!currentFilters.role.length}>
-        {currentFilters.role.map((item) => (
-          <Chip {...chipProps} key={item} label={item} onDelete={() => handleRemoveRole(item)} />
-        ))}
-      </FiltersBlock>
-
-      <FiltersBlock label="Keyword:" isShow={!!currentFilters.name}>
+      <FiltersBlock label="Nombre:" isShow={!!currentFilters.name}>
         <Chip {...chipProps} label={currentFilters.name} onDelete={handleRemoveKeyword} />
       </FiltersBlock>
     </FiltersResult>

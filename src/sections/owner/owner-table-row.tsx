@@ -24,6 +24,7 @@ import { fDate } from '../../utils/format-time';
 import { OwnerQuickEditForm } from './owner-quick-edit-form';
 
 import type { IOwnerItem } from '../../types/owner';
+import { getStatus, GetStatusType } from '../../utils/get-status';
 
 // ----------------------------------------------------------------------
 
@@ -32,19 +33,38 @@ type Props = {
   selected: boolean;
   editHref: string;
   onSelectRow: () => void;
-  onDeleteRow: () => void;
+  onDeleteRow: () => Promise<void>;
+  onRestore: () => Promise<void>;
 };
 
-export function OwnerTableRow({ row, selected, editHref, onSelectRow, onDeleteRow }: Props) {
+export function OwnerTableRow({ row, selected, onRestore, onSelectRow, onDeleteRow }: Props) {
   const menuActions = usePopover();
   const confirmDialog = useBoolean();
   const quickEditForm = useBoolean();
+  const restoreDialog = useBoolean();
 
   const renderQuickEditForm = () => (
     <OwnerQuickEditForm
-      currentAlly={row}
+      currentOwner={row}
       open={quickEditForm.value}
       onClose={quickEditForm.onFalse}
+    />
+  );
+
+  const renderRestoreDialog = () => (
+    <ConfirmDialog
+      open={restoreDialog.value}
+      onClose={restoreDialog.onFalse}
+      title="Restaurar"
+      content="Seguro que quieres restaurar este aliado?"
+      action={
+        <Button variant="contained" color="info" onClick={async () => {
+          await onRestore()
+          restoreDialog.onFalse();
+        }}>
+          Restaurar
+        </Button>
+      }
     />
   );
 
@@ -56,23 +76,32 @@ export function OwnerTableRow({ row, selected, editHref, onSelectRow, onDeleteRo
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
-        <li>
-          <MenuItem component={RouterLink} href={editHref} onClick={() => menuActions.onClose()}>
-            <Iconify icon="solar:pen-bold" />
-            Editar
+        {
+          row.status !== 'deleted' &&
+          <MenuItem
+            onClick={() => {
+              confirmDialog.onTrue();
+              menuActions.onClose();
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <Iconify icon="solar:trash-bin-trash-bold" />
+            Eliminar
           </MenuItem>
-        </li>
-
-        <MenuItem
-          onClick={() => {
-            confirmDialog.onTrue();
-            menuActions.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Eliminar
-        </MenuItem>
+        }
+        {
+          row.status === 'deleted' &&
+          <MenuItem
+            onClick={() => {
+              restoreDialog.onTrue();
+              menuActions.onClose();
+            }}
+            sx={{ color: 'info.main' }}
+          >
+            <Iconify icon="solar:restart-bold" />
+            Restaurar
+          </MenuItem>
+        }
       </MenuList>
     </CustomPopover>
   );
@@ -81,11 +110,14 @@ export function OwnerTableRow({ row, selected, editHref, onSelectRow, onDeleteRo
     <ConfirmDialog
       open={confirmDialog.value}
       onClose={confirmDialog.onFalse}
-      title="Delete"
-      content="Are you sure want to delete?"
+      title="Eliminar"
+      content="Esta seguro de eliminar este propietario?"
       action={
-        <Button variant="contained" color="error" onClick={onDeleteRow}>
-          Delete
+        <Button variant="contained" color="error" onClick={async () => {
+          await onDeleteRow();
+          confirmDialog.onFalse();
+        }}>
+          Eliminar
         </Button>
       }
     />
@@ -113,9 +145,10 @@ export function OwnerTableRow({ row, selected, editHref, onSelectRow, onDeleteRo
 
             <Stack sx={{ typography: 'body2', flex: '1 1 auto', alignItems: 'flex-start' }}>
               <Link
-                component={RouterLink}
-                href={editHref}
+                // component={RouterLink}
+                // href={editHref}
                 color="inherit"
+                onClick={quickEditForm.onTrue}
                 sx={{ cursor: 'pointer' }}
               >
                 {row.name} {row.lastname}
@@ -144,27 +177,30 @@ export function OwnerTableRow({ row, selected, editHref, onSelectRow, onDeleteRo
           <Label
             variant="soft"
             color={
-              (row.status === 'active' && 'success') ||
-              (row.status === 'pending' && 'warning') ||
-              (row.status === 'banned' && 'error') ||
-              (row.status === 'deleted' && 'error') ||
-              'default'
+              (getStatus(row.status as GetStatusType).variant)
             }
           >
-            {row.status}
+            {getStatus(row.status as GetStatusType).name}
           </Label>
         </TableCell>
 
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Tooltip title="Quick Edit" placement="top" arrow>
-              <IconButton
-                color={quickEditForm.value ? 'inherit' : 'default'}
-                onClick={quickEditForm.onTrue}
-              >
-                <Iconify icon="solar:pen-bold" />
-              </IconButton>
-            </Tooltip>
+            {
+              row.status !== 'deleted' &&
+              <Tooltip title="Editar" placement="top" arrow>
+                <IconButton
+                  color={quickEditForm.value ? 'inherit' : 'default'}
+                  onClick={quickEditForm.onTrue}
+                >
+                  <Iconify icon="solar:pen-bold" />
+                </IconButton>
+              </Tooltip>
+            }
+            {
+              row.status === 'deleted' &&
+              <Box width={36} height={36} />
+            }
 
             <IconButton
               color={menuActions.open ? 'inherit' : 'default'}
@@ -179,6 +215,7 @@ export function OwnerTableRow({ row, selected, editHref, onSelectRow, onDeleteRo
       {renderQuickEditForm()}
       {renderMenuActions()}
       {renderConfirmDialog()}
+      {renderRestoreDialog()}
     </>
   );
 }

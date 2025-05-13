@@ -16,6 +16,7 @@ import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/component
 
 import { AuthProvider } from 'src/auth/context/jwt';
 import { Toaster } from 'sonner';
+import { LocalizationProvider } from '../locales';
 
 // ----------------------------------------------------------------------
 
@@ -70,23 +71,25 @@ export default async function RootLayout({ children }: RootLayoutProps) {
         />
 
         <AuthProvider>
-          <SettingsProvider
-            cookieSettings={appConfig.cookieSettings}
-            defaultSettings={defaultSettings}
-          >
-            <AppRouterCacheProvider options={{ key: 'css' }}>
-              <ThemeProvider
-                modeStorageKey={themeConfig.modeStorageKey}
-                defaultMode={themeConfig.enableSystemMode ? 'system' : themeConfig.defaultMode}
-              >
-                <MotionLazy>
-                  <ProgressBar />
-                  <SettingsDrawer defaultSettings={defaultSettings} />
-                  {children}
-                </MotionLazy>
-              </ThemeProvider>
-            </AppRouterCacheProvider>
-          </SettingsProvider>
+          <LocalizationProvider>
+            <SettingsProvider
+              cookieSettings={appConfig.cookieSettings}
+              defaultSettings={defaultSettings}
+            >
+              <AppRouterCacheProvider options={{ key: 'css' }}>
+                <ThemeProvider
+                  modeStorageKey={themeConfig.modeStorageKey}
+                  defaultMode={themeConfig.enableSystemMode ? 'system' : themeConfig.defaultMode}
+                >
+                  <MotionLazy>
+                    <ProgressBar />
+                    <SettingsDrawer defaultSettings={defaultSettings} />
+                    {children}
+                  </MotionLazy>
+                </ThemeProvider>
+              </AppRouterCacheProvider>
+            </SettingsProvider>
+          </LocalizationProvider>
         </AuthProvider>
       </body>
     </html>

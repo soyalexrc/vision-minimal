@@ -57,6 +57,10 @@ export const endpoints = {
   },
   owner: {
     list: '/owner',
+    create: '/owner',
+    edit: '/owner',
+    restore: '/owner/restore',
+    delete: '/owner',
     details: '/ally/details',
     search: '/ally/search',
   },

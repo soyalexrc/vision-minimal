@@ -2,12 +2,9 @@ import type { IDateValue } from './common';
 
 // ----------------------------------------------------------------------
 
-export type IProductFilters = {
-  rating: string;
-  gender: string[];
-  category: string;
-  colors: string[];
-  priceRange: number[];
+export type IOwnerTableFilters = {
+  name: string;
+  status: string;
 };
 
 export type IProductTableFilters = {
@@ -34,6 +31,6 @@ export type IOwnerItem = {
   lastname: string;
   email: string;
   phoneNumber: string;
-  birthdate?: Date;
+  birthdate?: string;
   isInvestor: boolean;
 };
