@@ -8,6 +8,9 @@ import Chip from '@mui/material/Chip';
 
 import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-result';
 
+import { getStatus } from '../../utils/get-status';
+
+import type { GetStatusType } from '../../utils/get-status';
 import type { IExternalAdviserFilters } from '../../types/external-adviser';
 
 // ----------------------------------------------------------------------
@@ -40,13 +43,13 @@ export function ExternalAdviserTableFiltersResult({ filters, onResetPage, totalR
       <FiltersBlock label="Estatus:" isShow={currentFilters.status !== 'all'}>
         <Chip
           {...chipProps}
-          label={currentFilters.status}
+          label={getStatus(currentFilters.status as GetStatusType).name}
           onDelete={handleRemoveStatus}
           sx={{ textTransform: 'capitalize' }}
         />
       </FiltersBlock>
 
-      <FiltersBlock label="Keyword:" isShow={!!currentFilters.name}>
+      <FiltersBlock label="Nombre:" isShow={!!currentFilters.name}>
         <Chip {...chipProps} label={currentFilters.name} onDelete={handleRemoveKeyword} />
       </FiltersBlock>
     </FiltersResult>

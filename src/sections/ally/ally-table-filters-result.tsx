@@ -41,7 +41,7 @@ export function AllyTableFiltersResult({ filters, onResetPage, totalResults, sx 
           {...chipProps}
           label={getStatus(currentFilters.status as GetStatusType).name}
           onDelete={handleRemoveStatus}
-          sx={{ textTransform: 'capitalize', color: getStatus(currentFilters.status as GetStatusType).color, bgcolor: getStatus(currentFilters.status as GetStatusType).backgroundColor }}
+          sx={{ textTransform: 'capitalize' }}
         />
       </FiltersBlock>
 

@@ -27,7 +27,7 @@ export function FiltersResult({
     <ResultRoot sx={sx} {...other}>
       <ResultLabel>
         <strong>{totalResults}</strong>
-        <span> results found</span>
+        <span> resultados encontrados.</span>
       </ResultLabel>
 
       <ResultContent>
