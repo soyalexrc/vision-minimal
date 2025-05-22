@@ -52,8 +52,13 @@ export const endpoints = {
   },
   client: {
     list: '/client',
-    details: '/ally/details',
-    search: '/ally/search',
+    details: '/client/details',
+    search: '/client/search',
+  },
+  user: {
+    list: '/user',
+    details: '/user/details',
+    search: '/user/search',
   },
   owner: {
     list: '/owner',

@@ -44,8 +44,7 @@ import { ClientTableToolbar } from '../client-table-toolbar';
 import { LoadingScreen } from '../../../components/loading-screen';
 import { ClientTableFiltersResult } from '../client-table-filters-result';
 
-import type { IClientItem, IClientDataFilters } from '../../../../types/client';
-
+import type { IClientItem, IClientDataFilters } from '../../../types/client';
 
 // ----------------------------------------------------------------------
 const PUBLISH_OPTIONS = [

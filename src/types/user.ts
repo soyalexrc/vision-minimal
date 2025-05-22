@@ -76,7 +76,8 @@ export type IUserCard = {
 
 export type IUserItem = {
   id: string;
-  name: string;
+  firstname: string;
+  lastname: string;
   city: string;
   role: string;
   email: string;
@@ -87,7 +88,7 @@ export type IUserItem = {
   zipCode: string;
   company: string;
   avatarUrl: string;
-  phoneNumber: string;
+  phonenumber: string;
   isVerified: boolean;
 };
 

@@ -1,6 +1,6 @@
 'use client';
 
-import type { IUserTableFilters } from 'src/types/user';
+import type { IUserItem, IUserTableFilters } from 'src/types/user';
 import type { TableHeadCellProps } from 'src/components/table';
 
 import { varAlpha } from 'minimal-shared/utils';
@@ -47,6 +47,7 @@ import { UserTableToolbar } from '../user-table-toolbar';
 import { UserTableFiltersResult } from '../user-table-filters-result';
 
 import type { IAllyItem } from '../../../types/ally';
+import { useGetUsers } from '../../../actions/user';
 
 // ----------------------------------------------------------------------
 
@@ -66,13 +67,13 @@ export function UserListView() {
   const table = useTable();
 
   const confirmDialog = useBoolean();
-  const { allies, count, alliesError, alliesValidating, alliesLoading, alliesEmpty } = useGetAllies();
+  const { users, count, usersError, usersValidating, usersLoading, usersEmpty } = useGetUsers();
 
-  const [tableData, setTableData] = useState<IAllyItem[]>([]);
+  const [tableData, setTableData] = useState<IUserItem[]>(users);
 
   useEffect(() => {
-    setTableData(allies || []);
-  }, [allies]);
+    setTableData(users);
+  }, [users]);
 
   const filters = useSetState<IUserTableFilters>({ name: '', role: [], status: 'all' });
   const { state: currentFilters, setState: updateFilters } = filters;
@@ -159,7 +160,7 @@ export function UserListView() {
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.allies.create}
+              href={paths.dashboard.users.create}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
@@ -273,7 +274,7 @@ export function UserListView() {
                         selected={table.selected.includes(row.id!.toString())}
                         onSelectRow={() => table.onSelectRow(row.id!.toString())}
                         onDeleteRow={() => handleDeleteRow(row.id!.toString())}
-                        editHref={paths.dashboard.allies.edit(row.id!)}
+                        editHref={paths.dashboard.users.edit(row.id!)}
                       />
                     ))}
 
@@ -308,7 +309,7 @@ export function UserListView() {
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: IAllyItem[];
+  inputData: IUserItem[];
   filters: IUserTableFilters;
   comparator: (a: any, b: any) => number;
 };

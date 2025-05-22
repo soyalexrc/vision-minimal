@@ -1,4 +1,3 @@
-import type { IAllyItem } from 'src/types/ally';
 
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -19,18 +18,20 @@ import { USER_STATUS_OPTIONS } from 'src/_mock';
 import { toast } from 'src/components/snackbar';
 import { Form, Field, schemaHelper } from 'src/components/hook-form';
 
+import type { IUserItem } from '../../types/user';
+
 // ----------------------------------------------------------------------
 
-export type AllyQuickEditSchemaType = zod.infer<typeof AllyQuickEditSchema>;
+export type UserQuickEditSchemaType = zod.infer<typeof UserQuickEditSchema>;
 
-export const AllyQuickEditSchema = zod.object({
-  name: zod.string().min(1, { message: 'Nombre is required!' }),
+export const UserQuickEditSchema = zod.object({
+  firstname: zod.string().min(1, { message: 'Nombre is required!' }),
   lastname: zod.string().min(1, { message: 'Apellido is required!' }),
   email: zod
     .string()
     .min(1, { message: 'Email is required!' })
     .email({ message: 'Email must be a valid email address!' }),
-  phoneNumber: schemaHelper.phoneNumber({ isValid: isValidPhoneNumber }),
+  phonenumber: schemaHelper.phoneNumber({ isValid: isValidPhoneNumber }),
   // country: schemaHelper.nullableInput(zod.string().min(1, { message: 'Country is required!' }), {
     // message for null value
     // message: 'Country is required!',
@@ -50,23 +51,23 @@ export const AllyQuickEditSchema = zod.object({
 type Props = {
   open: boolean;
   onClose: () => void;
-  currentAlly?: IAllyItem;
+  currentUser?: IUserItem;
 };
 
-export function UserQuickEditForm({ currentAlly, open, onClose }: Props) {
-  const defaultValues: AllyQuickEditSchemaType = {
-    name: '',
-    lastname: '',
+export function UserQuickEditForm({ currentUser, open, onClose }: Props) {
+  const defaultValues: UserQuickEditSchemaType = {
+    firstname: '',
     email: '',
-    phoneNumber: '',
+    lastname: '',
+    phonenumber: '',
     status: 'active',
   };
 
-  const methods = useForm<AllyQuickEditSchemaType>({
+  const methods = useForm<UserQuickEditSchemaType>({
     mode: 'all',
-    resolver: zodResolver(AllyQuickEditSchema),
+    resolver: zodResolver(UserQuickEditSchema),
     defaultValues,
-    values: currentAlly,
+    values: currentUser,
   });
 
   const {

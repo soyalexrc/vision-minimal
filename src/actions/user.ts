@@ -1,12 +1,13 @@
-import type { SWRConfiguration } from 'swr';
+import { mutate, SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
+import useSWR from 'swr';
 import { useMemo } from 'react';
-import useSWR, { mutate } from 'swr';
 
 import { fetcher, endpoints } from 'src/lib/axios';
-
-import type { IClientItem } from '../types/client';
+import { IAllyItem } from '../types/ally';
+import { IClientItem } from '../types/client';
+import { IUserItem } from '../types/user';
 
 // ----------------------------------------------------------------------
 
@@ -18,23 +19,23 @@ const swrOptions: SWRConfiguration = {
 
 // ----------------------------------------------------------------------
 
-type ClientsData = {
-  data: IClientItem[];
+type UsersData = {
+  data: IUserItem[];
   total: number;
 }
 
-export function useGetClients() {
-  const url = endpoints.client.list;
+export function useGetUsers() {
+  const url = endpoints.user.list;
 
-  const { data, isLoading, error, isValidating } = useSWR<ClientsData>(url, fetcher, swrOptions);
+  const { data, isLoading, error, isValidating } = useSWR<UsersData>(url, fetcher, swrOptions);
 
   const memoizedValue = useMemo(
     () => ({
-      clients: data?.data || [],
-      clientsLoading: isLoading,
-      clientsError: error,
-      clientsValidating: isValidating,
-      clientsEmpty: !isLoading && !isValidating && !data?.data?.length,
+      users: data?.data || [],
+      usersLoading: isLoading,
+      usersError: error,
+      usersValidating: isValidating,
+      usersEmpty: !isLoading && !isValidating && !data?.data?.length,
       count: data?.total || 0,
       refresh: () => mutate(url)
     }),

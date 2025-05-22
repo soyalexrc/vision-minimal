@@ -28,7 +28,7 @@ import { UserQuickEditForm } from './user-quick-edit-form';
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IAllyItem;
+  row: IUserItem;
   selected: boolean;
   editHref: string;
   onSelectRow: () => void;
@@ -42,7 +42,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
 
   const renderQuickEditForm = () => (
     <UserQuickEditForm
-      currentAlly={row}
+      currentUser={row}
       open={quickEditForm.value}
       onClose={quickEditForm.onFalse}
     />
@@ -118,7 +118,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
                 color="inherit"
                 sx={{ cursor: 'pointer' }}
               >
-                {row.name} {row.lastname}
+                {row.firstname} {row.lastname}
               </Link>
               <Box component="span" sx={{ color: 'text.disabled' }}>
                 {row.email}
@@ -127,7 +127,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
           </Box>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phonenumber}</TableCell>
 
 
 
