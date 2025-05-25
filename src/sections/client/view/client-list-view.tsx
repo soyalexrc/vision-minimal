@@ -1,20 +1,20 @@
 'use client';
 
 import type { TableHeadCellProps } from 'src/components/table';
+import type { GridRowSelectionModel, GridColumnVisibilityModel } from '@mui/x-data-grid';
 
 import { varAlpha } from 'minimal-shared/utils';
 import { useState, useEffect, useCallback } from 'react';
-import { useBoolean, useSetState } from 'minimal-shared/hooks';
+import { useBoolean, usePopover, useSetState } from 'minimal-shared/hooks';
 
-import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
-import Table from '@mui/material/Table';
+import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import TableBody from '@mui/material/TableBody';
+import MenuItem from '@mui/material/MenuItem';
 import IconButton from '@mui/material/IconButton';
+import { DataGrid, gridClasses } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
 
@@ -23,40 +23,36 @@ import { DashboardContent } from 'src/layouts/dashboard';
 import { Label } from 'src/components/label';
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
-import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import {
-  useTable,
-  emptyRows,
-  rowInPage,
-  TableNoData,
-  getComparator,
-  TableEmptyRows,
-  TableHeadCustom,
-  TableSelectedAction,
-  TablePaginationCustom,
-} from 'src/components/table';
+import { useTable, rowInPage, getComparator } from 'src/components/table';
 
-import { ClientTableRow } from '../client-table-row';
 import { useGetClients } from '../../../actions/client';
-import { ClientTableToolbar } from '../client-table-toolbar';
-import { LoadingScreen } from '../../../components/loading-screen';
-import { ClientTableFiltersResult } from '../client-table-filters-result';
+import { EmptyContent } from '../../../components/empty-content';
+import { ClientGridTableToolbar } from '../client-table-toolbar';
+import { CustomPopover } from '../../../components/custom-popover';
+import { clientColumns } from '../../../utils/columns/client-columns';
 
 import type { IClientItem, IClientDataFilters } from '../../../types/client';
+import MenuList from '@mui/material/MenuList';
+import { RouterLink } from '../../../routes/components';
 
 // ----------------------------------------------------------------------
-const PUBLISH_OPTIONS = [
-  { value: 'published', label: 'Published' },
-  { value: 'draft', label: 'Draft' },
-];
 
 const HIDE_COLUMNS = { category: false };
 
 const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activo' }, {value: 'concreted', label: 'Concretado'}, {value: 'inactive', label: 'Inactivo'}, { value: 'deleted', label: 'Eliminado' }];
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'active', label: 'Activo' },
+  {
+    value: 'concreted',
+    label: 'Concretado',
+  },
+  { value: 'inactive', label: 'Inactivo' },
+  { value: 'deleted', label: 'Eliminado' },
+];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID' },
@@ -83,11 +79,37 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 
 export function ClientListView() {
   const table = useTable({ defaultDense: true, defaultRowsPerPage: 25, defaultOrderBy: 'id' });
-
   const confirmDialog = useBoolean();
   const { clients, refresh, clientsLoading } = useGetClients();
-
+  const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
+  const [columnVisibilityModel, setColumnVisibilityModel] =
+    useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
   const [tableData, setTableData] = useState<IClientItem[]>(clients);
+  const [filterButtonEl, setFilterButtonEl] = useState<HTMLButtonElement | null>(null);
+
+  const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
+
+  const { state: currentFilters, setState: updateFilters } = filters;
+
+  const CustomToolbarCallback = useCallback(
+    () => (
+      <ClientGridTableToolbar
+        filters={filters}
+        canReset={canReset}
+        selectedRowIds={selectedRowIds}
+        setFilterButtonEl={setFilterButtonEl}
+        filteredResults={dataFiltered.length}
+        onOpenConfirmDeleteRows={confirmDialog.onTrue}
+      />
+    ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [currentFilters, selectedRowIds]
+  );
+
+  const getTogglableColumns = () =>
+    clientColumns
+      .filter((column) => !HIDE_COLUMNS_TOGGLABLE.includes(column.field))
+      .map((column) => column.field);
 
   useEffect(() => {
     if (clients?.length > 0) {
@@ -95,8 +117,8 @@ export function ClientListView() {
     }
   }, [clients]);
 
-  const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
-  const { state: currentFilters, setState: updateFilters } = filters;
+  // const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
+  // const { state: currentFilters, setState: updateFilters } = filters;
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -106,8 +128,7 @@ export function ClientListView() {
 
   const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
 
-  const canReset =
-    !!currentFilters.name || currentFilters.status !== 'all';
+  const canReset = !!currentFilters.name || currentFilters.status !== 'all';
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
@@ -179,13 +200,12 @@ export function ClientListView() {
           ]}
           action={
             <Button
-              // component={RouterLink}
-              // href={paths.dashboard.clients.create}
-              onClick={refresh}
+              component={RouterLink}
+              href={paths.dashboard.clients.create}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
-              Nuevo aliado
+              Nuevo cliente
             </Button>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
@@ -215,8 +235,8 @@ export function ClientListView() {
                       'soft'
                     }
                     color={
-                      (tab.value === 'concreted' && 'success') ||
-                      (tab.value === 'active' && 'warning') ||
+                      (tab.value === 'concreted' && 'info') ||
+                      (tab.value === 'active' && 'success') ||
                       (tab.value === 'deleted' && 'error') ||
                       'default'
                     }
@@ -230,103 +250,196 @@ export function ClientListView() {
             ))}
           </Tabs>
 
-          <ClientTableToolbar
-            filters={filters}
-            onResetPage={table.onResetPage}
-          />
+          <Card
+            sx={{
+              minHeight: 640,
+              flexGrow: { md: 1 },
+              display: { md: 'flex' },
+              height: { xs: 800, md: '1px' },
+              flexDirection: { md: 'column' },
+            }}
+          >
+            <DataGrid
+              checkboxSelection
+              disableRowSelectionOnClick
+              rows={dataFiltered}
+              columns={[
+                {
+                  field: 'actions',
+                  headerName: '',
+                  align: 'center',
+                  filterable: false,
+                  width: 50,
+                  disableExport: true,
+                  editable: false,
+                  groupable: false,
+                  sortable: false,
+                  resizable: false,
+                  disableColumnMenu: true,
+                  headerAlign: 'center',
+                  renderCell: (params) => {
+                    const popover = usePopover();
 
-          {canReset && (
-            <ClientTableFiltersResult
-              filters={filters}
-              totalResults={dataFiltered.length}
-              onResetPage={table.onResetPage}
-              sx={{ p: 2.5, pt: 0 }}
-            />
-          )}
+                    return (
+                      <Stack>
+                        <IconButton
+                          color={popover.open ? 'inherit' : 'default'}
+                          onClick={popover.onOpen}
+                        >
+                          <Iconify icon="eva:more-vertical-fill" />
+                        </IconButton>
+                        <CustomPopover
+                          anchorEl={popover.anchorEl}
+                          open={popover.open}
+                          onClose={popover.onClose}
+                          sx={{ width: 190 }}
+                        >
+                          <MenuList>
+                            <MenuItem
+                              onClick={() => {
+                                // onViewSummary(params.row);
+                                popover.onClose();
+                              }}
+                            >
+                              <Iconify icon="material-symbols:description" />
+                              Ver resumen
+                            </MenuItem>
 
-          <Box sx={{ position: 'relative' }}>
-            <TableSelectedAction
-              dense={table.dense}
-              numSelected={table.selected.length}
-              rowCount={dataFiltered.length}
-              onSelectAllRows={(checked) =>
-                table.onSelectAllRows(
-                  checked,
-                  dataFiltered.map((row) => row.id!.toString())
-                )
+                            <MenuItem
+                              onClick={() => {
+                                // onEdit(params.row);
+                                popover.onClose();
+                              }}
+                              sx={{ color: 'info.main' }}
+                            >
+                              <Iconify icon="eva:edit-2-fill" />
+                              Editar
+                            </MenuItem>
+
+                            <MenuItem
+                              onClick={() => {
+                                // onDelete(params.row);
+                                popover.onClose();
+                              }}
+                              sx={{ color: 'error.main' }}
+                            >
+                              <Iconify icon="eva:trash-2-outline" />
+                              Eliminar
+                            </MenuItem>
+                          </MenuList>
+                        </CustomPopover>
+                      </Stack>
+                    )
+                  },
+                },
+                ...clientColumns,
+              ]}
+              loading={clientsLoading}
+              getRowHeight={() => 'auto'}
+              pageSizeOptions={[25, 50, 100, { value: -1, label: 'All' }]}
+              initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
+              onRowSelectionModelChange={(newSelectionModel) =>
+                setSelectedRowIds(newSelectionModel)
               }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={confirmDialog.onTrue}>
-                    <Iconify icon="solar:trash-bin-trash-bold" />
-                  </IconButton>
-                </Tooltip>
-              }
+              columnVisibilityModel={columnVisibilityModel}
+              onColumnVisibilityModelChange={(newModel) => setColumnVisibilityModel(newModel)}
+              slots={{
+                toolbar: CustomToolbarCallback,
+                noRowsOverlay: () => <EmptyContent />,
+                noResultsOverlay: () => <EmptyContent title="No results found" />,
+              }}
+              slotProps={{
+                toolbar: { setFilterButtonEl },
+                panel: { anchorEl: filterButtonEl },
+                columnsManagement: { getTogglableColumns },
+              }}
+              sx={{ [`& .${gridClasses.cell}`]: { alignItems: 'center', display: 'inline-flex' } }}
             />
+          </Card>
 
-            {
-              clientsLoading &&
-              <Box sx={{ height: 400, justifyContent: 'center', alignItems: 'center' }}>
-                <LoadingScreen />
-              </Box>
-            }
+          {/*<Box sx={{ position: 'relative' }}>*/}
+          {/*  <TableSelectedAction*/}
+          {/*    dense={table.dense}*/}
+          {/*    numSelected={table.selected.length}*/}
+          {/*    rowCount={dataFiltered.length}*/}
+          {/*    onSelectAllRows={(checked) =>*/}
+          {/*      table.onSelectAllRows(*/}
+          {/*        checked,*/}
+          {/*        dataFiltered.map((row) => row.id!.toString())*/}
+          {/*      )*/}
+          {/*    }*/}
+          {/*    action={*/}
+          {/*      <Tooltip title="Delete">*/}
+          {/*        <IconButton color="primary" onClick={confirmDialog.onTrue}>*/}
+          {/*          <Iconify icon="solar:trash-bin-trash-bold" />*/}
+          {/*        </IconButton>*/}
+          {/*      </Tooltip>*/}
+          {/*    }*/}
+          {/*  />*/}
 
-            {
-              !clientsLoading && clients.length > 0 &&
-              <Scrollbar>
-                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                  <TableHeadCustom
-                    order={table.order}
-                    orderBy={table.orderBy}
-                    headCells={TABLE_HEAD}
-                    rowCount={dataFiltered.length}
-                    numSelected={table.selected.length}
-                    onSort={table.onSort}
-                    onSelectAllRows={(checked) =>
-                      table.onSelectAllRows(
-                        checked,
-                        dataFiltered.map((row) => row.id!.toString())
-                      )
-                    }
-                  />
-                  <TableBody>
-                    {dataFiltered
-                      .slice(
-                        table.page * table.rowsPerPage,
-                        table.page * table.rowsPerPage + table.rowsPerPage
-                      )
-                      .map((row) => (
-                        <ClientTableRow
-                          key={row.id}
-                          row={row}
-                          selected={table.selected.includes(row.id!.toString())}
-                          onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                          onDeleteRow={() => handleDeleteRow(row.id!.toString())}
-                          editHref={paths.dashboard.clients.edit(row.id!)}
-                        />
-                      ))}
+          {/*  {*/}
+          {/*    clientsLoading &&*/}
+          {/*    <Box sx={{ height: 400, justifyContent: 'center', alignItems: 'center' }}>*/}
+          {/*      <LoadingScreen />*/}
+          {/*    </Box>*/}
+          {/*  }*/}
 
-                    <TableEmptyRows
-                      height={table.dense ? 56 : 56 + 20}
-                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
-                    />
+          {/*  {*/}
+          {/*    !clientsLoading && clients.length > 0 &&*/}
+          {/*    <Scrollbar>*/}
+          {/*      <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>*/}
+          {/*        <TableHeadCustom*/}
+          {/*          order={table.order}*/}
+          {/*          orderBy={table.orderBy}*/}
+          {/*          headCells={TABLE_HEAD}*/}
+          {/*          rowCount={dataFiltered.length}*/}
+          {/*          numSelected={table.selected.length}*/}
+          {/*          onSort={table.onSort}*/}
+          {/*          onSelectAllRows={(checked) =>*/}
+          {/*            table.onSelectAllRows(*/}
+          {/*              checked,*/}
+          {/*              dataFiltered.map((row) => row.id!.toString())*/}
+          {/*            )*/}
+          {/*          }*/}
+          {/*        />*/}
+          {/*        <TableBody>*/}
+          {/*          {dataFiltered*/}
+          {/*            .slice(*/}
+          {/*              table.page * table.rowsPerPage,*/}
+          {/*              table.page * table.rowsPerPage + table.rowsPerPage*/}
+          {/*            )*/}
+          {/*            .map((row) => (*/}
+          {/*              <ClientTableRow*/}
+          {/*                key={row.id}*/}
+          {/*                row={row}*/}
+          {/*                selected={table.selected.includes(row.id!.toString())}*/}
+          {/*                onSelectRow={() => table.onSelectRow(row.id!.toString())}*/}
+          {/*                onDeleteRow={() => handleDeleteRow(row.id!.toString())}*/}
+          {/*                editHref={paths.dashboard.clients.edit(row.id!)}*/}
+          {/*              />*/}
+          {/*            ))}*/}
 
-                    <TableNoData notFound={notFound} />
-                  </TableBody>
-                </Table>
-              </Scrollbar>
-            }
-          </Box>
+          {/*          <TableEmptyRows*/}
+          {/*            height={table.dense ? 56 : 56 + 20}*/}
+          {/*            emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}*/}
+          {/*          />*/}
 
-          <TablePaginationCustom
-            page={table.page}
-            dense={table.dense}
-            count={dataFiltered.length}
-            rowsPerPage={table.rowsPerPage}
-            onPageChange={table.onChangePage}
-            onChangeDense={table.onChangeDense}
-            onRowsPerPageChange={table.onChangeRowsPerPage}
-          />
+          {/*          <TableNoData notFound={notFound} />*/}
+          {/*        </TableBody>*/}
+          {/*      </Table>*/}
+          {/*    </Scrollbar>*/}
+          {/*  }*/}
+          {/*</Box>*/}
+
+          {/*<TablePaginationCustom*/}
+          {/*  page={table.page}*/}
+          {/*  dense={table.dense}*/}
+          {/*  count={dataFiltered.length}*/}
+          {/*  rowsPerPage={table.rowsPerPage}*/}
+          {/*  onPageChange={table.onChangePage}*/}
+          {/*  onChangeDense={table.onChangeDense}*/}
+          {/*  onRowsPerPageChange={table.onChangeRowsPerPage}*/}
+          {/*/>*/}
         </Card>
       </DashboardContent>
 

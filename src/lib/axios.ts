@@ -50,8 +50,28 @@ export const endpoints = {
     search: '/ally/search',
     delete: '/ally'
   },
+  service: {
+    list: '/service',
+    create: '/service',
+    edit: '/service',
+    restore: '/service/restore',
+    details: '/service/details',
+    search: '/service/search',
+    delete: '/service'
+  },
+  category: {
+    list: '/category',
+    create: '/category',
+    edit: '/category',
+    restore: '/category/restore',
+    details: '/category/details',
+    search: '/category/search',
+    delete: '/category'
+  },
   client: {
     list: '/client',
+    create: '/client',
+    edit: '/client',
     details: '/client/details',
     search: '/client/search',
   },

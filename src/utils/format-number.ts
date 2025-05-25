@@ -19,6 +19,7 @@ function processInput(inputValue: InputNumberValue): number | null {
   return Number(inputValue);
 }
 
+
 // ----------------------------------------------------------------------
 
 export function fNumber(inputValue: InputNumberValue, options?: Options) {
@@ -105,3 +106,8 @@ export function fData(inputValue: InputNumberValue) {
 
   return fm;
 }
+
+export const parseCurrency = (value: string): number => {
+  if (!value) return 0;
+  return Number(value.replace(/[^0-9.-]+/g, ''));
+};

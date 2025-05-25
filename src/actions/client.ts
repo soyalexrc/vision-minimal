@@ -7,6 +7,9 @@ import useSWR, { mutate } from 'swr';
 import { fetcher, endpoints } from 'src/lib/axios';
 
 import type { IClientItem } from '../types/client';
+import { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
+import axios from '../lib/axios';
+import { ClientFormSchemaType } from '../sections/client/form/create-update-client-form';
 
 // ----------------------------------------------------------------------
 
@@ -70,28 +73,12 @@ export function useGetProduct(productId: string) {
 
 // ----------------------------------------------------------------------
 
-type SearchResultsData = {
-  results: IProductItem[];
-};
+export async function createClient(payload: ClientFormSchemaType) {
+  const url = `${endpoints.client.create}`;
+  return axios.post(url, payload);
+}
 
-export function useSearchProducts(query: string) {
-  const url = query ? [endpoints.product.search, { params: { query } }] : '';
-
-  const { data, isLoading, error, isValidating } = useSWR<SearchResultsData>(url, fetcher, {
-    ...swrOptions,
-    keepPreviousData: true,
-  });
-
-  const memoizedValue = useMemo(
-    () => ({
-      searchResults: data?.results || [],
-      searchLoading: isLoading,
-      searchError: error,
-      searchValidating: isValidating,
-      searchEmpty: !isLoading && !isValidating && !data?.results.length,
-    }),
-    [data?.results, error, isLoading, isValidating]
-  );
-
-  return memoizedValue;
+export async function updateClient(payload: ClientFormSchemaType, id: number) {
+  const url = `${endpoints.client.edit}/${id}`;
+  return axios.patch(url, payload);
 }
