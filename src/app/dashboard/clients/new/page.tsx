@@ -29,7 +29,7 @@ export default function Page() {
           mb: { xs: 3, md: 5 },
         }}
       />
-      <CreateUpdateClientForm />
+      <CreateUpdateClientForm isEdit />
     </Container>
   );
 }

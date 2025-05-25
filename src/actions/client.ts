@@ -26,6 +26,10 @@ type ClientsData = {
   total: number;
 }
 
+type ClientData = {
+  data: IClientItem;
+}
+
 export function useGetClients() {
   const url = endpoints.client.list;
 
@@ -46,6 +50,29 @@ export function useGetClients() {
 
   return memoizedValue;
 }
+
+// ----------------------------------------------------------------------
+
+export function useGetClient(id: number | string) {
+  const url = endpoints.client.edit + '/' + id;
+
+  const { data, isLoading, error, isValidating } = useSWR<ClientData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      client: data?.data || {},
+      clientLoading: isLoading,
+      clientError: error,
+      clientValidating: isValidating,
+      clientEmpty: !isLoading && !isValidating && !data?.data?.length,
+      refresh: () => mutate(url)
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
 
 // ----------------------------------------------------------------------
 
@@ -81,4 +108,19 @@ export async function createClient(payload: ClientFormSchemaType) {
 export async function updateClient(payload: ClientFormSchemaType, id: number) {
   const url = `${endpoints.client.edit}/${id}`;
   return axios.patch(url, payload);
+}
+
+export async function deleteManyClients(ids: number[]) {
+  const url = `${endpoints.client.delete}/remove-many`;
+  return axios.post(url, { ids });
+}
+
+export async function deleteClient(id: number) {
+  const url = `${endpoints.client.delete}/${id}`;
+  return axios.delete(url);
+}
+
+export async function restoreClient(id: number) {
+  const url = `${endpoints.client.restore}`;
+  return axios.post(url, { id });
 }

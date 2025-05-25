@@ -23,6 +23,7 @@ export default function RHFCurrencyField({
                                         thousandSeparator = ',',
                                         decimalSeparator = '.',
                                         allowNegative = false,
+                                        ...other
                                       }: CurrencyFieldProps) {
   const { control } = useFormContext();
 
@@ -47,6 +48,7 @@ export default function RHFCurrencyField({
           onValueChange={({ floatValue }) => field.onChange(floatValue)}
           error={!!fieldState.error}
           helperText={fieldState.error?.message}
+          {...other}
         />
       )}
     />

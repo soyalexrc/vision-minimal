@@ -8,6 +8,7 @@ import Chip from '@mui/material/Chip';
 import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-result';
 
 import type { IClientDataFilters } from '../../types/client';
+import { getStatus, GetStatusType } from '../../utils/get-status';
 
 // ----------------------------------------------------------------------
 
@@ -49,7 +50,7 @@ export function ClientTableFiltersResult({ filters, onResetPage, totalResults, s
       <FiltersBlock label="Estatus:" isShow={currentFilters.status !== 'all'}>
         <Chip
           {...chipProps}
-          label={currentFilters.status}
+          label={getStatus(currentFilters.status as GetStatusType).name}
           onDelete={handleRemoveStatus}
           sx={{ textTransform: 'capitalize' }}
         />

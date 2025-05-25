@@ -13,12 +13,12 @@ export const clientColumns: GridColDef[] = [
     field: 'name',
     headerName: 'Nombre',
     flex: 1,
-    minWidth: 360,
-    hideable: false,
+    minWidth: 320,
     renderCell: (params) =>  {
-      const url = `/dashboard/clients/view/${params.row.id}`;
+      // const url = `/dashboard/clients/view/${params.row.id}`;
       return (
-        <RenderCellRedirect redirectTo={url} params={params} value={params.row.name} />
+        // <RenderCellRedirect redirectTo={url} params={params} value={params.row.name} />
+        <RenderCell params={params} value={params.row.name} />
       )
     }
   },
@@ -27,7 +27,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Telefono',
     flex: 1,
     minWidth: 200,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.phone} />
     ),
@@ -37,7 +36,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Nombre de asesor',
     flex: 1,
     minWidth: 200,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.adviserName} />
     ),
@@ -47,7 +45,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Nombre de servicio',
     flex: 1,
     minWidth: 200,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.serviceName} />
     ),
@@ -57,7 +54,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Tipo de inmueble',
     flex: 1,
     minWidth: 200,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.propertytype} />
     ),
@@ -67,7 +63,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Inmueble por el cual nos contacta',
     flex: 1,
     minWidth: 300,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.propertyOfInterest} />
     ),
@@ -77,7 +72,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'De donde nos contacta',
     flex: 1,
     minWidth: 200,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.contactFrom} />
     ),
@@ -87,7 +81,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Detalle de la solicitud',
     flex: 1,
     minWidth: 250,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.specificRequirement} />
     ),
@@ -97,7 +90,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Seguimiento',
     flex: 1,
     minWidth: 250,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.requestracking} />
     ),
@@ -107,7 +99,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Estatus',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCellStatus params={params} value={params.row.status} />
     ),
@@ -117,7 +108,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Lista de espera',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCellStatus params={params} value={params.row.isinwaitinglist ? 'yes' : 'no'} />
     ),
@@ -127,7 +117,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Potencial inversor',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCellStatus params={params} value={params.row.isPotentialInvestor ? 'yes' : 'no'} />
     ),
@@ -137,7 +126,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Presupuesto desde',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCellAmount params={params} value={params.row.budgetfrom} />
     ),
@@ -147,7 +135,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Presupuesto hasta',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCellAmount params={params} value={params.row.budgetto} />
     ),
@@ -157,7 +144,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Perfil de cliente',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.typeOfPerson} />
     ),
@@ -167,7 +153,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Menores de edad',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCellStatus params={params} value={params.row.allowyounger ? 'yes' : 'no'} />
     ),
@@ -177,7 +162,6 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Menores Mascotas',
     flex: 1,
     minWidth: 150,
-    hideable: false,
     renderCell: (params) => (
       <RenderCellStatus params={params} value={params.row.allowpets ? 'yes' : 'no'} />
     ),

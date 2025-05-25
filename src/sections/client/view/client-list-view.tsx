@@ -1,7 +1,8 @@
 'use client';
 
+import type { AxiosResponse } from 'axios';
 import type { TableHeadCellProps } from 'src/components/table';
-import type { GridRowSelectionModel, GridColumnVisibilityModel } from '@mui/x-data-grid';
+import { GridRowSelectionModel, GridColumnVisibilityModel, GridActionsCellItem } from '@mui/x-data-grid';
 
 import { varAlpha } from 'minimal-shared/utils';
 import { useState, useEffect, useCallback } from 'react';
@@ -13,6 +14,7 @@ import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
+import MenuList from '@mui/material/MenuList';
 import IconButton from '@mui/material/IconButton';
 import { DataGrid, gridClasses } from '@mui/x-data-grid';
 
@@ -27,15 +29,20 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { useTable, rowInPage, getComparator } from 'src/components/table';
 
-import { useGetClients } from '../../../actions/client';
+import { useRouter } from '../../../routes/hooks';
+import { RouterLink } from '../../../routes/components';
 import { EmptyContent } from '../../../components/empty-content';
 import { ClientGridTableToolbar } from '../client-table-toolbar';
 import { CustomPopover } from '../../../components/custom-popover';
 import { clientColumns } from '../../../utils/columns/client-columns';
+import {
+  deleteClient, restoreClient,
+  useGetClients,
+  deleteManyClients,
+} from '../../../actions/client';
 
 import type { IClientItem, IClientDataFilters } from '../../../types/client';
-import MenuList from '@mui/material/MenuList';
-import { RouterLink } from '../../../routes/components';
+import { GridActionsLinkItem } from '../../product/view';
 
 // ----------------------------------------------------------------------
 
@@ -86,7 +93,7 @@ export function ClientListView() {
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
   const [tableData, setTableData] = useState<IClientItem[]>(clients);
   const [filterButtonEl, setFilterButtonEl] = useState<HTMLButtonElement | null>(null);
-
+  const router = useRouter();
   const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
 
   const { state: currentFilters, setState: updateFilters } = filters;
@@ -132,28 +139,62 @@ export function ClientListView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const handleDeleteRow = useCallback(
-    (id: string) => {
-      const deleteRow = tableData.filter((row) => row.id!.toString() !== id);
+  const handleDeleteRow = async (id: number) => {
+    const promise = await (async () => {
+      const response: AxiosResponse<any> = await deleteClient(id);
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
 
-      toast.success('Delete success!');
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registro eliminado!',
+      error: (error) => error || 'Error al eliminar el registro!',
+    });
 
-      setTableData(deleteRow);
+    refresh();
+  };
 
-      table.onUpdatePageDeleteRow(dataInPage.length);
-    },
-    [dataInPage.length, table, tableData]
-  );
+  const handleRestoreRow = async (id: number) => {
+    const promise = await (async () => {
+      const response: AxiosResponse<any> = await restoreClient(id);
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
 
-  const handleDeleteRows = useCallback(() => {
-    const deleteRows = tableData.filter((row) => !table.selected.includes(row.id!.toString()));
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registro restaurado!',
+      error: (error) => error || 'Error al restaurar el registro!',
+    });
 
-    toast.success('Delete success!');
+    refresh();
+  };
 
-    setTableData(deleteRows);
+  const handleDeleteRows = async () => {
+    const promise = await (async () => {
+      const response: AxiosResponse<any> = await deleteManyClients(selectedRowIds as number[]);
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
 
-    table.onUpdatePageDeleteRows(dataInPage.length, dataFiltered.length);
-  }, [dataFiltered.length, dataInPage.length, table, tableData]);
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registros eliminados!',
+      error: (error) => error || 'Error al eliminar los registros!',
+    });
+
+    refresh();
+  };
 
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
@@ -170,7 +211,7 @@ export function ClientListView() {
       title="Eliminar"
       content={
         <>
-          Estas seguro de eliminar <strong> {table.selected.length} </strong> Aliados?
+          Estas seguro de eliminar <strong> {selectedRowIds.length} </strong> Clientes?
         </>
       }
       action={
@@ -266,6 +307,7 @@ export function ClientListView() {
               columns={[
                 {
                   field: 'actions',
+                  type: 'actions',
                   headerName: '',
                   align: 'center',
                   filterable: false,
@@ -277,60 +319,46 @@ export function ClientListView() {
                   resizable: false,
                   disableColumnMenu: true,
                   headerAlign: 'center',
-                  renderCell: (params) => {
-                    const popover = usePopover();
-
-                    return (
-                      <Stack>
-                        <IconButton
-                          color={popover.open ? 'inherit' : 'default'}
-                          onClick={popover.onOpen}
-                        >
-                          <Iconify icon="eva:more-vertical-fill" />
-                        </IconButton>
-                        <CustomPopover
-                          anchorEl={popover.anchorEl}
-                          open={popover.open}
-                          onClose={popover.onClose}
-                          sx={{ width: 190 }}
-                        >
-                          <MenuList>
-                            <MenuItem
-                              onClick={() => {
-                                // onViewSummary(params.row);
-                                popover.onClose();
-                              }}
-                            >
-                              <Iconify icon="material-symbols:description" />
-                              Ver resumen
-                            </MenuItem>
-
-                            <MenuItem
-                              onClick={() => {
-                                // onEdit(params.row);
-                                popover.onClose();
-                              }}
-                              sx={{ color: 'info.main' }}
-                            >
-                              <Iconify icon="eva:edit-2-fill" />
-                              Editar
-                            </MenuItem>
-
-                            <MenuItem
-                              onClick={() => {
-                                // onDelete(params.row);
-                                popover.onClose();
-                              }}
-                              sx={{ color: 'error.main' }}
-                            >
-                              <Iconify icon="eva:trash-2-outline" />
-                              Eliminar
-                            </MenuItem>
-                          </MenuList>
-                        </CustomPopover>
-                      </Stack>
-                    )
-                  },
+                  getActions: (params) => [
+                    <GridActionsLinkItem
+                      showInMenu
+                      icon={<Iconify icon="solar:eye-bold" />}
+                      label="Ver detalle"
+                      href={paths.dashboard.clients.details(params.row.id)}
+                    />,
+                    ...(params.row.status !== 'deleted'
+                     ? [
+                          <GridActionsLinkItem
+                            showInMenu
+                            icon={<Iconify icon="eva:edit-2-fill" />}
+                            label="Editar"
+                            href={paths.dashboard.clients.edit(params.row.id)}
+                          />
+                        ] : []
+                    ),
+                    ...(params.row.status !== 'deleted'
+                      ? [
+                          <GridActionsCellItem
+                            showInMenu
+                            icon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                            label="Eliminar"
+                            onClick={() => handleDeleteRow(params.row.id)}
+                            sx={{ color: 'error.main' }}
+                          />,
+                        ]
+                      : []),
+                    ...(params.row.status === 'deleted'
+                      ? [
+                          <GridActionsCellItem
+                            showInMenu
+                            icon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                            label="Restaurar"
+                            onClick={() => handleRestoreRow(params.row.id)}
+                            sx={{ color: 'info.main' }}
+                          />,
+                        ]
+                      : []),
+                  ]
                 },
                 ...clientColumns,
               ]}

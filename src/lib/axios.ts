@@ -72,8 +72,10 @@ export const endpoints = {
     list: '/client',
     create: '/client',
     edit: '/client',
+    delete: '/client',
     details: '/client/details',
     search: '/client/search',
+    restore: '/client/restore',
   },
   user: {
     list: '/user',

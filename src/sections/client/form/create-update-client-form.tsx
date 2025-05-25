@@ -13,14 +13,14 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-import { useRouter } from '../../../routes/hooks';
+import { useParams, useRouter } from '../../../routes/hooks';
 import { toast } from '../../../components/snackbar';
 import { useGetAllies } from '../../../actions/ally';
 import { Iconify } from '../../../components/iconify';
 import { useGetServices } from '../../../actions/service';
 import { Form, Field } from '../../../components/hook-form';
 import { useGetCategories } from '../../../actions/category';
-import { createClient, updateClient } from '../../../actions/client';
+import { createClient, updateClient, useGetClient, useGetClients } from '../../../actions/client';
 
 import type { IClientItem } from '../../../types/client';
 import { parseCurrency } from '../../../utils/format-number';
@@ -40,8 +40,6 @@ export const CONTACT_FROM_OPTIONS = [
   { value: 'Cliente recurrente', label: 'Cliente recurrente' },
   { value: 'Referido', label: 'Referido' },
 ];
-
-
 
 export type ClientFormSchemaType = z.infer<typeof ClientFormSchema>;
 
@@ -105,9 +103,10 @@ export const ClientFormSchema = z.object({
 
 type Props = {
   currentClient?: IClientItem;
+  isEdit?: boolean;
 };
 
-export function CreateUpdateClientForm({ currentClient }: Props) {
+export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props) {
   const defaultValues: ClientFormSchemaType = {
     name: '',
     phone: '',
@@ -124,7 +123,7 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
     budgetfrom: '',
     budgetto: '',
     isinwaitinglist: false,
-    status: 'Activo',
+    status: 'active',
     propertytype: '',
     propertyOfInterest: '',
     propertyLocation: '',
@@ -155,9 +154,9 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
     company: '',
     m2: '0',
     occupation: '',
-    userFullName:  null,
+    userFullName: null,
     userId: null,
-    serviceName:  null,
+    serviceName: null,
     serviceId: null,
     subServiceName: null,
     subServiceId: null,
@@ -165,6 +164,7 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
     propertyDistribution: null,
   };
   const router = useRouter();
+  const { id } = useParams();
 
   const methods = useForm<ClientFormSchemaType>({
     mode: 'all',
@@ -205,19 +205,22 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
   const watchedAllowPets = watch('allowpets');
   const watchedAllowYounger = watch('allowyounger');
 
-  const { refetch } = useGetAllies();
-  const { services } = useGetServices()
-  const { categories } = useGetCategories()
-
+  const { refresh } = useGetClients();
+  const { refresh: refreshCurrent } = useGetClient(id as any);
+  const { services } = useGetServices();
+  const { categories } = useGetCategories();
 
   const onSubmit = handleSubmit(async (values) => {
-
     const data = {
       ...values,
       budgetfrom: parseCurrency(values.budgetfrom),
       budgetto: parseCurrency(values.budgetto),
-      amountOfYounger: typeof values.amountOfYounger === 'string' ? Number(values.amountOfYounger) : values.amountOfYounger,
-      amountOfPets: typeof values.amountOfPets === 'string' ? Number(values.amountOfPets) : values.amountOfPets,
+      amountOfYounger:
+        typeof values.amountOfYounger === 'string'
+          ? Number(values.amountOfYounger)
+          : values.amountOfYounger,
+      amountOfPets:
+        typeof values.amountOfPets === 'string' ? Number(values.amountOfPets) : values.amountOfPets,
       // adviser_name: users.find((user: any) => user.id === values.adviser_id)?.fullName,
     };
 
@@ -238,15 +241,16 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
 
     toast.promise(promise, {
       loading: 'Cargando...',
-      success: (message: string) => message || 'Update success!',
-      error: (error) => error || 'Update error!',
+      success: (message: string) => message || 'Registro actualizado!',
+      error: (error) => error || 'Error al actualizar el registro!',
     });
 
     try {
       await promise;
       reset();
-      refetch()
-      console.info('DATA', data);
+      refresh();
+      refreshCurrent();
+      router.push('/dashboard/clients');
     } catch (error) {
       console.error(error);
     }
@@ -254,36 +258,50 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
-
       {/* --- Sección: Información básica --- */}
       <Section title="Información básica">
         <Grid columns="repeat(3, 1fr)">
-          <Field.Text size="small" name="name" label="Nombre" />
-          <Field.Phone size="small" name="phone" label="Teléfono" />
-          <Field.Text size="small" name="email" label="Correo electrónico" />
-          <Field.Select size="small" name="contactFrom" label="¿Cómo nos contactó?">
-            {CONTACT_FROM_OPTIONS.map(opt => (
-              <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
+          <Field.Text disabled={!isEdit} size="small" name="name" label="Nombre" />
+          <Field.Phone disabled={!isEdit} size="small" name="phone" label="Teléfono" />
+          {/*<Field.Text size="small" name="email" label="Correo electrónico" />*/}
+          <Field.Select
+            disabled={!isEdit}
+            size="small"
+            name="contactFrom"
+            label="¿Cómo nos contactó?"
+          >
+            {CONTACT_FROM_OPTIONS.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
             ))}
           </Field.Select>
           {watchedContactFrom === 'Referido' && (
-            <Field.Text name="referrer" label="Nombre del referido" />
+            <Field.Text disabled={!isEdit} name="referrer" label="Nombre del referido" />
           )}
+          <Field.Checkbox
+            disabled={!isEdit}
+            name="isPotentialInvestor"
+            label="Es potencial inversor"
+          />
           <div />
           <div />
-          <Field.Checkbox  name="isPotentialInvestor" label="Es potencial inversor" />
-          <div />
-          <div />
-          <Field.Checkbox  name="isInWaitingList" label="Esta en lista de espera" />
+          <Field.Checkbox
+            disabled={!isEdit}
+            name="isInWaitingList"
+            label="Esta en lista de espera"
+          />
         </Grid>
       </Section>
 
       {/* --- Sección: Información de servicio --- */}
       <Section title="Servicio e Interés">
         <Grid columns="repeat(2, 1fr)">
-          <Field.Select size="small" name="serviceName" label="Tipo de servicio">
-            {services?.map(s => (
-              <MenuItem key={s.id} value={s.title}>{s.title}</MenuItem>
+          <Field.Select disabled={!isEdit} size="small" name="serviceName" label="Tipo de servicio">
+            {services?.map((s) => (
+              <MenuItem key={s.id} value={s.title}>
+                {s.title}
+              </MenuItem>
             ))}
           </Field.Select>
 
@@ -293,19 +311,32 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
           {/*  ))}*/}
           {/*</Field.Select>*/}
 
-          <Field.Select size="small" name="propertytype" label="Tipo de inmueble">
-            {categories?.map(cat => (
-              <MenuItem key={cat.id} value={cat.title}>{cat.title}</MenuItem>
+          <Field.Select
+            disabled={!isEdit}
+            size="small"
+            name="propertytype"
+            label="Tipo de inmueble"
+          >
+            {categories?.map((cat) => (
+              <MenuItem key={cat.id} value={cat.title}>
+                {cat.title}
+              </MenuItem>
             ))}
           </Field.Select>
 
-          <Field.Text size="small" name="propertyOfInterest" label="Propiedad de interés" />
+          <Field.Text
+            disabled={!isEdit}
+            size="small"
+            name="propertyOfInterest"
+            label="Propiedad de interés"
+          />
           <div />
           {/*<Stack direction="row" spacing={2} flexWrap="wrap">*/}
           <DynamicList
             register={methods.register}
             title="Zonas de interés"
             items={zones}
+            disabled={!isEdit}
             onAdd={() => appendZone('')}
             onRemove={removeZone}
             registerFieldPrefix="zonesOfInterest"
@@ -400,6 +431,7 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
             register={methods.register}
             title="Características esenciales"
             items={features}
+            disabled={!isEdit}
             onAdd={() => appendFeature('')}
             onRemove={removeFeature}
             registerFieldPrefix="essentialFeatures"
@@ -411,33 +443,33 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
       {/* --- Sección: Presupuesto --- */}
       <Section title="Presupuesto">
         <Grid columns="repeat(2, 1fr)">
-          <Field.Currency size="small" name="budgetfrom" label="Desde" />
-          <Field.Currency size="small" name="budgetto" label="Hasta" />
+          <Field.Currency disabled={!isEdit} size="small" name="budgetfrom" label="Desde" />
+          <Field.Currency disabled={!isEdit} size="small" name="budgetto" label="Hasta" />
         </Grid>
       </Section>
 
       {/* --- Sección: Perfil del cliente --- */}
       <Section title="Perfil del cliente">
         <Grid columns="repeat(2, 1fr)">
-          <Field.Select name="typeOfPerson" label="Tipo de persona">
+          <Field.Select disabled={!isEdit} name="typeOfPerson" label="Tipo de persona">
             <MenuItem value="Natural">Natural</MenuItem>
             <MenuItem value="Juridica">Jurídica</MenuItem>
           </Field.Select>
 
           {watchedTypeOfPerson === 'Natural' && (
-            <Field.Text name="ocuppation" label="Ocupación" />
+            <Field.Text disabled={!isEdit} name="occupation" label="Ocupación" />
           )}
 
           {watchedTypeOfPerson === 'Juridica' && (
             <>
-              <Field.Text name="personEntry" label="Rubro" />
-              <Field.Select name="personHeadquarters" label="Sede">
+              <Field.Text disabled={!isEdit} name="personEntry" label="Rubro" />
+              <Field.Select disabled={!isEdit} name="personHeadquarters" label="Sede">
                 <MenuItem value="Fisica">Física</MenuItem>
                 <MenuItem value="Virtual">Virtual</MenuItem>
                 <MenuItem value="Ninguna">Ninguna</MenuItem>
               </Field.Select>
               {watchedPersonHeadquarters !== 'Ninguna' && (
-                <Field.Text name="personLocation" label="Ubicación sede" />
+                <Field.Text disabled={!isEdit} name="personLocation" label="Ubicación sede" />
               )}
             </>
           )}
@@ -447,71 +479,90 @@ export function CreateUpdateClientForm({ currentClient }: Props) {
       {/* --- Sección: Otros --- */}
       <Section title="Otros">
         <Grid columns="repeat(2, 1fr)">
-
-          <Field.Select size="small" name="allowyounger" label="Presencia de menores de edad">
+          <Field.Select
+            disabled={!isEdit}
+            size="small"
+            name="allowyounger"
+            label="Presencia de menores de edad"
+          >
             <MenuItem value="Si">Si</MenuItem>
             <MenuItem value="No">No</MenuItem>
             <MenuItem value="N/A">N/A</MenuItem>
           </Field.Select>
 
-          {
-            watchedAllowYounger === 'Si' && (
-              <Field.Text type="number" size="small" name="amountOfYounger" label="Cantidad de menores de edad" />
-            )
-          }
+          {watchedAllowYounger === 'Si' && (
+            <Field.Text
+              disabled={!isEdit}
+              type="number"
+              size="small"
+              name="amountOfYounger"
+              label="Cantidad de menores de edad"
+            />
+          )}
 
-          <Field.Select size="small" name="allowpets" label="Presencia de mascotas">
+          <Field.Select
+            disabled={!isEdit}
+            size="small"
+            name="allowpets"
+            label="Presencia de mascotas"
+          >
             <MenuItem value="Si">Si</MenuItem>
             <MenuItem value="No">No</MenuItem>
             <MenuItem value="N/A">N/A</MenuItem>
           </Field.Select>
 
-          {
-            watchedAllowPets === 'Si' && (
-              <Field.Text type="number" size="small" name="amountOfPets" label="Cantidad de mascotas" />
-            )
-          }
-          <Field.Text size="small"  name="specificRequirement" label="Detalle de la solicitud" />
-          <Field.Text size="small" name="requestracking" label="Seguimiento de la solicitud" />
-          <Field.Select size="small" name="status" label="Estatus">
+          {watchedAllowPets === 'Si' && (
+            <Field.Text
+              disabled={!isEdit}
+              type="number"
+              size="small"
+              name="amountOfPets"
+              label="Cantidad de mascotas"
+            />
+          )}
+          <Field.Text
+            disabled={!isEdit}
+            size="small"
+            name="specificRequirement"
+            label="Detalle de la solicitud"
+          />
+          <Field.Text
+            disabled={!isEdit}
+            size="small"
+            name="requestracking"
+            label="Seguimiento de la solicitud"
+          />
+          <Field.Select disabled={!isEdit} size="small" name="status" label="Estatus">
             <MenuItem value="active">Activo</MenuItem>
             <MenuItem value="inactive">Inactivo</MenuItem>
             <MenuItem value="concreted">Concretado</MenuItem>
           </Field.Select>
-
-
         </Grid>
       </Section>
 
-
-
-
-
-
-
-    {/*  Button to submit*/}
+      {/*  Button to submit*/}
       <Stack direction="row" justifyContent="flex-end" gap={4} mt={2} mb={5}>
         <Button onClick={() => router.back()}>
           <Iconify icon="eva:arrow-ios-back-fill" />
           Volver
         </Button>
-        <Button
-          variant="contained"
-          type="submit"
-          size="large"
-          color="primary"
-          disabled={isSubmitting}
-          loading={isSubmitting}
-          startIcon={isSubmitting ? <Iconify icon="eva:loading-spinner-fill" /> : null}
-        >
-          {currentClient ? 'Actualizar' : 'Crear'} cliente
-        </Button>
+        {isEdit && (
+          <Button
+            variant="contained"
+            type="submit"
+            size="large"
+            color="primary"
+            disabled={isSubmitting}
+            loading={isSubmitting}
+            startIcon={isSubmitting ? <Iconify icon="eva:loading-spinner-fill" /> : null}
+          >
+            {currentClient ? 'Actualizar' : 'Crear'} cliente
+          </Button>
+        )}
       </Stack>
-
     </Form>
   );
 }
-
 
 type DynamicListProps = {
   title: string;
@@ -519,13 +570,23 @@ type DynamicListProps = {
   onAdd: () => void;
   onRemove: (index: number) => void;
   registerFieldPrefix: string;
+  disabled?: boolean;
   register: UseFormRegister<any>;
 };
 
-
-const DynamicList: React.FC<DynamicListProps> = ({ title, items, onAdd, onRemove, registerFieldPrefix, register }) => (
+const DynamicList: React.FC<DynamicListProps> = ({
+  title,
+  items,
+  onAdd,
+  onRemove,
+  registerFieldPrefix,
+  register,
+  disabled = false,
+}) => (
   <Stack flex={1}>
-    <Typography variant="subtitle1" mb={2}>{title}</Typography>
+    <Typography variant="subtitle1" mb={2}>
+      {title}
+    </Typography>
     {items.length === 0 ? (
       <Stack p={2} bgcolor="background.paper" borderRadius={2} mb={2}>
         <Typography color="text.secondary" align="center">
@@ -535,27 +596,31 @@ const DynamicList: React.FC<DynamicListProps> = ({ title, items, onAdd, onRemove
     ) : (
       items.map((item, index) => (
         <Stack key={item.id} direction="row" spacing={2} alignItems="flex-end" mb={2}>
-          <Field.Text fullWidth size="small" {...register(`${registerFieldPrefix}.${index}`)} />
-          <IconButton color="error" onClick={() => onRemove(index)}>
+          <Field.Text
+            disabled={disabled}
+            fullWidth
+            size="small"
+            {...register(`${registerFieldPrefix}.${index}`)}
+          />
+          <IconButton disabled={disabled} color="error" onClick={() => onRemove(index)}>
             <Iconify icon="mdi:delete" />
           </IconButton>
         </Stack>
       ))
     )}
-    <Button variant="outlined" startIcon={<Iconify icon="mdi:plus" />} onClick={onAdd}>
+    <Button
+      disabled={disabled}
+      variant="outlined"
+      startIcon={<Iconify icon="mdi:plus" />}
+      onClick={onAdd}
+    >
       Agregar
     </Button>
   </Stack>
 );
 
-
 const Grid = ({ columns, children }: { columns: any; children: React.ReactNode }) => (
-  <Box
-    display="grid"
-    gridTemplateColumns={columns}
-    gap={2}
-    mb={3}
-  >
+  <Box display="grid" gridTemplateColumns={columns} gap={2} mb={3}>
     {children}
   </Box>
 );
