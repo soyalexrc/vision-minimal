@@ -43,6 +43,7 @@ import {
 
 import type { IClientItem, IClientDataFilters } from '../../../types/client';
 import { GridActionsLinkItem } from '../../product/view';
+import { esES } from '@mui/x-data-grid/locales';
 
 // ----------------------------------------------------------------------
 
@@ -302,6 +303,7 @@ export function ClientListView() {
           >
             <DataGrid
               checkboxSelection
+              localeText={esES.components.MuiDataGrid.defaultProps.localeText}
               disableRowSelectionOnClick
               rows={dataFiltered}
               columns={[

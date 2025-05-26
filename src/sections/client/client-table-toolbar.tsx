@@ -143,7 +143,7 @@ export function ClientGridTableToolbar({
       <GridToolbarContainer>
         {/*<ClientTableToolbar filters={filters} onResetPage={() => {}} />*/}
 
-        <GridToolbarQuickFilter />
+        <GridToolbarQuickFilter placeholder="Buscar..." sx={{ flex: 1 }} />
 
         <Box
           sx={{
@@ -177,9 +177,13 @@ export function ClientGridTableToolbar({
             </Button>
           )}
 
+          {/*<GridToolbarColumnsButton />*/}
+          {/*<GridToolbarFilterButton ref={setFilterButtonEl} slotProps={{  }} />*/}
+          {/*<GridToolbarExport />*/}
+
           <GridToolbarColumnsButton />
-          <GridToolbarFilterButton ref={setFilterButtonEl} />
-          <GridToolbarExport />
+          <GridToolbarFilterButton ref={setFilterButtonEl} slotProps={{}} />
+          <GridToolbarExport printOptions={{ disableToolbarButton: true }} csvOptions={{ fileName: 'clientes' }} />
         </Box>
       </GridToolbarContainer>
 

@@ -2,7 +2,7 @@ import type { GridColDef } from '@mui/x-data-grid';
 
 import {
   RenderCell,
-  RenderCellAmount,
+  RenderCellAmount, RenderCellPhone,
   RenderCellRedirect,
   RenderCellStatus,
 } from '../../sections/client/client-table-row';
@@ -28,7 +28,7 @@ export const clientColumns: GridColDef[] = [
     flex: 1,
     minWidth: 200,
     renderCell: (params) => (
-      <RenderCell params={params} value={params.row.phone} />
+      <RenderCellPhone params={params} value={params.row.phone} />
     ),
   },
   {

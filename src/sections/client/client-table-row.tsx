@@ -9,6 +9,7 @@ import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
+import NextLink from 'next/link'
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
@@ -28,6 +29,7 @@ import { ClientQuickEditForm } from './client-quick-edit-form';
 
 import type { IClientItem } from '../../types/client';
 import type { GetStatusType } from '../../utils/get-status';
+import { formatLocalVenezuelanPhone, formatVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 
@@ -80,6 +82,17 @@ export function RenderCell({ params, value }: ParamsProps & { value: string }) {
   return (
     <Stack direction="row" spacing={0.5} sx={{ py: 1 }}>
       {value} <RenderErrorWarning params={params} />
+    </Stack>
+  );
+}
+
+export function RenderCellPhone({ params, value }: ParamsProps & { value: string }) {
+  return (
+    <Stack direction="row" spacing={0.5} sx={{ py: 1 }}>
+      <NextLink href={`https://wa.me/${value}`} target="_blank" rel="noopener noreferrer">
+        <Typography variant="body2" sx={{ textDecoration: 'underline', cursor: 'pointer' }}>{formatLocalVenezuelanPhone(value)}</Typography>
+      </NextLink>
+      <RenderErrorWarning params={params} />
     </Stack>
   );
 }
