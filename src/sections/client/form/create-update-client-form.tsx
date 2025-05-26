@@ -24,6 +24,8 @@ import { createClient, updateClient, useGetClient, useGetClients } from '../../.
 
 import type { IClientItem } from '../../../types/client';
 import { parseCurrency } from '../../../utils/format-number';
+import { useAuthContext, useMockedUser } from '../../../auth/hooks';
+import { getChangedFields } from '../../../utils/form';
 
 export const CONTACT_FROM_OPTIONS = [
   { value: 'Mercado Libre', label: 'Mercado Libre' },
@@ -45,6 +47,9 @@ export type ClientFormSchemaType = z.infer<typeof ClientFormSchema>;
 
 export const ClientFormSchema = z.object({
   id: z.number().optional(),
+  updatedby: z.any().optional(),
+  changes: z.any().optional(),
+  createdby: z.any().optional(),
   name: z.string({ required_error: 'Este campo es requerido' }).min(3, 'Minimo 3 caracteres'),
   referrer: z.string().optional().nullable(),
   adviserId: z.string().optional().nullable(),
@@ -165,6 +170,7 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
   };
   const router = useRouter();
   const { id } = useParams();
+  const {user} = useAuthContext()
 
   const methods = useForm<ClientFormSchemaType>({
     mode: 'all',
@@ -227,9 +233,16 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     const promise = await (async () => {
       let response: AxiosResponse<any>;
       if (currentClient?.id) {
-        response = await updateClient(data, currentClient.id);
+
+        const changes = getChangedFields(data, currentClient);
+
+        if (Object.keys(changes).length === 0) {
+          console.log("No changes made.");
+          return 'No se aplicaron cambios.';
+        }
+        response = await updateClient({ ...data, updatedby: user, changes }, currentClient.id);
       } else {
-        response = await createClient(data);
+        response = await createClient({ ...data, createdby: user });
       }
 
       if (response.status === 200 || response.status === 201) {

@@ -64,7 +64,7 @@ export function useGetClient(id: number | string) {
       clientLoading: isLoading,
       clientError: error,
       clientValidating: isValidating,
-      clientEmpty: !isLoading && !isValidating && !data?.data?.length,
+      clientEmpty: !isLoading && !isValidating && !data?.data,
       refresh: () => mutate(url)
     }),
     [data?.data, error, isLoading, isValidating]
