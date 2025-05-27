@@ -75,9 +75,9 @@ export function JwtSignInView() {
       await checkUserSession?.();
 
       router.refresh();
-    } catch (error) {
-      console.error(error);
-      const feedbackMessage = getErrorMessage(error);
+    } catch (error: any) {
+      console.error(error.error);
+      const feedbackMessage = getErrorMessage(error.error);
       setErrorMessage(feedbackMessage);
     }
   });

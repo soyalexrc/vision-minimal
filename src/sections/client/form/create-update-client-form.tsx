@@ -170,7 +170,9 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
   };
   const router = useRouter();
   const { id } = useParams();
-  const {user} = useAuthContext()
+  const { user } = useAuthContext()
+
+  const shortUser = { id: user?.id, username: user?.username, name: user?.firstname + ' ' + user?.lastname, email: user.email }
 
   const methods = useForm<ClientFormSchemaType>({
     mode: 'all',
@@ -240,9 +242,9 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
           console.log("No changes made.");
           return 'No se aplicaron cambios.';
         }
-        response = await updateClient({ ...data, updatedby: user, changes }, currentClient.id);
+        response = await updateClient({ ...data, updatedby: shortUser, changes }, currentClient.id);
       } else {
-        response = await createClient({ ...data, createdby: user });
+        response = await createClient({ ...data, createdby: shortUser });
       }
 
       if (response.status === 200 || response.status === 201) {
