@@ -1,7 +1,7 @@
 'use client';
 
-import type { IUserItem, IUserTableFilters } from 'src/types/user';
 import type { TableHeadCellProps } from 'src/components/table';
+import type { IUserItem, IUserTableFilters } from 'src/types/user';
 
 import { varAlpha } from 'minimal-shared/utils';
 import { useState, useEffect, useCallback } from 'react';
@@ -20,7 +20,6 @@ import IconButton from '@mui/material/IconButton';
 import { paths } from 'src/routes/paths';
 import { RouterLink } from 'src/routes/components';
 
-import { _roles } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
@@ -42,20 +41,20 @@ import {
 } from 'src/components/table';
 
 import { UserTableRow } from '../user-table-row';
-import { useGetAllies } from '../../../actions/ally';
+import { useGetUsers } from '../../../actions/user';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { UserTableFiltersResult } from '../user-table-filters-result';
 
-import type { IAllyItem } from '../../../types/ally';
-import { useGetUsers } from '../../../actions/user';
 
 // ----------------------------------------------------------------------
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activos' }, { value: 'deleted', label: 'Eliminados' }];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
-  { id: 'name', label: 'Nombre' },
-  { id: 'phoneNumber', label: 'Telefono', width: 180 },
+  { id: 'id', label: 'ID' },
+  { id: 'firstname', label: 'Nombre' },
+  { id: 'role', label: 'Rol' },
+  { id: 'phonenumber', label: 'Telefono', width: 180 },
   // { id: 'company', label: 'Compania', width: 220 },
   { id: 'status', label: 'Status', width: 100 },
   { id: '', width: 88 },
@@ -64,7 +63,7 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 // ----------------------------------------------------------------------
 
 export function UserListView() {
-  const table = useTable();
+  const table = useTable({ defaultDense: true, defaultRowsPerPage: 25 });
 
   const confirmDialog = useBoolean();
   const { users, count, usersError, usersValidating, usersLoading, usersEmpty } = useGetUsers();
@@ -159,8 +158,6 @@ export function UserListView() {
           ]}
           action={
             <Button
-              component={RouterLink}
-              href={paths.dashboard.users.create}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
@@ -274,7 +271,7 @@ export function UserListView() {
                         selected={table.selected.includes(row.id!.toString())}
                         onSelectRow={() => table.onSelectRow(row.id!.toString())}
                         onDeleteRow={() => handleDeleteRow(row.id!.toString())}
-                        editHref={paths.dashboard.users.edit(row.id!)}
+                        editHref={''}
                       />
                     ))}
 
@@ -328,7 +325,7 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (name) {
-    inputData = inputData.filter((user) => user.name.toLowerCase().includes(name.toLowerCase()));
+    inputData = inputData.filter((user) => user.firstname.toLowerCase().includes(name.toLowerCase()));
   }
 
   if (status !== 'all') {

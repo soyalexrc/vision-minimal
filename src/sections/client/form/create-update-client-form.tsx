@@ -240,7 +240,7 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
 
         if (Object.keys(changes).length === 0) {
           console.log("No changes made.");
-          return 'No se aplicaron cambios.';
+          return 'No se detectaron cambios en el registro.';
         }
         response = await updateClient({ ...data, updatedby: shortUser, changes }, currentClient.id);
       } else {

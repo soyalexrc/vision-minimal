@@ -24,6 +24,9 @@ import { CustomPopover } from 'src/components/custom-popover';
 
 import { IAllyItem } from '../../types/ally';
 import { UserQuickEditForm } from './user-quick-edit-form';
+import Typography from '@mui/material/Typography';
+import { getStatus, GetStatusType } from '../../utils/get-status';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 
@@ -107,6 +110,10 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
           />
         </TableCell>
 
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <Typography variant="body2">{row.id}</Typography>
+        </TableCell>
+
         <TableCell>
           <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
             {/*<Avatar alt={row.name} src={row.name} />*/}
@@ -127,7 +134,11 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
           </Box>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phonenumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <Typography variant="body2">{row.role}</Typography>
+        </TableCell>
+
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatLocalVenezuelanPhone(row.phonenumber)}</TableCell>
 
 
 
@@ -142,7 +153,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
               'default'
             }
           >
-            {row.status}
+            {getStatus(row.status as GetStatusType).name}
           </Label>
         </TableCell>
 

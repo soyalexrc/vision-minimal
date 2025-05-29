@@ -62,8 +62,6 @@ export const paths = {
     users: {
       root: `${ROOTS.DASHBOARD}/users`,
       list: `${ROOTS.DASHBOARD}/users`,
-      edit: (id: number | string) => `${ROOTS.DASHBOARD}/users/update/${id}`,
-      create: `${ROOTS.DASHBOARD}/users/new`,
     },
     externalAdvisers: {
       root: `${ROOTS.DASHBOARD}/external-advisers`,

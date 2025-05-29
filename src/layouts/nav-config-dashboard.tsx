@@ -82,10 +82,6 @@ export const navData: NavSectionProps['data'] = [
         title: 'Usuarios',
         path: paths.dashboard.users.root,
         icon: ICONS.user,
-        children: [
-          { title: 'Lista', path: paths.dashboard.users.list },
-          { title: 'Nuevo usuario ', path: paths.dashboard.users.create },
-        ],
       },
       {
         title: 'Aliados',
