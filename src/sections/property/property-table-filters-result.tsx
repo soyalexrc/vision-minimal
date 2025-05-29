@@ -19,7 +19,7 @@ type Props = FiltersResultProps & {
   filters: UseSetStateReturn<IPropertyDataFilters>;
 };
 
-export function ClientTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
+export function PropertyTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {
   const { state: currentFilters, setState: updateFilters, resetState: resetFilters } = filters;
 
   const handleRemoveKeyword = useCallback(() => {

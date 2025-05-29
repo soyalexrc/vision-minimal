@@ -16,6 +16,10 @@ import { fCurrency } from '../../utils/format-number';
 import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 import type { GetStatusType } from '../../utils/get-status';
+import Box from '@mui/material/Box';
+import Avatar from '@mui/material/Avatar';
+import ListItemText from '@mui/material/ListItemText';
+import Link from '@mui/material/Link';
 
 // ----------------------------------------------------------------------
 
@@ -44,6 +48,41 @@ const RenderErrorWarning = ({ params }: ParamsProps) => {
   }
   return <></>;
 };
+
+export function RenderCellProperty({ params, href }: ParamsProps & { href: string }) {
+  return (
+    <Box
+      sx={{
+        py: 2,
+        gap: 2,
+        width: 1,
+        display: 'flex',
+        alignItems: 'center',
+      }}
+    >
+      <Avatar
+        alt={params.row.publicationTitle}
+        src={params.row.coverUrl}
+        variant="rounded"
+        sx={{ width: 64, height: 64 }}
+      />
+
+      <ListItemText
+        primary={
+          <Link component={RouterLink} href={href} color="inherit">
+            {params.row.publicationTitle}
+          </Link>
+        }
+        secondary="secondary"
+        slotProps={{
+          primary: { noWrap: true },
+          secondary: { sx: { color: 'text.disabled' } },
+        }}
+      />
+    </Box>
+  );
+}
+
 
 export function RenderCellAmount({ params, value }: ParamsProps & { value: number }) {
   return (

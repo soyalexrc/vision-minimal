@@ -1,6 +1,5 @@
 import { CONFIG } from 'src/global-config';
 
-import { BlankView } from 'src/sections/blank/view';
 import { PropertyListView } from '../../../sections/property/view/property-list-view';
 
 // ----------------------------------------------------------------------

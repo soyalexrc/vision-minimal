@@ -30,15 +30,14 @@ import { useRouter } from '../../../routes/hooks';
 import { RouterLink } from '../../../routes/components';
 import { GridActionsLinkItem } from '../../product/view';
 import { EmptyContent } from '../../../components/empty-content';
-import { ClientGridTableToolbar } from '../../client/client-table-toolbar';
-import { clientColumns } from '../../../utils/columns/client-columns';
+import { PropertyGridTableToolbar } from '../property-table-toolbar';
+import { propertyColumns } from '../../../utils/columns/property-columns';
 import {
-  deleteClient, restoreClient,
-  useGetClients,
-  deleteManyClients,
-} from '../../../actions/client';
+  deleteProperty, restoreProperty,
+  deleteManyPropertys, useGetProperties, useGetCategories,
+} from '../../../actions/property';
 
-import type { IClientItem, IClientDataFilters } from '../../../types/client';
+import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';
 
 // ----------------------------------------------------------------------
 
@@ -58,22 +57,23 @@ const STATUS_OPTIONS = [
 export function PropertyListView() {
   const table = useTable({ defaultDense: true, defaultRowsPerPage: 25, defaultOrderBy: 'id' });
   const confirmDialog = useBoolean();
-  const { clients, refresh, clientsLoading } = useGetClients();
+  const { properties, refresh, propertiesLoading } = useGetProperties();
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
-  const [tableData, setTableData] = useState<IClientItem[]>(clients);
+  const [tableData, setTableData] = useState<IPropertyItemPreview[]>(properties);
   const [filterButtonEl, setFilterButtonEl] = useState<HTMLButtonElement | null>(null);
   const router = useRouter();
-  const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
+  const filters = useSetState<IPropertyDataFilters>({ name: '', status: 'all', propertyType: [], operationType: [] });
 
   const { state: currentFilters, setState: updateFilters } = filters;
 
   const CustomToolbarCallback = useCallback(
     () => (
-      <ClientGridTableToolbar
+      <PropertyGridTableToolbar
         filters={filters}
         canReset={canReset}
+        onResetPage={table.onResetPage}
         selectedRowIds={selectedRowIds}
         setFilterButtonEl={setFilterButtonEl}
         filteredResults={dataFiltered.length}
@@ -85,17 +85,17 @@ export function PropertyListView() {
   );
 
   const getTogglableColumns = () =>
-    clientColumns
+    propertyColumns
       .filter((column) => !HIDE_COLUMNS_TOGGLABLE.includes(column.field))
       .map((column) => column.field);
 
   useEffect(() => {
-    if (clients?.length > 0) {
-      setTableData(clients);
+    if (properties?.length > 0) {
+      setTableData(properties);
     }
-  }, [clients]);
+  }, [properties]);
 
-  // const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
+  // const filters = useSetState<IPropertyDataFilters>({ name: '', status: 'all' });
   // const { state: currentFilters, setState: updateFilters } = filters;
 
   const dataFiltered = applyFilter({
@@ -112,7 +112,7 @@ export function PropertyListView() {
 
   const handleDeleteRow = async (id: number) => {
     const promise = await (async () => {
-      const response: AxiosResponse<any> = await deleteClient(id);
+      const response: AxiosResponse<any> = await deleteProperty(id);
       if (response.status === 200 || response.status === 201) {
         return response.data?.message;
       } else {
@@ -131,7 +131,7 @@ export function PropertyListView() {
 
   const handleRestoreRow = async (id: number) => {
     const promise = await (async () => {
-      const response: AxiosResponse<any> = await restoreClient(id);
+      const response: AxiosResponse<any> = await restoreProperty(id);
       if (response.status === 200 || response.status === 201) {
         return response.data?.message;
       } else {
@@ -150,7 +150,7 @@ export function PropertyListView() {
 
   const handleDeleteRows = async () => {
     const promise = await (async () => {
-      const response: AxiosResponse<any> = await deleteManyClients(selectedRowIds as number[]);
+      const response: AxiosResponse<any> = await deleteManyPropertys(selectedRowIds as number[]);
       if (response.status === 200 || response.status === 201) {
         return response.data?.message;
       } else {
@@ -182,7 +182,7 @@ export function PropertyListView() {
       title="Eliminar"
       content={
         <>
-          Estas seguro de eliminar <strong> {selectedRowIds.length} </strong> Clientes?
+          Estas seguro de eliminar <strong> {selectedRowIds.length} </strong> Propertyes?
         </>
       }
       action={
@@ -213,7 +213,7 @@ export function PropertyListView() {
           action={
             <Button
               component={RouterLink}
-              href={paths.dashboard.clients.create}
+              href={paths.dashboard.properties.create}
               variant="contained"
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
@@ -275,6 +275,7 @@ export function PropertyListView() {
               checkboxSelection
               localeText={esES.components.MuiDataGrid.defaultProps.localeText}
               disableRowSelectionOnClick
+              getRowId={(params) => params.id}
               rows={dataFiltered}
               columns={[
                 {
@@ -296,7 +297,14 @@ export function PropertyListView() {
                       showInMenu
                       icon={<Iconify icon="solar:eye-bold" />}
                       label="Ver detalle"
-                      href={paths.dashboard.clients.details(params.row.id)}
+                      href={paths.dashboard.properties.details(params.row.id)}
+                    />,
+
+
+                    <GridActionsCellItem
+                      showInMenu
+                      icon={<Iconify icon="lucide:image-down" />}
+                      label="Descargar imagenes"
                     />,
                     ...(params.row.status !== 'deleted'
                         ? [
@@ -304,9 +312,38 @@ export function PropertyListView() {
                             showInMenu
                             icon={<Iconify icon="eva:edit-2-fill" />}
                             label="Editar"
-                            href={paths.dashboard.clients.edit(params.row.id)}
+                            href={paths.dashboard.properties.edit(params.row.id)}
                           />
                         ] : []
+                    ),
+                    ...(params.row.status === 'active'
+                    ? [
+                          <GridActionsCellItem
+                            showInMenu
+                            icon={<Iconify icon="uim:favorite" />}
+                            label="Marcar como favorito"
+                            sx={{ color: 'warning.main' }}
+                          />,
+
+                          <GridActionsCellItem
+                            showInMenu
+                            icon={<Iconify icon="material-symbols:share" />}
+                            label="Compartir"
+                          />,
+                          <GridActionsCellItem
+                            showInMenu
+                            icon={<Iconify icon="lsicon:disable-outline" />}
+                            label="Desactivar"
+                            sx={{ color: 'error.main' }}
+                          />,
+                        ] : [
+                          <GridActionsCellItem
+                            showInMenu
+                            icon={<Iconify icon="lets-icons:check-fill" />}
+                            label="Activar"
+                            sx={{ color: 'success.main' }}
+                          />,
+                        ]
                     ),
                     ...(params.row.status !== 'deleted'
                       ? [
@@ -332,9 +369,9 @@ export function PropertyListView() {
                       : []),
                   ]
                 },
-                ...clientColumns,
+                ...propertyColumns,
               ]}
-              loading={clientsLoading}
+              loading={propertiesLoading}
               getRowHeight={() => 'auto'}
               pageSizeOptions={[25, 50, 100, { value: -1, label: 'All' }]}
               initialState={{ pagination: { paginationModel: { pageSize: 25 } } }}
@@ -378,14 +415,14 @@ export function PropertyListView() {
           {/*  />*/}
 
           {/*  {*/}
-          {/*    clientsLoading &&*/}
+          {/*    propertiesLoading &&*/}
           {/*    <Box sx={{ height: 400, justifyContent: 'center', alignItems: 'center' }}>*/}
           {/*      <LoadingScreen />*/}
           {/*    </Box>*/}
           {/*  }*/}
 
           {/*  {*/}
-          {/*    !clientsLoading && clients.length > 0 &&*/}
+          {/*    !propertiesLoading && properties.length > 0 &&*/}
           {/*    <Scrollbar>*/}
           {/*      <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>*/}
           {/*        <TableHeadCustom*/}
@@ -409,13 +446,13 @@ export function PropertyListView() {
           {/*              table.page * table.rowsPerPage + table.rowsPerPage*/}
           {/*            )*/}
           {/*            .map((row) => (*/}
-          {/*              <ClientTableRow*/}
+          {/*              <PropertyTableRow*/}
           {/*                key={row.id}*/}
           {/*                row={row}*/}
           {/*                selected={table.selected.includes(row.id!.toString())}*/}
           {/*                onSelectRow={() => table.onSelectRow(row.id!.toString())}*/}
           {/*                onDeleteRow={() => handleDeleteRow(row.id!.toString())}*/}
-          {/*                editHref={paths.dashboard.clients.edit(row.id!)}*/}
+          {/*                editHref={paths.dashboard.properties.edit(row.id!)}*/}
           {/*              />*/}
           {/*            ))}*/}
 
@@ -451,13 +488,13 @@ export function PropertyListView() {
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: IClientItem[];
-  filters: IClientDataFilters;
+  inputData: IPropertyItemPreview[];
+  filters: IPropertyDataFilters;
   comparator: (a: any, b: any) => number;
 };
 
 function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
-  const { name, status } = filters;
+  const { name, status, operationType, propertyType } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -470,11 +507,20 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (name) {
-    inputData = inputData.filter((user) => user.name.toLowerCase().includes(name.toLowerCase()));
+    inputData = inputData.filter((user) => user.publicationTitle.toLowerCase().includes(name.toLowerCase()));
   }
 
   if (status !== 'all') {
     inputData = inputData.filter((user) => user.status === status);
+  }
+
+
+  if (propertyType.length) {
+    inputData = inputData.filter((product) => propertyType.includes(product.propertyType));
+  }
+
+  if (operationType.length) {
+    inputData = inputData.filter((product) => operationType.includes(product.operationType));
   }
 
   // if (role.length) {

@@ -72,6 +72,9 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/properties`,
       list: `${ROOTS.DASHBOARD}/properties`,
       create: `${ROOTS.DASHBOARD}/properties/new`,
+      edit: (id: number | string) => `${ROOTS.DASHBOARD}/properties/update/${id}`,
+      details: (id: number | string) => `${ROOTS.DASHBOARD}/properties/view/${id}`,
+
     },
     admin: {
       internal: `${ROOTS.DASHBOARD}/admin-internal`,

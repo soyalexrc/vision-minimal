@@ -77,6 +77,22 @@ export const endpoints = {
     search: '/client/search',
     restore: '/client/restore',
   },
+  property: {
+    category: {
+      list: '/category',
+      create: '/category',
+      edit: '/category',
+      delete: '/category',
+    },
+    list: '/property',
+    create: '/property',
+    edit: '/property',
+    delete: '/property',
+    details: '/property/details',
+    search: '/property/search',
+    restore: '/property/restore',
+  },
+
   user: {
     list: '/user',
     details: '/user/details',

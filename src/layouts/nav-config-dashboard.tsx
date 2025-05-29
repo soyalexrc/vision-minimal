@@ -79,6 +79,15 @@ export const navData: NavSectionProps['data'] = [
         ],
       },
       {
+        title: 'Inmuebles',
+        path: paths.dashboard.properties.root,
+        icon: ICONS.building,
+        children: [
+          { title: 'Lista', path: paths.dashboard.properties.list },
+          { title: 'Nuevo inmueble ', path: paths.dashboard.properties.create },
+        ],
+      },
+      {
         title: 'Usuarios',
         path: paths.dashboard.users.root,
         icon: ICONS.user,
@@ -97,15 +106,6 @@ export const navData: NavSectionProps['data'] = [
         title: 'Propietarios',
         path: paths.dashboard.owners.root,
         icon: ICONS.owner,
-      },
-      {
-        title: 'Inmuebles',
-        path: paths.dashboard.properties.root,
-        icon: ICONS.building,
-        children: [
-          { title: 'Lista', path: paths.dashboard.properties.list },
-          { title: 'Nuevo inmueble ', path: paths.dashboard.properties.create },
-        ],
       },
     ],
   },
