@@ -87,28 +87,16 @@ export const navData: NavSectionProps['data'] = [
         title: 'Aliados',
         path: paths.dashboard.allies.root,
         icon: ICONS.team,
-        children: [
-          { title: 'Lista', path: paths.dashboard.allies.list },
-          { title: 'Nuevo aliado ', path: paths.dashboard.allies.create },
-        ],
       },
       {
         title: 'Asesores externos',
         path: paths.dashboard.externalAdvisers.root,
         icon: ICONS.teamExternal,
-        children: [
-          { title: 'Lista', path: paths.dashboard.externalAdvisers.list },
-          { title: 'Nuevo asesor externo ', path: paths.dashboard.externalAdvisers.create },
-        ],
       },
       {
         title: 'Propietarios',
         path: paths.dashboard.owners.root,
         icon: ICONS.owner,
-        children: [
-          { title: 'Lista', path: paths.dashboard.owners.list },
-          { title: 'Nuevo propietario ', path: paths.dashboard.owners.create },
-        ],
       },
       {
         title: 'Inmuebles',
