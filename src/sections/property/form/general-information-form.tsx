@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -13,6 +13,8 @@ import CardHeader from '@mui/material/CardHeader';
 
 import { Field } from '../../../components/hook-form';
 import { useGetCategories } from '../../../actions/category';
+import { useFormContext } from 'react-hook-form';
+import Typography from '@mui/material/Typography';
 
 type Props = {
   collapseValue: boolean;
@@ -21,8 +23,27 @@ type Props = {
   onPressNext: () => void;
 }
 
+
 export default function GeneralInformationForm({collapseValue, onCollapseToggle, renderCollapseButton, onPressNext}: Props) {
+  const { watch, setValue } = useFormContext();
   const { categories } = useGetCategories()
+
+  const watchedImages = watch('images')
+
+  console.log(watchedImages)
+
+  const handleRemoveFile = useCallback(
+    (inputFile: File | string) => {
+      const filtered = watchedImages && watchedImages?.filter((file) => file !== inputFile);
+      setValue('images', filtered);
+    },
+    [setValue, watchedImages]
+  );
+
+  const handleRemoveAllFiles = useCallback(() => {
+    setValue('images', [], { shouldValidate: true });
+  }, [setValue]);
+
   return (
     <Card>
       <CardHeader
@@ -82,6 +103,18 @@ export default function GeneralInformationForm({collapseValue, onCollapseToggle,
             </Box>
             <Box sx={{ gridColumn: '1 / -1' }}>
               <Field.Checkbox name="generalInformation.isOccupiedByPeople" label="La propiedad está ocupada por personas" />
+            </Box>
+            <Box sx={{ gridColumn: '1 / -1' }} >
+              <Typography variant="h5" mb={2}>Cargar imagenes</Typography>
+              <Field.Upload
+                multiple
+                thumbnail
+                name="images"
+                maxSize={1073741824}
+                onRemove={handleRemoveFile}
+                onRemoveAll={handleRemoveAllFiles}
+                onUpload={() => console.info('ON UPLOAD')}
+              />
             </Box>
           </Box>
           <Stack direction="row" justifyContent="flex-end" onClick={onPressNext}>

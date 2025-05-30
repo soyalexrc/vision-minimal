@@ -33,7 +33,7 @@ export type PropertyFormSchemaType = z.infer<typeof PropertyFormSchema>;
 export const PropertyFormSchema = z.object({
   id: z.string().optional(),
   userId: z.string().optional(),
-  images: z.array(z.string()).optional(),
+  images: z.any().optional(),
   distributions: z.any().optional(),
   attributes: z.any().optional(),
   equipments: z.any().optional(),
@@ -151,7 +151,7 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   const defaultValues: PropertyFormSchemaType = {
     id: undefined,
     userId: undefined,
-    images: [],
+    images: ['https://2.img-dpreview.com/files/p/E~C1000x0S4000x4000T1200x1200~articles/3925134721/0266554465.jpeg'],
     distributions: [],
     attributes: [],
     equipments: [],

@@ -53,7 +53,7 @@ export function Upload({
           <Box sx={{ gap: 1.5, display: 'flex', justifyContent: 'flex-end' }}>
             {onRemoveAll && (
               <Button color="inherit" variant="outlined" size="small" onClick={onRemoveAll}>
-                Remove all
+                Eliminar todas
               </Button>
             )}
 
@@ -64,7 +64,7 @@ export function Upload({
                 onClick={onUpload}
                 startIcon={<Iconify icon="eva:cloud-upload-fill" />}
               >
-                Upload
+                Subir
               </Button>
             )}
           </Box>
