@@ -16,6 +16,10 @@ import AttributesTab from './attributes-tab';
 import { useParams } from '../../../routes/hooks';
 
 import type { Attribute } from '../../../types/property';
+import DistributionsTab from './distributions-tab';
+import EquipmentsTab from './equipments-tab';
+import UtilitiesTab from './utilities-tab';
+import AdjacenciesTab from './adjacencies-tab';
 
 type Props = {
   collapseValue: boolean;
@@ -47,13 +51,13 @@ const AttributesEquipmentUtilitiesDistributionAdjacenciesForm = React.forwardRef
           <AttributesTab />
         );
       case 'distribution':
-        return <div>Distribution content here</div>;
+        return  <DistributionsTab />;
       case 'equipment':
-        return <div>Equipment content here</div>;
+        return <EquipmentsTab />;
       case 'utilities':
-        return <div>Utilities content here</div>;
+        return <UtilitiesTab />;
       case 'adjacencies':
-        return <div>Adjacencies content here</div>;
+        return <AdjacenciesTab />;
       default:
         return null;
     }

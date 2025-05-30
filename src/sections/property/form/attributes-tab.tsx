@@ -313,8 +313,4 @@ const AttributesTab = () => {
   );
 };
 
-interface AttributesTabProps {
-  availableAttributes?: Attribute[];
-}
-
 export default AttributesTab;

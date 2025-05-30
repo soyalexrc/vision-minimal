@@ -25,6 +25,59 @@ export interface AttributeFormField {
   attribute: Attribute;
 }
 
+export interface Distribution {
+  id: number;
+  title: string;
+  description?: string;
+}
+
+export interface DistributionFormField {
+  distributionId: number;
+  distribution: Distribution;
+  additionalInformation?: string;
+  value: string; // Add this line
+}
+
+export interface Equipment {
+  id: number;
+  title: string;
+  description?: string;
+}
+
+export interface EquipmentFormField {
+  equipmentId: number;
+  equipment: Equipment;
+  additionalInformation?: string;
+  brand?: string;
+  value: string; // Add this line
+}
+
+export interface Utility {
+  id: number;
+  title: string;
+  description?: string;
+}
+
+export interface UtilityFormField {
+  utilityId: number;
+  utility: Utility;
+  additionalInformation?: string;
+  value: string; // Add this line
+}
+
+export interface Adjacency {
+  id: number;
+  title: string;
+  description?: string;
+}
+
+export interface AdjacencyFormField {
+  adjacencyId: number;
+  adjacency: Adjacency;
+  additionalInformation?: string;
+  value: string; // Add this line
+}
+
 export type IPropertyItemPreview = {
   id: string;
   status: string;
@@ -54,7 +107,7 @@ export type IPropertyItemCreateUpdate = {
   id?: string;
   userId?: string;
   images?: string[];
-  distribution?: any;
+  distributions?: any;
   attributes?: any;
   equipments?: any;
   utilities?: any;

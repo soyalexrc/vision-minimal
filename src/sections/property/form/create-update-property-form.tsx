@@ -20,7 +20,13 @@ import DocumentationInformationForm from './documentation-information-form';
 import AttributesEquipmentUtilitiesServicesDistributionForm
   from './attributes-equipment-utilities-services-distribution-form';
 
-import type { Attribute, AttributeFormField, IPropertyItemCreateUpdate } from '../../../types/property';
+import type {
+  Adjacency, AdjacencyFormField,
+  Attribute,
+  AttributeFormField, Distribution,
+  DistributionFormField, EquipmentFormField,
+  IPropertyItemCreateUpdate, Utility, UtilityFormField,
+} from '../../../types/property';
 
 export type PropertyFormSchemaType = z.infer<typeof PropertyFormSchema>;
 
@@ -28,7 +34,7 @@ export const PropertyFormSchema = z.object({
   id: z.string().optional(),
   userId: z.string().optional(),
   images: z.array(z.string()).optional(),
-  distribution: z.any().optional(),
+  distributions: z.any().optional(),
   attributes: z.any().optional(),
   equipments: z.any().optional(),
   utilities: z.any().optional(),
@@ -146,7 +152,7 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
     id: undefined,
     userId: undefined,
     images: [],
-    distribution: [],
+    distributions: [],
     attributes: [],
     equipments: [],
     utilities: [],
@@ -270,6 +276,10 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   const documentationRef = React.useRef<HTMLDivElement>(null);
 
   const [attributesFetched, setAttributesFetched] = useState(false);
+  const [equipmentsFetched, setEquipmentsFetched] = useState(false);
+  const [utilitiesFetched, setUtilitiesFetched] = useState(false);
+  const [adjacenciesFetched, setAdjacenciesFetched] = useState(false);
+  const [distributionsFetched, setDistributionsFetched] = useState(false);
 
   const methods = useForm<PropertyFormSchemaType>({
     mode: 'all',
@@ -281,27 +291,88 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   const {
     handleSubmit,
     control,
+    watch,
     formState: { isSubmitting, },
   } = methods;
 
+  // const wathedDistributions = watch('distributions');
+
+  // console.log('watchedDistributions:', wathedDistributions);
+
   const {replace: attrReplace, fields: attrFields} = useFieldArray({ control, name: 'attributes' })
+  const {replace: distReplace, fields: distFields} = useFieldArray({ control, name: 'distributions' })
+  const {replace: equipReplace, fields: equipFields} = useFieldArray({ control, name: 'equipments' })
+  const {replace: utilsReplace, fields: utilsFields} = useFieldArray({ control, name: 'utilities' })
+  const {replace: adjaReplace, fields: adjaFields} = useFieldArray({ control, name: 'adjacencies' })
 
   // Fetch attributes once when component mounts
   useEffect(() => {
-    const fetchAttributes = async () => {
-      try {
-        const response = await axiosInstance.get('/attribute');
-        await initializeAttributeFields(response.data);
-        setAttributesFetched(true);
-      } catch (error) {
-        console.error('Error fetching attributes:', error);
-      }
-    };
-
     if (!attributesFetched) {
       fetchAttributes();
     }
+    if (!distributionsFetched) {
+      fetchDistributions();
+    }
+    if (!equipmentsFetched) {
+      fetchEquipments();
+    }
+    if (!utilitiesFetched) {
+      fetchUtilities();
+    }
+    if (!adjacenciesFetched) {
+      fetchAdjacencies();
+    }
   }, []);
+
+  const fetchAttributes = async () => {
+    try {
+      const response = await axiosInstance.get('/attribute');
+      await initializeAttributeFields(response.data);
+      setAttributesFetched(true);
+    } catch (error) {
+      console.error('Error fetching attributes:', error);
+    }
+  };
+
+  const fetchDistributions = async () => {
+    try {
+      const response = await axiosInstance.get('/distribution');
+      await initializeDistributionFields(response.data);
+      setDistributionsFetched(true);
+    } catch (error) {
+      console.error('Error fetching distributions:', error);
+    }
+  };
+
+  const fetchEquipments = async () => {
+    try {
+      const response = await axiosInstance.get('/equipment');
+      await initializeEquipmentsFields(response.data);
+      setEquipmentsFetched(true);
+    } catch (error) {
+      console.error('Error fetching equipments:', error);
+    }
+  };
+
+  const fetchUtilities = async () => {
+    try {
+      const response = await axiosInstance.get('/utility');
+      await initializeUtilitiesFields(response.data);
+      setUtilitiesFetched(true);
+    } catch (error) {
+      console.error('Error fetching utilities:', error);
+    }
+  };
+
+  const fetchAdjacencies = async () => {
+    try {
+      const response = await axiosInstance.get('/adjacency');
+      await initializeAdjacenciesFields(response.data);
+      setAdjacenciesFetched(true);
+    } catch (error) {
+      console.error('Error fetching adjacencies:', error);
+    }
+  };
 
   const initializeAttributeFields = async (attributesData: Attribute[]) => {
     let attributeFields: AttributeFormField[] = [];
@@ -353,6 +424,224 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
     }
   };
 
+  const initializeDistributionFields = async (distributionsData: Distribution[]) => {
+
+    let distributionFields: DistributionFormField[] = [];
+
+    if (currentProperty?.id) {
+      console.log('Editing existing property:', currentProperty?.id);
+      // Editing existing property - fetch current values
+      try {
+        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/distributions`);
+        const currentValues = await valuesResponse.data;
+        console.log('Current values:', currentValues);
+
+        // Create form fields from existing values
+        distributionFields = distributionsData.map((dist) => {
+          const existingValue = currentValues.find((cv: any) => cv.distributionId === dist.id);
+          return {
+            distributionId: dist.id,
+            distribution: dist,
+            additionalInformation: existingValue?.additionalInformation || '', // Add this
+            value: existingValue ? 'true' : 'false',
+            valueType: 'boolean', // Add this
+          };
+        });
+      } catch (valueError) {
+        console.warn('Could not fetch existing values, using defaults:', valueError);
+        // Fallback to default values if fetching existing values fails
+        distributionFields = distributionsData.map((dist) => ({
+          distributionId: dist.id,
+          distribution: dist,
+          additionalInformation: '', // Add this
+          value: 'false', // Add default value
+          valueType: 'boolean', // Add this
+        }));
+      }
+    } else {
+      console.log('Creating new property');
+      // New property - create default form fields
+      distributionFields = distributionsData.map((dist) => ({
+        distributionId: dist.id,
+        additionalInformation: '', // Add this
+        value: 'false', // Add default value
+        distribution: dist,
+        valueType: 'boolean', // Add this
+      }));
+    }
+
+    console.log('Prepared distribution fields:', distributionFields);
+
+    // Only replace if we don't have fields yet or if this is the first initialization
+    if (distFields.length === 0 || !distributionsFetched) {
+      distReplace(distributionFields);
+    }
+  };
+
+  const initializeEquipmentsFields = async (equipmentsData: Distribution[]) => {
+
+    let equipmentFields: EquipmentFormField[] = [];
+
+    if (currentProperty?.id) {
+      console.log('Editing existing property:', currentProperty?.id);
+      // Editing existing property - fetch current values
+      try {
+        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/distributions`);
+        const currentValues = await valuesResponse.data;
+        console.log('Current values:', currentValues);
+
+        // Create form fields from existing values
+        equipmentFields = equipmentsData.map((equip) => {
+          const existingValue = currentValues.find((cv: any) => cv.equipmentId === equip.id);
+          return {
+            equipmentId: equip.id,
+            equipment: equip,
+            additionalInformation: existingValue?.additionalInformation || '', // Add this
+            brand: existingValue?.brand || '', // Add this
+            value: existingValue ? 'true' : 'false',
+            valueType: 'boolean', // Add this
+          };
+        });
+      } catch (valueError) {
+        console.warn('Could not fetch existing values, using defaults:', valueError);
+        // Fallback to default values if fetching existing values fails
+        equipmentFields = equipmentsData.map((equip) => ({
+          equipmentId: equip.id,
+          equipment: equip,
+          additionalInformation: '', // Add this
+          brand: '', // Add this
+          value: 'false', // Add default value
+          valueType: 'boolean', // Add this
+        }));
+      }
+    } else {
+      console.log('Creating new property');
+      // New property - create default form fields
+      equipmentFields = equipmentsData.map((equip) => ({
+        equipmentId: equip.id,
+        equipment: equip,
+        additionalInformation: '', // Add this
+        brand: '', // Add this
+        value: 'false', // Add default value
+        valueType: 'boolean', // Add this
+      }));
+    }
+
+    console.log('Prepared equipments fields:', equipmentFields);
+
+    // Only replace if we don't have fields yet or if this is the first initialization
+    if (equipFields.length === 0 || !equipmentsFetched) {
+      equipReplace(equipmentFields);
+    }
+  };
+
+  const initializeUtilitiesFields = async (utilitiesData: Utility[]) => {
+
+    let utilitiesFields: UtilityFormField[] = [];
+
+    if (currentProperty?.id) {
+      console.log('Editing existing property:', currentProperty?.id);
+      // Editing existing property - fetch current values
+      try {
+        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/utilities`);
+        const currentValues = await valuesResponse.data;
+        console.log('Current values:', currentValues);
+
+        // Create form fields from existing values
+        utilitiesFields = utilitiesData.map((util) => {
+          const existingValue = currentValues.find((cv: any) => cv.utilityId === util.id);
+          return {
+            utilityId: util.id,
+            utility: util,
+            additionalInformation: existingValue?.additionalInformation || '', // Add this
+            value: existingValue ? 'true' : 'false',
+            valueType: 'boolean', // Add this
+          };
+        });
+      } catch (valueError) {
+        console.warn('Could not fetch existing values, using defaults:', valueError);
+        // Fallback to default values if fetching existing values fails
+        utilitiesFields = utilitiesData.map((util) => ({
+          utilityId: util.id,
+          utility: util,
+          additionalInformation: '', // Add this
+          value: 'false', // Add default value
+          valueType: 'boolean', // Add this
+        }));
+      }
+    } else {
+      console.log('Creating new property');
+      // New property - create default form fields
+      utilitiesFields = utilitiesData.map((util) => ({
+        utilityId: util.id,
+        utility: util,
+        additionalInformation: '', // Add this
+        value: 'false', // Add default value
+        valueType: 'boolean', // Add this
+      }));
+    }
+
+    console.log('Prepared utilitiess fields:', utilitiesFields);
+
+    // Only replace if we don't have fields yet or if this is the first initialization
+    if (utilsFields.length === 0 || !utilitiesFetched) {
+      utilsReplace(utilitiesFields);
+    }
+  };
+
+  const initializeAdjacenciesFields = async (adjacenciesData: Adjacency[]) => {
+
+    let adjacenciesFields: AdjacencyFormField[] = [];
+
+    if (currentProperty?.id) {
+      console.log('Editing existing property:', currentProperty?.id);
+      // Editing existing property - fetch current values
+      try {
+        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/adjacencies`);
+        const currentValues = await valuesResponse.data;
+        console.log('Current values:', currentValues);
+
+        // Create form fields from existing values
+        adjacenciesFields = adjacenciesData.map((util) => {
+          const existingValue = currentValues.find((cv: any) => cv.utilityId === util.id);
+          return {
+            adjacencyId: util.id,
+            adjacency: util,
+            additionalInformation: existingValue?.additionalInformation || '', // Add this
+            value: existingValue ? 'true' : 'false',
+            valueType: 'boolean', // Add this
+          };
+        });
+      } catch (valueError) {
+        console.warn('Could not fetch existing values, using defaults:', valueError);
+        // Fallback to default values if fetching existing values fails
+        adjacenciesFields = adjacenciesData.map((util) => ({
+          adjacencyId: util.id,
+          adjacency: util,
+          additionalInformation: '', // Add this
+          value: 'false', // Add default value
+          valueType: 'boolean', // Add this
+        }));
+      }
+    } else {
+      console.log('Creating new property');
+      // New property - create default form fields
+      adjacenciesFields = adjacenciesData.map((util) => ({
+        adjacencyId: util.id,
+        adjacency: util,
+        additionalInformation: '', // Add this
+        value: 'false', // Add default value
+        valueType: 'boolean', // Add this
+      }));
+    }
+
+    console.log('Prepared adjacencies fields:', adjacenciesFields);
+
+    // Only replace if we don't have fields yet or if this is the first initialization
+    if (adjaFields.length === 0 || !adjacenciesFetched) {
+      adjaReplace(adjacenciesFields);
+    }
+  };
 
   const onSubmit = handleSubmit(async (values) => {
     // const data = {
