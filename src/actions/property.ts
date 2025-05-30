@@ -24,7 +24,7 @@ type PropertiesData = {
   total: number;
 }
 
-type IPropertyCategoryItem = {
+type IPropertyCategoryItemData = {
   data: IPropertyCategoryItem[];
   total: number;
 }
@@ -60,7 +60,7 @@ export function useGetProperties() {
 export function useGetCategories() {
   const url = endpoints.property.category.list;
 
-  const { data, isLoading, error, isValidating } = useSWR<IPropertyCategoryItem>(url, fetcher, swrOptions);
+  const { data, isLoading, error, isValidating } = useSWR<IPropertyCategoryItemData>(url, fetcher, swrOptions);
 
   const memoizedValue = useMemo(
     () => ({
