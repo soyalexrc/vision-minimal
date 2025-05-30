@@ -58,6 +58,7 @@ export function Scrollbar({
     scrollElement.addEventListener('mouseup', handleMouseUp);
     scrollElement.addEventListener('mousemove', handleMouseMove);
 
+    // eslint-disable-next-line consistent-return
     return () => {
       scrollElement.removeEventListener('mousedown', handleMouseDown);
       scrollElement.removeEventListener('mouseleave', handleMouseLeave);

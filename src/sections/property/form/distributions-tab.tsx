@@ -172,7 +172,7 @@ const DistributionsTab = () => {
       {/* Show message when no results found */}
       {searchTerm && filteredFields.length === 0 && (
         <Box sx={{ textAlign: 'center', mt: 4, color: 'text.secondary' }}>
-          No distribution found matching "{searchTerm}"
+          No distribution found matching &#34;{searchTerm}&#34;
         </Box>
       )}
     </Box>
