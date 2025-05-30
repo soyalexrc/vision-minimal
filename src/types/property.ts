@@ -9,6 +9,22 @@ export type IPropertyDataFilters = {
   operationType: string[];
 };
 
+export interface Attribute {
+  id: number;
+  label: string;
+  placeholder?: string;
+  options?: string; // JSON string for select/radio options
+  formType: 'text' | 'number' | 'check' | 'select' | 'radio' | 'textarea';
+}
+
+export interface AttributeFormField {
+  attributeId: number;
+  value: string;
+  valueType: 'string' | 'number' | 'boolean';
+  // Include attribute details for rendering
+  attribute: Attribute;
+}
+
 export type IPropertyItemPreview = {
   id: string;
   status: string;
@@ -33,6 +49,115 @@ export type IPropertyCategoryItem = {
   isFeatured: boolean;
   image?: string;
 }
+
+export type IPropertyItemCreateUpdate = {
+  id?: string;
+  userId?: string;
+  images?: string[];
+  distribution?: any;
+  attributes?: any;
+  equipments?: any;
+  utilities?: any;
+  furnishedAreas?: any;
+  status: string;
+  updatedby?: any;
+  changes?: any;
+  createdby?: any;
+
+  generalInformation: {
+    id?: string;
+    code?: string;
+    publicationTitle?: string;
+    footageGround?: string;
+    footageBuilding?: string;
+    description?: string;
+    propertyType?: string;
+    zoning?: string;
+    propertyCondition?: string;
+    antiquity?: string;
+    amountOfFloors?: string;
+    typeOfWork?: string;
+    propertiesPerFloor?: string;
+    handoverKeys?: boolean;
+    termsAndConditionsAccepted?: boolean;
+    isFurnished?: boolean;
+    isOccupiedByPeople?: boolean;
+  };
+
+  locationInformation: {
+    id?: string;
+    location?: string;
+    nomenclature?: string;
+    tower?: string;
+    amountOfFloors?: string;
+    isClosedStreet?: string;
+    country?: string;
+    state?: string;
+    municipality?: string;
+    urbanization?: string;
+    avenue?: string;
+    city?: string;
+    street?: string;
+    buildingShoppingCenter?: string;
+    buildingNumber?: string;
+    floor?: string;
+    referencePoint?: string;
+    howToGet?: string;
+    trunkNumber?: string;
+    trunkLevel?: string;
+    parkingNumber?: string;
+    parkingLevel?: string;
+  };
+
+  documentsInformation: {
+    id?: string;
+    propertyDoc?: boolean;
+    CIorRIF?: boolean;
+    ownerCIorRIF?: boolean;
+    spouseCIorRIF?: boolean;
+    isCatastralRecordSameOwner?: boolean;
+    condominiumSolvency?: boolean;
+    mainProperty?: boolean;
+    mortgageRelease?: string;
+    condominiumSolvencyDetails?: string;
+    power?: string;
+    successionDeclaration?: string;
+    courtRulings?: string;
+    catastralRecordYear?: string;
+    attorneyEmail?: string;
+    attorneyPhone?: string;
+    attorneyFirstName?: string;
+    attorneyLastName?: string;
+    realStateTax?: string;
+    owner?: string;
+  };
+
+  negotiationInformation: {
+    id?: string;
+    price?: string;
+    minimumNegotiation?: string;
+    client?: string;
+    reasonToSellOrRent?: string;
+    realstateadvisername?: string;
+    externaladvisername?: string;
+    partOfPayment?: string;
+    operationType?: string;
+    ally?: string;
+    allyname?: string;
+    propertyExclusivity?: string;
+    realStateAdviser?: string;
+    additional_price?: string;
+    externalAdviser?: string;
+    sellCommission?: string;
+    rentCommission?: string;
+    ownerPaysCommission?: string;
+    mouthToMouth?: boolean;
+    realStateGroups?: boolean;
+    realStateWebPages?: boolean;
+    socialMedia?: boolean;
+    publicationOnBuilding?: boolean;
+  };
+};
 
 export type IPropertyItem = {
   id?: number;

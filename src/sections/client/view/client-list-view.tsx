@@ -5,7 +5,7 @@ import type { TableHeadCellProps } from 'src/components/table';
 import { GridRowSelectionModel, GridColumnVisibilityModel, GridActionsCellItem } from '@mui/x-data-grid';
 
 import { varAlpha } from 'minimal-shared/utils';
-import { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useBoolean, usePopover, useSetState } from 'minimal-shared/hooks';
 
 import Tab from '@mui/material/Tab';

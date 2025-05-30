@@ -6,7 +6,8 @@ import { DashboardContent } from 'src/layouts/dashboard';
 
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { CreateUpdatePropertyForm } from '../../../../sections/property/form/create-update-property-form';
+import { CreateUpdatePropertyForm } from '../../../../../sections/property/form/create-update-property-form';
+
 
 // ----------------------------------------------------------------------
 
@@ -14,11 +15,11 @@ export default function Page() {
   return (
     <DashboardContent>
       <CustomBreadcrumbs
-        heading="Nuevo inmueble"
+        heading="Editar inmueble"
         links={[
           { name: 'Inicio', href: paths.dashboard.root },
           { name: 'Inmuebles', href: paths.dashboard.properties.root },
-          { name: 'Nuevo inmueble' },
+          { name: 'Apartamento en las quintas ejemplo' },
         ]}
         sx={{ mb: { xs: 3, md: 5 } }}
       />
