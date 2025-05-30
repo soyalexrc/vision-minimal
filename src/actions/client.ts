@@ -4,12 +4,10 @@ import type { IProductItem } from 'src/types/product';
 import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
 
-import { fetcher, endpoints } from 'src/lib/axios';
+import axios, { fetcher, endpoints } from 'src/lib/axios';
 
 import type { IClientItem } from '../types/client';
-import { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
-import axios from '../lib/axios';
-import { ClientFormSchemaType } from '../sections/client/form/create-update-client-form';
+import type { ClientFormSchemaType } from '../sections/client/form/create-update-client-form';
 
 // ----------------------------------------------------------------------
 

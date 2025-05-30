@@ -15,7 +15,7 @@ import {
 
 import { Iconify } from '../../../components/iconify';
 
-import type { DistributionFormField, EquipmentFormField } from '../../../types/property';
+import type { EquipmentFormField } from '../../../types/property';
 
 const EquipmentsTab = () => {
   const [searchTerm, setSearchTerm] = useState('');

@@ -13,18 +13,17 @@ import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 
-import { RouterLink } from 'src/routes/components';
-
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { fDate } from '../../utils/format-time';
+import { getStatus } from '../../utils/get-status';
 import { OwnerQuickEditForm } from './owner-quick-edit-form';
 
 import type { IOwnerItem } from '../../types/owner';
-import { getStatus, GetStatusType } from '../../utils/get-status';
+import type { GetStatusType } from '../../utils/get-status';
 
 // ----------------------------------------------------------------------
 

@@ -1,13 +1,12 @@
-import { mutate, SWRConfiguration } from 'swr';
+import type { SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
-import useSWR from 'swr';
 import { useMemo } from 'react';
+import useSWR, { mutate } from 'swr';
 
 import { fetcher, endpoints } from 'src/lib/axios';
-import { IAllyItem } from '../types/ally';
-import { IClientItem } from '../types/client';
-import { IUserItem } from '../types/user';
+
+import type { IUserItem } from '../types/user';
 
 // ----------------------------------------------------------------------
 

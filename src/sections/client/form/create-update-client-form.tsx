@@ -13,19 +13,18 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
-import { useParams, useRouter } from '../../../routes/hooks';
 import { toast } from '../../../components/snackbar';
-import { useGetAllies } from '../../../actions/ally';
+import { useAuthContext } from '../../../auth/hooks';
 import { Iconify } from '../../../components/iconify';
+import { getChangedFields } from '../../../utils/form';
 import { useGetServices } from '../../../actions/service';
 import { Form, Field } from '../../../components/hook-form';
+import { useParams, useRouter } from '../../../routes/hooks';
 import { useGetCategories } from '../../../actions/category';
+import { parseCurrency } from '../../../utils/format-number';
 import { createClient, updateClient, useGetClient, useGetClients } from '../../../actions/client';
 
 import type { IClientItem } from '../../../types/client';
-import { parseCurrency } from '../../../utils/format-number';
-import { useAuthContext, useMockedUser } from '../../../auth/hooks';
-import { getChangedFields } from '../../../utils/form';
 
 export const CONTACT_FROM_OPTIONS = [
   { value: 'Mercado Libre', label: 'Mercado Libre' },

@@ -18,7 +18,6 @@ import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -271,7 +270,7 @@ export function UserListView() {
                         selected={table.selected.includes(row.id!.toString())}
                         onSelectRow={() => table.onSelectRow(row.id!.toString())}
                         onDeleteRow={() => handleDeleteRow(row.id!.toString())}
-                        editHref={''}
+                        editHref=""
                       />
                     ))}
 

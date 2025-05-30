@@ -2,21 +2,18 @@
 
 import type { AxiosResponse } from 'axios';
 import type { TableHeadCellProps } from 'src/components/table';
-import { GridRowSelectionModel, GridColumnVisibilityModel, GridActionsCellItem } from '@mui/x-data-grid';
+import type { GridRowSelectionModel, GridColumnVisibilityModel} from '@mui/x-data-grid';
 
 import { varAlpha } from 'minimal-shared/utils';
+import { useBoolean, useSetState } from 'minimal-shared/hooks';
 import React, { useState, useEffect, useCallback } from 'react';
-import { useBoolean, usePopover, useSetState } from 'minimal-shared/hooks';
 
 import Tab from '@mui/material/Tab';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
-import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import MenuItem from '@mui/material/MenuItem';
-import MenuList from '@mui/material/MenuList';
-import IconButton from '@mui/material/IconButton';
-import { DataGrid, gridClasses } from '@mui/x-data-grid';
+import { esES } from '@mui/x-data-grid/locales';
+import { DataGrid, gridClasses , GridActionsCellItem } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
 
@@ -31,9 +28,9 @@ import { useTable, rowInPage, getComparator } from 'src/components/table';
 
 import { useRouter } from '../../../routes/hooks';
 import { RouterLink } from '../../../routes/components';
+import { GridActionsLinkItem } from '../../product/view';
 import { EmptyContent } from '../../../components/empty-content';
 import { ClientGridTableToolbar } from '../client-table-toolbar';
-import { CustomPopover } from '../../../components/custom-popover';
 import { clientColumns } from '../../../utils/columns/client-columns';
 import {
   deleteClient, restoreClient,
@@ -42,8 +39,6 @@ import {
 } from '../../../actions/client';
 
 import type { IClientItem, IClientDataFilters } from '../../../types/client';
-import { GridActionsLinkItem } from '../../product/view';
-import { esES } from '@mui/x-data-grid/locales';
 
 // ----------------------------------------------------------------------
 

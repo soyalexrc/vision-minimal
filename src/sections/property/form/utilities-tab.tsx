@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 
 import { Iconify } from '../../../components/iconify';
-import { UtilityFormField } from '../../../types/property';
+
+import type { UtilityFormField } from '../../../types/property';
 
 const UtilitiesTab = () => {
   const [searchTerm, setSearchTerm] = useState('');

@@ -1,12 +1,10 @@
 'use client';
 
 
-import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 
 import { paths } from '../../../../../routes/paths';
 import { useParams } from '../../../../../routes/hooks';
-import { Iconify } from '../../../../../components/iconify';
 import { useGetClient } from '../../../../../actions/client';
 import { useSettingsContext } from '../../../../../components/settings';
 import { LoadingScreen } from '../../../../../components/loading-screen';

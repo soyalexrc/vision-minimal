@@ -1,6 +1,6 @@
 import SimpleBar from 'simplebar-react';
-import { mergeClasses } from 'minimal-shared/utils';
 import { useRef, useEffect } from 'react';
+import { mergeClasses } from 'minimal-shared/utils';
 
 import { styled } from '@mui/material/styles';
 

@@ -1,4 +1,3 @@
-import type { IUserItem } from 'src/types/user';
 
 import { useBoolean, usePopover } from 'minimal-shared/hooks';
 
@@ -6,7 +5,6 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
@@ -15,16 +13,16 @@ import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
 
-import { RouterLink } from 'src/routes/components';
-
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
-import { IAllyItem } from '../../types/ally';
+import { getStatus } from '../../utils/get-status';
 import { AllyQuickEditForm } from './ally-quick-edit-form';
-import { getStatus, GetStatusType } from '../../utils/get-status';
+
+import type { IAllyItem } from '../../types/ally';
+import type { GetStatusType } from '../../utils/get-status';
 
 // ----------------------------------------------------------------------
 

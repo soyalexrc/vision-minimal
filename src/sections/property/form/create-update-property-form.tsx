@@ -12,7 +12,6 @@ import axiosInstance from '../../../lib/axios';
 import { useAuthContext } from '../../../auth/hooks';
 import { Form } from '../../../components/hook-form';
 import { Iconify } from '../../../components/iconify';
-import { useParams, useRouter } from '../../../routes/hooks';
 import GeneralInformationForm from './general-information-form';
 import LocationInformationForm from './location-information-form';
 import NegotiationInformationForm from './negotiation-information-form';
@@ -21,11 +20,11 @@ import AttributesEquipmentUtilitiesServicesDistributionForm
   from './attributes-equipment-utilities-services-distribution-form';
 
 import type {
-  Adjacency, AdjacencyFormField,
+  Utility, Adjacency,
   Attribute,
-  AttributeFormField, Distribution,
-  DistributionFormField, EquipmentFormField,
-  IPropertyItemCreateUpdate, Utility, UtilityFormField,
+  Distribution, UtilityFormField,
+  AdjacencyFormField, AttributeFormField,
+  EquipmentFormField, DistributionFormField, IPropertyItemCreateUpdate,
 } from '../../../types/property';
 
 export type PropertyFormSchemaType = z.infer<typeof PropertyFormSchema>;

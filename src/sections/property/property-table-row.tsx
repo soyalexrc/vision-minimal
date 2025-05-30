@@ -2,9 +2,13 @@ import type { GridCellParams } from '@mui/x-data-grid';
 
 import NextLink from 'next/link'
 
+import Box from '@mui/material/Box';
+import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
+import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import Typography from '@mui/material/Typography';
+import ListItemText from '@mui/material/ListItemText';
 
 import { RouterLink } from 'src/routes/components';
 
@@ -16,10 +20,6 @@ import { fCurrency } from '../../utils/format-number';
 import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 import type { GetStatusType } from '../../utils/get-status';
-import Box from '@mui/material/Box';
-import Avatar from '@mui/material/Avatar';
-import ListItemText from '@mui/material/ListItemText';
-import Link from '@mui/material/Link';
 
 // ----------------------------------------------------------------------
 

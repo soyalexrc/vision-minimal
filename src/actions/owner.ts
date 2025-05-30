@@ -1,15 +1,13 @@
-import { mutate, SWRConfiguration } from 'swr';
+import type { SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
-import useSWR from 'swr';
 import { useMemo } from 'react';
+import useSWR, { mutate } from 'swr';
 
-import { fetcher, endpoints } from 'src/lib/axios';
+import axios, { fetcher, endpoints } from 'src/lib/axios';
 
 import type { IOwnerItem } from '../types/owner';
-import axios from '../lib/axios';
-import { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
-import { OwnerQuickEditSchemaType } from '../sections/owner/owner-quick-edit-form';
+import type { OwnerQuickEditSchemaType } from '../sections/owner/owner-quick-edit-form';
 
 
 // ----------------------------------------------------------------------

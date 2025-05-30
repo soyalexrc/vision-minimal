@@ -1,4 +1,4 @@
-import { LabelColor } from '../components/label';
+import type { LabelColor } from '../components/label';
 
 export type GetStatusType = 'active' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
 

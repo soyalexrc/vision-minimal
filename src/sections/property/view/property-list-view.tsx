@@ -34,7 +34,7 @@ import { PropertyGridTableToolbar } from '../property-table-toolbar';
 import { propertyColumns } from '../../../utils/columns/property-columns';
 import {
   deleteProperty, restoreProperty,
-  deleteManyPropertys, useGetProperties, useGetCategories,
+  useGetProperties, deleteManyPropertys,
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';

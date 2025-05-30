@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 
 import { useRouter } from 'src/routes/hooks';
 
-// eslint-disable-next-line import/no-unresolved
 import { toast } from 'src/components/snackbar';
 
 import { allLangs } from './all-langs';

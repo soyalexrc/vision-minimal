@@ -10,9 +10,9 @@ import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
 import MenuItem from '@mui/material/MenuItem';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 
 import { Field } from '../../../components/hook-form';
-import Typography from '@mui/material/Typography';
 
 type Props = {
   collapseValue: boolean;

@@ -1,13 +1,13 @@
 import type { SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
-import useSWR, { mutate } from 'swr';
 import { useMemo } from 'react';
+import useSWR, { mutate } from 'swr';
 
-import { fetcher, endpoints } from 'src/lib/axios';
-import { IAllyItem } from '../types/ally';
-import axios from 'src/lib/axios';
-import { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
+import axios, { fetcher, endpoints } from 'src/lib/axios';
+
+import type { IAllyItem } from '../types/ally';
+import type { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
 
 // ----------------------------------------------------------------------
 

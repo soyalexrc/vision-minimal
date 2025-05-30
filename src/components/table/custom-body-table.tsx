@@ -1,7 +1,7 @@
 import Box from '@mui/material/Box';
 import TableBody from '@mui/material/TableBody';
 
-import { LoadingScreen, SplashScreen } from '../loading-screen';
+import { LoadingScreen } from '../loading-screen';
 
 interface TableBodyCustomProps {
   children: React.ReactNode;

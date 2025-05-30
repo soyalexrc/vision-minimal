@@ -21,7 +21,7 @@ import {
 
 import { Iconify } from '../../../components/iconify';
 
-import type { Attribute, AttributeFormField } from '../../../types/property';
+import type { AttributeFormField } from '../../../types/property';
 
 const AttributesTab = () => {
   const [searchTerm, setSearchTerm] = useState('');

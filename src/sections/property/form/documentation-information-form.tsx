@@ -5,14 +5,14 @@ import React from 'react';
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
+import MenuItem from '@mui/material/MenuItem';
 import CardHeader from '@mui/material/CardHeader';
+import Typography from '@mui/material/Typography';
 
 import { Field } from '../../../components/hook-form';
-import MenuItem from '@mui/material/MenuItem';
-import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 
 type Props = {
   collapseValue: boolean;
@@ -26,8 +26,7 @@ const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(({
                                                                    onCollapseToggle,
                                                                    renderCollapseButton,
                                                                    onPressNext
-                                                                 }: Props, ref) => {
-  return (
+                                                                 }: Props, ref) => (
     <Card ref={ref}>
       <CardHeader
         title="Documentacion de inmueble"
@@ -128,7 +127,6 @@ const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(({
         </Stack>
       </Collapse>
     </Card>
-  );
-})
+  ))
 
 export default DocumentationInformationForm;

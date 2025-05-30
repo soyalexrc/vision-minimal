@@ -14,7 +14,8 @@ import {
 } from '@mui/material';
 
 import { Iconify } from '../../../components/iconify';
-import { AdjacencyFormField } from '../../../types/property';
+
+import type { AdjacencyFormField } from '../../../types/property';
 
 const AdjacenciesTab = () => {
   const [searchTerm, setSearchTerm] = useState('');

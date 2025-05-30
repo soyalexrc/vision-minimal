@@ -1,4 +1,5 @@
-import type { IAllyItem } from 'src/types/ally';
+
+import type { AxiosResponse } from 'axios';
 
 import { z as zod } from 'zod';
 import { useForm } from 'react-hook-form';
@@ -6,22 +7,18 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { isValidPhoneNumber } from 'react-phone-number-input/input';
 
 import Box from '@mui/material/Box';
-import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import MenuItem from '@mui/material/MenuItem';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 
-import { USER_STATUS_OPTIONS } from 'src/_mock';
-
 import { toast } from 'src/components/snackbar';
 import { Form, Field, schemaHelper } from 'src/components/hook-form';
-import { IExternalAdviserItem } from '../../types/external-adviser';
-import type { AxiosResponse } from 'axios';
-import { createAlly, updateAlly } from '../../actions/ally';
+
 import { createExternalAdviser, updateExternalAdviser, useGetExternalAdvisers } from '../../actions/external-adviser';
+
+import type { IExternalAdviserItem } from '../../types/external-adviser';
 
 // ----------------------------------------------------------------------
 

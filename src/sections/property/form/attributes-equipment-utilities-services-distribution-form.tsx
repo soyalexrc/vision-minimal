@@ -12,14 +12,13 @@ import Divider from '@mui/material/Divider';
 import Collapse from '@mui/material/Collapse';
 import CardHeader from '@mui/material/CardHeader';
 
-import AttributesTab from './attributes-tab';
-import { useParams } from '../../../routes/hooks';
-
-import type { Attribute } from '../../../types/property';
-import DistributionsTab from './distributions-tab';
-import EquipmentsTab from './equipments-tab';
 import UtilitiesTab from './utilities-tab';
+import AttributesTab from './attributes-tab';
+import EquipmentsTab from './equipments-tab';
 import AdjacenciesTab from './adjacencies-tab';
+import { useParams } from '../../../routes/hooks';
+import DistributionsTab from './distributions-tab';
+
 
 type Props = {
   collapseValue: boolean;

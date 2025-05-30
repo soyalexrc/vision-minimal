@@ -2,8 +2,7 @@ import type { GridColDef } from '@mui/x-data-grid';
 
 import {
   RenderCell,
-  RenderCellAmount, RenderCellPhone,
-  RenderCellRedirect,
+  RenderCellPhone, RenderCellAmount,
   RenderCellStatus,
 } from '../../sections/client/client-table-row';
 
@@ -14,13 +13,13 @@ export const clientColumns: GridColDef[] = [
     headerName: 'Nombre',
     flex: 1,
     minWidth: 320,
-    renderCell: (params) =>  {
+    renderCell: (params) =>  
       // const url = `/dashboard/clients/view/${params.row.id}`;
-      return (
+       (
         // <RenderCellRedirect redirectTo={url} params={params} value={params.row.name} />
         <RenderCell params={params} value={params.row.name} />
       )
-    }
+    
   },
   {
     field: 'phone',
