@@ -13,6 +13,7 @@ type CurrencyFieldProps = {
   thousandSeparator?: string;
   decimalSeparator?: string;
   allowNegative?: boolean;
+  disabled?: boolean;
 };
 
 export default function RHFCurrencyField({

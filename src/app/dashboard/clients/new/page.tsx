@@ -16,7 +16,8 @@ export default function Page() {
   const settings = useSettingsContext();
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+    // <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+    <Container maxWidth="xl">
       <CustomBreadcrumbs
         heading="Nuevo Cliente"
         links={[

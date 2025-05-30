@@ -33,8 +33,8 @@ const EquipmentsTab = () => {
     if (!searchTerm.trim()) return fields;
 
     return fields.filter((field) => {
-      const distributionField = field as EquipmentFormField;
-      return distributionField.equipment.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const equipmentField = field as unknown as EquipmentFormField;
+      return equipmentField.equipment.title.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [fields, searchTerm]);
 
@@ -149,13 +149,12 @@ const EquipmentsTab = () => {
 
       <Grid container spacing={1}>
         {filteredFields.map((field) => {
-          const equipmentField = field as EquipmentFormField;
+          const equipmentField = field as unknown as EquipmentFormField;
           // Find the original index in the unfiltered array
           const originalIndex = fields.findIndex(f => f.id === field.id);
 
           return (
             <Grid
-              item
               size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
               key={field.id || `equip-${originalIndex}`}
             >

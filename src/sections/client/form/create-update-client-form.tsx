@@ -171,7 +171,7 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
   const { id } = useParams();
   const { user } = useAuthContext()
 
-  const shortUser = { id: user?.id, username: user?.username, name: user?.firstname + ' ' + user?.lastname, email: user.email }
+  const shortUser = { id: user?.id, username: user?.username, name: user?.firstname + ' ' + user?.lastname, email: user?.email }
 
   const methods = useForm<ClientFormSchemaType>({
     mode: 'all',

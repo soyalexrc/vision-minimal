@@ -10,13 +10,13 @@ import { chipProps, FiltersBlock, FiltersResult } from 'src/components/filters-r
 import { getStatus } from '../../utils/get-status';
 
 import type { GetStatusType } from '../../utils/get-status';
-import type { IPropertyDataFilters } from '../../types/property';
+import type { IClientDataFilters } from '../../types/client';
 
 // ----------------------------------------------------------------------
 
 type Props = FiltersResultProps & {
   onResetPage: () => void;
-  filters: UseSetStateReturn<IPropertyDataFilters>;
+  filters: UseSetStateReturn<IClientDataFilters>;
 };
 
 export function ClientTableFiltersResult({ filters, onResetPage, totalResults, sx }: Props) {

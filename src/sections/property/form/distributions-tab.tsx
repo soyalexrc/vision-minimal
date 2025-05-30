@@ -33,7 +33,7 @@ const DistributionsTab = () => {
     if (!searchTerm.trim()) return fields;
 
     return fields.filter((field) => {
-      const distributionField = field as DistributionFormField;
+      const distributionField = field as unknown as DistributionFormField;
       return distributionField.distribution.title.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [fields, searchTerm]);
@@ -132,13 +132,12 @@ const DistributionsTab = () => {
 
       <Grid container spacing={1}>
         {filteredFields.map((field) => {
-          const distributionField = field as DistributionFormField;
+          const distributionField = field as unknown as DistributionFormField;
           // Find the original index in the unfiltered array
           const originalIndex = fields.findIndex(f => f.id === field.id);
 
           return (
             <Grid
-              item
               size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
               key={field.id || `dist-${originalIndex}`}
             >

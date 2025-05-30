@@ -34,7 +34,7 @@ export default function GeneralInformationForm({collapseValue, onCollapseToggle,
 
   const handleRemoveFile = useCallback(
     (inputFile: File | string) => {
-      const filtered = watchedImages && watchedImages?.filter((file) => file !== inputFile);
+      const filtered = watchedImages && watchedImages?.filter((file: any) => file !== inputFile);
       setValue('images', filtered);
     },
     [setValue, watchedImages]

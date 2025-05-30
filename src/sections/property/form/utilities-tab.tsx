@@ -35,7 +35,7 @@ const UtilitiesTab = () => {
     if (!searchTerm.trim()) return fields;
 
     return fields.filter((field) => {
-      const utilityField = field as UtilityFormField;
+      const utilityField = field as unknown as UtilityFormField;
       return utilityField.utility.title.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [fields, searchTerm]);
@@ -136,14 +136,13 @@ const UtilitiesTab = () => {
 
       <Grid container spacing={1}>
         {filteredFields.map((field) => {
-          const utilityField = field as UtilityFormField;
+          const utilityField = field as unknown as UtilityFormField;
 
           // Find the original index in the unfiltered array
           const originalIndex = fields.findIndex(f => f.id === field.id);
 
           return (
             <Grid
-              item
               size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
               key={field.id || `util-${originalIndex}`}
             >

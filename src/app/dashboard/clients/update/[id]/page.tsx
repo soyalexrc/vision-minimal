@@ -23,17 +23,16 @@ export default function Page() {
 
   const { client, clientLoading, clientError } = useGetClient(id as any)
 
-  console.log(client);
-
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+    // <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+    <Container maxWidth="xl">
       <CustomBreadcrumbs
         heading="Edicion de Cliente"
         links={[
           { name: 'Inicio', href: paths.dashboard.root },
           { name: 'Gestion' },
           { name: 'Clientes', href: paths.dashboard.clients.list },
-          { name: client.name },
+          { name: (client as any).name },
         ]}
         sx={{
           mb: { xs: 3, md: 5 },

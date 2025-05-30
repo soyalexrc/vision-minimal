@@ -29,14 +29,15 @@ export default function Page() {
   console.log(client);
 
   return (
-    <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+    // <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+    <Container maxWidth="xl">
       <CustomBreadcrumbs
         heading="Detalle de Cliente"
         links={[
           { name: 'Inicio', href: paths.dashboard.root },
           { name: 'Gestion' },
           { name: 'Clientes', href: paths.dashboard.clients.list },
-          { name: client.name },
+          { name: (client as any).name },
         ]}
         action={
           <div>

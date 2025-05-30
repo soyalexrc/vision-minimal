@@ -84,7 +84,7 @@ export function ProductListView() {
 
   useEffect(() => {
     if (products.length) {
-      setTableData(products);
+      setTableData(products as any);
     }
   }, [products]);
 

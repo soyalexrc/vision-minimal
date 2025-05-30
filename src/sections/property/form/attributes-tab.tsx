@@ -39,7 +39,7 @@ const AttributesTab = () => {
     if (!searchTerm.trim()) return fields;
 
     return fields.filter((field) => {
-      const attributeField = field as AttributeFormField;
+      const attributeField = field as unknown as AttributeFormField;
       return attributeField.attribute.label.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [fields, searchTerm]);
@@ -258,7 +258,7 @@ const AttributesTab = () => {
 
       <Grid container spacing={1}>
         {filteredFields.map((field) => {
-          const attributeField = field as AttributeFormField;
+          const attributeField = field as unknown as AttributeFormField;
           // Find the original index in the unfiltered array
           const originalIndex = fields.findIndex(f => f.id === field.id);
 
@@ -280,7 +280,6 @@ const AttributesTab = () => {
 
           return (
             <Grid
-              item
               size={{...getGridSize(attributeField.attribute.formType)}}
               key={field.id || `attr-${originalIndex}`}
             >

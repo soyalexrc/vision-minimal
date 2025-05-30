@@ -35,7 +35,7 @@ const AdjacenciesTab = () => {
     if (!searchTerm.trim()) return fields;
 
     return fields.filter((field) => {
-      const adjacencyField = field as AdjacencyFormField;
+      const adjacencyField = field as unknown as AdjacencyFormField;;
       return adjacencyField.adjacency.title.toLowerCase().includes(searchTerm.toLowerCase());
     });
   }, [fields, searchTerm]);
@@ -133,14 +133,13 @@ const AdjacenciesTab = () => {
 
       <Grid container spacing={1}>
         {filteredFields.map((field) => {
-          const adjacencyField = field as AdjacencyFormField;
+          const adjacencyField = field as unknown as AdjacencyFormField;;
 
           // Find the original index in the unfiltered array
           const originalIndex = fields.findIndex(f => f.id === field.id);
 
           return (
             <Grid
-              item
               size={{ xs: 12, sm: 6, md: 4, lg: 3 }}
               key={field.id || `util-${originalIndex}`}
             >
