@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { varAlpha } from 'minimal-shared/utils';
 
 import Tab from '@mui/material/Tab';
@@ -39,16 +39,18 @@ const AttributesEquipmentUtilitiesDistributionAdjacenciesForm = React.forwardRef
   HTMLDivElement,
   Props
 >(({ collapseValue, onCollapseToggle, onPressNext, renderCollapseButton }: Props, ref) => {
-  const [currentTab, setCurrentTab] = useState<string>('attributes');
+  const [currentTab, setCurrentTab] = useState<string>('distribution');
 
-  const { id } = useParams<{ id?: string }>();
+  useEffect(() => {
+    setTimeout(() => {
+      setCurrentTab('attributes')
+    }, 1000)
+  }, []);
 
   const renderTabContent = () => {
     switch (currentTab) {
       case 'attributes':
-        return (
-          <AttributesTab />
-        );
+        return <AttributesTab />;
       case 'distribution':
         return  <DistributionsTab />;
       case 'equipment':

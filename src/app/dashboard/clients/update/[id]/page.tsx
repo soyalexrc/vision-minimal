@@ -19,8 +19,6 @@ export default function Page() {
   const settings = useSettingsContext();
   const { id } = useParams();
 
-  console.log(id);
-
   const { client, clientLoading, clientError } = useGetClient(id as any)
 
   return (

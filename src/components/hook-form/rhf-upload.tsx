@@ -62,7 +62,7 @@ export function RHFUploadBox({ name, ...other }: RHFUploadProps) {
 
 // ----------------------------------------------------------------------
 
-export function RHFUpload({ name, multiple, helperText, ...other }: RHFUploadProps) {
+export function RHFUpload({ name, multiple, helperText, accept,...other }: RHFUploadProps) {
   const { control, setValue } = useFormContext();
 
   return (
@@ -72,7 +72,7 @@ export function RHFUpload({ name, multiple, helperText, ...other }: RHFUploadPro
       render={({ field, fieldState: { error } }) => {
         const uploadProps = {
           multiple,
-          accept: { 'image/*': [] },
+          accept,
           error: !!error,
           helperText: error?.message ?? helperText,
         };

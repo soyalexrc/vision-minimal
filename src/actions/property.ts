@@ -6,8 +6,15 @@ import useSWR, { mutate } from 'swr';
 
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
-import type { IPropertyItem, IPropertyItemPreview, IPropertyCategoryItem } from '../types/property';
+import type {
+  IPropertyItem,
+  IPropertyItemPreview,
+  IPropertyCategoryItem,
+  AdjacencyFormField,
+  AttributeFormField, EquipmentFormField, UtilityFormField, DistributionFormField, IPropertyItemCreateUpdate,
+} from '../types/property';
 import type { PropertyFormSchemaType } from '../sections/property/form/create-update-property-form';
+import { UploadService } from '../utils/files/upload';
 
 // ----------------------------------------------------------------------
 
@@ -30,7 +37,7 @@ type IPropertyCategoryItemData = {
 }
 
 type PropertyData = {
-  data: IPropertyItem;
+  data: IPropertyItemCreateUpdate;
 }
 
 export function useGetProperties() {
@@ -80,8 +87,8 @@ export function useGetCategories() {
 
 // ----------------------------------------------------------------------
 
-export function useGetProperty(id: number | string) {
-  const url = endpoints.client.edit + '/' + id;
+export function useGetProperty(id: string) {
+  const url = endpoints.property.edit + '/' + id;
 
   const { data, isLoading, error, isValidating } = useSWR<PropertyData>(url, fetcher, swrOptions);
 
@@ -100,41 +107,42 @@ export function useGetProperty(id: number | string) {
   return memoizedValue;
 }
 
-
 // ----------------------------------------------------------------------
 
-type ProductData = {
-  product: IProductItem;
-};
+export async function createUpdateProperty(payload: PropertyFormSchemaType, type: 'create' | 'update', id?: string | number) {
+  const imagesUploaded = payload.images.filter((image: any) => typeof image === 'string' && image.startsWith('http'));
+  const imagesToUpload = payload.images.filter((image: any) => typeof image === 'object' && image instanceof File);
 
-export function useGetProduct(productId: string) {
-  const url = productId ? [endpoints.product.details, { params: { productId } }] : '';
+  if (imagesToUpload.length > 0) {
+    const newImagesUploaded  = await UploadService.uploadMultiple(imagesToUpload);
+    payload.images = [...imagesUploaded, ...newImagesUploaded.urls];
+    console.log('newImagesUploaded', newImagesUploaded);
+  }
 
-  const { data, isLoading, error, isValidating } = useSWR<ProductData>(url, fetcher, swrOptions);
+  const documentsUploaded = payload.documents.filter((doc: any) => typeof doc === 'string' && doc.startsWith('http'));
+  const documentsToUpload = payload.documents.filter((doc: any) => typeof doc === 'object' && doc instanceof File);
 
-  const memoizedValue = useMemo(
-    () => ({
-      product: data?.product,
-      productLoading: isLoading,
-      productError: error,
-      productValidating: isValidating,
-    }),
-    [data?.product, error, isLoading, isValidating]
-  );
 
-  return memoizedValue;
-}
+  if (documentsToUpload.length > 0) {
+    const newDocumentsUploaded =  await UploadService.uploadMultiple(documentsToUpload);
+    payload.documents = [...documentsUploaded, ...newDocumentsUploaded.urls];
 
-// ----------------------------------------------------------------------
+    console.log('newDocumentsUploaded', newDocumentsUploaded);
+  }
 
-export async function createProperty(payload: PropertyFormSchemaType) {
-  const url = `${endpoints.client.create}`;
-  return axios.post(url, payload);
-}
+  payload.adjacencies = payload.adjacencies.filter((item: AdjacencyFormField) => item?.value === 'true');
+  payload.attributes = payload.attributes.filter((item: AttributeFormField) => item?.value === 'true');
+  payload.equipments = payload.equipments.filter((item: EquipmentFormField) => item?.value === 'true');
+  payload.utilities = payload.utilities.filter((item: UtilityFormField) => item?.value === 'true');
+  payload.distributions  = payload.distributions.filter((item: DistributionFormField) => item?.value === 'true');
 
-export async function updateProperty(payload: PropertyFormSchemaType, id: number) {
-  const url = `${endpoints.client.edit}/${id}`;
-  return axios.patch(url, payload);
+  const url = `${endpoints.property.create}`;
+
+  if (type === 'update' && id) {
+    return axios.patch(`${url}/${id}`, payload);
+  } else {
+    return axios.post(url, payload);
+  }
 }
 
 export async function deleteManyPropertys(ids: number[]) {

@@ -1,14 +1,18 @@
+import type { AxiosResponse } from 'axios';
 
 import { z } from 'zod';
+import { toast } from 'sonner';
 import { useBoolean } from 'minimal-shared/hooks';
 import React, { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 
 import Stack from '@mui/material/Stack';
+import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 
 import axiosInstance from '../../../lib/axios';
+import { useRouter } from '../../../routes/hooks';
 import { useAuthContext } from '../../../auth/hooks';
 import { Form } from '../../../components/hook-form';
 import { Iconify } from '../../../components/iconify';
@@ -16,25 +20,32 @@ import GeneralInformationForm from './general-information-form';
 import LocationInformationForm from './location-information-form';
 import NegotiationInformationForm from './negotiation-information-form';
 import DocumentationInformationForm from './documentation-information-form';
-import AttributesEquipmentUtilitiesServicesDistributionForm
-  from './attributes-equipment-utilities-services-distribution-form';
+import { useGetProperties, createUpdateProperty } from '../../../actions/property';
+import AttributesEquipmentUtilitiesServicesDistributionForm from './attributes-equipment-utilities-services-distribution-form';
 
 import type {
-  Utility, Adjacency,
+  Utility,
+  Adjacency,
   Attribute,
-  Distribution, UtilityFormField,
-  AdjacencyFormField, AttributeFormField,
-  EquipmentFormField, DistributionFormField, IPropertyItemCreateUpdate,
+  Distribution,
+  UtilityFormField,
+  AdjacencyFormField,
+  AttributeFormField,
+  EquipmentFormField,
+  DistributionFormField,
+  IPropertyItemCreateUpdate,
 } from '../../../types/property';
 
 export type PropertyFormSchemaType = z.infer<typeof PropertyFormSchema>;
 
 export const PropertyFormSchema = z.object({
   id: z.string().optional(),
-  userId: z.string().optional(),
+  userId: z.string(),
   images: z.any().optional(),
+  documents: z.any().optional(),
   distributions: z.any().optional(),
   attributes: z.any().optional(),
+  adjacencies: z.any().optional(),
   equipments: z.any().optional(),
   utilities: z.any().optional(),
   furnishedAreas: z.any().optional(),
@@ -47,21 +58,21 @@ export const PropertyFormSchema = z.object({
   generalInformation: z.object({
     id: z.string().optional(),
     code: z.string().optional(),
-    publicationTitle: z.string().optional(),
-    footageGround: z.string().optional(),
-    footageBuilding: z.string().optional(),
-    description: z.string().optional(),
-    propertyType: z.string().optional(),
+    publicationTitle: z.string(),
+    footageGround: z.string(),
+    footageBuilding: z.string(),
+    description: z.string(),
+    propertyType: z.string(),
     zoning: z.string().optional(),
     propertyCondition: z.string().optional(),
     antiquity: z.string().optional(),
     amountOfFloors: z.string().optional(),
     typeOfWork: z.string().optional(),
     propertiesPerFloor: z.string().optional(),
-    handoverKeys: z.boolean().optional(),
-    termsAndConditionsAccepted: z.boolean().optional(),
-    isFurnished: z.boolean().optional(),
-    isOccupiedByPeople: z.boolean().optional(),
+    handoverKeys: z.boolean(),
+    termsAndConditionsAccepted: z.boolean(),
+    isFurnished: z.boolean(),
+    isOccupiedByPeople: z.boolean(),
   }),
 
   locationInformation: z.object({
@@ -71,8 +82,8 @@ export const PropertyFormSchema = z.object({
     tower: z.string().optional(),
     amountOfFloors: z.string().optional(),
     isClosedStreet: z.string().optional(),
-    country: z.string().optional(),
-    state: z.string().optional(),
+    country: z.string(),
+    state: z.string(),
     municipality: z.string().optional(),
     urbanization: z.string().optional(),
     avenue: z.string().optional(),
@@ -95,9 +106,9 @@ export const PropertyFormSchema = z.object({
     CIorRIF: z.boolean().optional(),
     ownerCIorRIF: z.boolean().optional(),
     spouseCIorRIF: z.boolean().optional(),
-    isCatastralRecordSameOwner: z.boolean().optional(),
-    condominiumSolvency: z.boolean().optional(),
-    mainProperty: z.boolean().optional(),
+    isCatastralRecordSameOwner: z.boolean(),
+    condominiumSolvency: z.boolean(),
+    mainProperty: z.boolean(),
     mortgageRelease: z.string().optional(),
     condominiumSolvencyDetails: z.string().optional(),
     power: z.string().optional(),
@@ -114,45 +125,46 @@ export const PropertyFormSchema = z.object({
 
   negotiationInformation: z.object({
     id: z.string().optional(),
-    price: z.string().optional(),
-    minimumNegotiation: z.string().optional(),
+    price: z.any(),
+    minimumNegotiation: z.any().optional(),
     client: z.string().optional(),
     reasonToSellOrRent: z.string().optional(),
     realstateadvisername: z.string().optional(),
     externaladvisername: z.string().optional(),
     partOfPayment: z.string().optional(),
-    operationType: z.string().optional(),
+    operationType: z.string(),
     ally: z.string().optional(),
     allyname: z.string().optional(),
-    propertyExclusivity: z.string().optional(),
+    propertyExclusivity: z.string(),
     realStateAdviser: z.string().optional(),
     additional_price: z.string().optional(),
     externalAdviser: z.string().optional(),
     sellCommission: z.string().optional(),
     rentCommission: z.string().optional(),
     ownerPaysCommission: z.string().optional(),
-    mouthToMouth: z.boolean().optional(),
-    realStateGroups: z.boolean().optional(),
-    realStateWebPages: z.boolean().optional(),
-    socialMedia: z.boolean().optional(),
-    publicationOnBuilding: z.boolean().optional(),
+    mouthToMouth: z.boolean(),
+    realStateGroups: z.boolean(),
+    realStateWebPages: z.boolean(),
+    socialMedia: z.boolean(),
+    publicationOnBuilding: z.boolean(),
   }),
-
-
 });
 
 type Props = {
   currentProperty?: IPropertyItemCreateUpdate;
-  isEdit?: boolean;
 };
 
-export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Props) {
+export function CreateUpdatePropertyForm({ currentProperty}: Props) {
   const defaultValues: PropertyFormSchemaType = {
     id: undefined,
-    userId: undefined,
-    images: ['https://2.img-dpreview.com/files/p/E~C1000x0S4000x4000T1200x1200~articles/3925134721/0266554465.jpeg'],
+    userId: 'TEST',
+    images: [],
+    documents: [],
+    // documents: ['https://bucket.visioninmobiliaria.com.ve/images/1748585345043-z31n58s0h89.pdf'],
+    // images: ['https://2.img-dpreview.com/files/p/E~C1000x0S4000x4000T1200x1200~articles/3925134721/0266554465.jpeg'],
     distributions: [],
     attributes: [],
+    adjacencies: [],
     equipments: [],
     utilities: [],
     furnishedAreas: [],
@@ -178,7 +190,7 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
       handoverKeys: false,
       termsAndConditionsAccepted: false,
       isFurnished: false,
-      isOccupiedByPeople: false
+      isOccupiedByPeople: false,
     },
 
     locationInformation: {
@@ -203,7 +215,7 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
       trunkNumber: '',
       trunkLevel: '',
       parkingNumber: '',
-      parkingLevel: ''
+      parkingLevel: '',
     },
 
     documentsInformation: {
@@ -226,7 +238,7 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
       attorneyFirstName: '',
       attorneyLastName: '',
       realStateTax: '',
-      owner: ''
+      owner: '',
     },
 
     negotiationInformation: {
@@ -252,11 +264,12 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
       realStateGroups: false,
       realStateWebPages: false,
       socialMedia: false,
-      publicationOnBuilding: false
-    }
+      publicationOnBuilding: false,
+    },
   };
   const { user } = useAuthContext();
-
+  const router = useRouter();
+  const { refresh } = useGetProperties();
   const shortUser = {
     id: user?.id,
     username: user?.username,
@@ -265,9 +278,9 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   };
 
   const openGeneralInfo = useBoolean(true);
-  const openLocationInfo = useBoolean(true);
-  const openNegotiationInfo = useBoolean(true);
-  const openDocumentationInfo = useBoolean(true);
+  const openLocationInfo = useBoolean(false);
+  const openNegotiationInfo = useBoolean(false);
+  const openDocumentationInfo = useBoolean(false);
   const openSelectablesInfo = useBoolean(false);
   const locationRef = React.useRef<HTMLDivElement>(null);
   const selectablesRef = React.useRef<HTMLDivElement>(null);
@@ -290,19 +303,30 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   const {
     handleSubmit,
     control,
-    watch,
-    formState: { isSubmitting, },
+    reset,
+    formState: { isSubmitting },
   } = methods;
 
-  // const wathedDistributions = watch('distributions');
-
-  // console.log('watchedDistributions:', wathedDistributions);
-
-  const {replace: attrReplace, fields: attrFields} = useFieldArray({ control, name: 'attributes' })
-  const {replace: distReplace, fields: distFields} = useFieldArray({ control, name: 'distributions' })
-  const {replace: equipReplace, fields: equipFields} = useFieldArray({ control, name: 'equipments' })
-  const {replace: utilsReplace, fields: utilsFields} = useFieldArray({ control, name: 'utilities' })
-  const {replace: adjaReplace, fields: adjaFields} = useFieldArray({ control, name: 'adjacencies' })
+  const { replace: attrReplace, fields: attrFields } = useFieldArray({
+    control,
+    name: 'attributes',
+  });
+  const { replace: distReplace, fields: distFields } = useFieldArray({
+    control,
+    name: 'distributions',
+  });
+  const { replace: equipReplace, fields: equipFields } = useFieldArray({
+    control,
+    name: 'equipments',
+  });
+  const { replace: utilsReplace, fields: utilsFields } = useFieldArray({
+    control,
+    name: 'utilities',
+  });
+  const { replace: adjaReplace, fields: adjaFields } = useFieldArray({
+    control,
+    name: 'adjacencies',
+  });
 
   // Fetch attributes once when component mounts
   useEffect(() => {
@@ -380,8 +404,7 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
       console.log('Editing existing property:', currentProperty?.id);
       // Editing existing property - fetch current values
       try {
-        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/attributes`);
-        const currentValues = await valuesResponse.data;
+        const currentValues: any = currentProperty.attributes;
         console.log('Current values:', currentValues);
 
         // Create form fields from existing values
@@ -424,15 +447,13 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   };
 
   const initializeDistributionFields = async (distributionsData: Distribution[]) => {
-
     let distributionFields: DistributionFormField[] = [];
 
     if (currentProperty?.id) {
       console.log('Editing existing property:', currentProperty?.id);
       // Editing existing property - fetch current values
       try {
-        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/distributions`);
-        const currentValues = await valuesResponse.data;
+        const currentValues: any = currentProperty.distributions;
         console.log('Current values:', currentValues);
 
         // Create form fields from existing values
@@ -478,15 +499,13 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   };
 
   const initializeEquipmentsFields = async (equipmentsData: Distribution[]) => {
-
     let equipmentFields: EquipmentFormField[] = [];
 
     if (currentProperty?.id) {
       console.log('Editing existing property:', currentProperty?.id);
       // Editing existing property - fetch current values
       try {
-        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/distributions`);
-        const currentValues = await valuesResponse.data;
+        const currentValues: any = currentProperty.equipments;
         console.log('Current values:', currentValues);
 
         // Create form fields from existing values
@@ -535,15 +554,13 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   };
 
   const initializeUtilitiesFields = async (utilitiesData: Utility[]) => {
-
     let utilitiesFields: UtilityFormField[] = [];
 
     if (currentProperty?.id) {
       console.log('Editing existing property:', currentProperty?.id);
       // Editing existing property - fetch current values
       try {
-        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/utilities`);
-        const currentValues = await valuesResponse.data;
+        const currentValues: any = currentProperty.utilities;
         console.log('Current values:', currentValues);
 
         // Create form fields from existing values
@@ -589,24 +606,21 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   };
 
   const initializeAdjacenciesFields = async (adjacenciesData: Adjacency[]) => {
-
     let adjacenciesFields: AdjacencyFormField[] = [];
 
     if (currentProperty?.id) {
       console.log('Editing existing property:', currentProperty?.id);
       // Editing existing property - fetch current values
       try {
-        const valuesResponse = await axiosInstance.get(`/api/properties/${currentProperty?.id}/adjacencies`);
-        const currentValues = await valuesResponse.data;
+        const currentValues: any = currentProperty.adjacencies;
         console.log('Current values:', currentValues);
 
         // Create form fields from existing values
-        adjacenciesFields = adjacenciesData.map((util) => {
-          const existingValue = currentValues.find((cv: any) => cv.utilityId === util.id);
+        adjacenciesFields = adjacenciesData.map((adjacency) => {
+          const existingValue = currentValues.find((cv: any) => cv.adjacencyId === adjacency.id);
           return {
-            adjacencyId: util.id,
-            adjacency: util,
-            additionalInformation: existingValue?.additionalInformation || '', // Add this
+            adjacencyId: adjacency.id,
+            adjacency,
             value: existingValue ? 'true' : 'false',
             valueType: 'boolean', // Add this
           };
@@ -617,7 +631,6 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
         adjacenciesFields = adjacenciesData.map((util) => ({
           adjacencyId: util.id,
           adjacency: util,
-          additionalInformation: '', // Add this
           value: 'false', // Add default value
           valueType: 'boolean', // Add this
         }));
@@ -628,7 +641,6 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
       adjacenciesFields = adjacenciesData.map((util) => ({
         adjacencyId: util.id,
         adjacency: util,
-        additionalInformation: '', // Add this
         value: 'false', // Add default value
         valueType: 'boolean', // Add this
       }));
@@ -643,58 +655,52 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
   };
 
   const onSubmit = handleSubmit(async (values) => {
-    // const data = {
-    //   ...values,
-    //   budgetfrom: parseCurrency(values.budgetfrom),
-    //   budgetto: parseCurrency(values.budgetto),
-    //   amountOfYounger:
-    //     typeof values.amountOfYounger === 'string'
-    //       ? Number(values.amountOfYounger)
-    //       : values.amountOfYounger,
-    //   amountOfPets:
-    //     typeof values.amountOfPets === 'string' ? Number(values.amountOfPets) : values.amountOfPets,
-    //   // adviser_name: users.find((user: any) => user.id === values.adviser_id)?.fullName,
-    // };
+    console.log('Submitting property:', values);
 
-    // const promise = await (async () => {
-    //   let response: AxiosResponse<any>;
-    //   if (currentProperty?.id) {
-    //     const changes = getChangedFields(data, currentProperty);
-    //
-    //     if (Object.keys(changes).length === 0) {
-    //       console.log('No changes made.');
-    //       return 'No se detectaron cambios en el registro.';
-    //     }
-    //     response = await updateProperty(
-    //       { ...data, updatedby: shortUser, changes },
-    //       currentProperty.id
-    //     );
-    //   } else {
-    //     response = await createProperty({ ...data, createdby: shortUser });
-    //   }
-    //
-    //   if (response.status === 200 || response.status === 201) {
-    //     return response.data?.message;
-    //   } else {
-    //     throw new Error(response.data?.message);
-    //   }
-    // })();
+    const data = {
+      ...values,
+      // negotiationInformation: {
+      //   ...values.negotiationInformation,
+      //   price: parseCurrency(values.negotiationInformation.price),
+      //   minimumNegotiation: parseCurrency(values.negotiationInformation.minimumNegotiation),
+      // }
+    };
 
-    // toast.promise(promise, {
-    //   loading: 'Cargando...',
-    //   success: (message: string) => message || 'Registro actualizado!',
-    //   error: (error) => error || 'Error al actualizar el registro!',
-    // });
-    //
-    // try {
-    //   await promise;
-    //   reset();
-    //   refresh();
-    //   refreshCurrent();
-    //   router.push('/dashboard/clients');
-    // } catch (error) {
-    //   console.error(error);
-    // }
+    const promise = await (async () => {
+      let response: AxiosResponse<any>;
+      if (currentProperty?.id) {
+        // const changes = getChangedFields(data, currentProperty);
+        //
+        // if (Object.keys(changes).length === 0) {
+        //   console.log('No changes made.');
+        //   return 'No se detectaron cambios en el registro.';
+        // }
+        response = await createUpdateProperty(data, 'update', currentProperty.id);
+      } else {
+        response = await createUpdateProperty(data, 'create');
+      }
+
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
+
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registro actualizado!',
+      error: (error) => error || 'Error al actualizar el registro!',
+    });
+
+    try {
+      await promise;
+      reset();
+      await refresh();
+      router.push('/dashboard/properties');
+    } catch (error) {
+      console.error(error);
+    }
   });
 
   const renderCollapseButton = (value: boolean, onToggle: () => void) => (
@@ -705,11 +711,23 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
 
   function onPressNext(currentCollapseKey: string) {
     const collapseMap: any = {
-      'general': { close: openGeneralInfo.onFalse, open: openLocationInfo.onTrue, ref: locationRef },
-      'location': { close: openLocationInfo.onFalse, open: openSelectablesInfo.onTrue, ref: selectablesRef },
-      'selectables': { close: openSelectablesInfo.onFalse, open: openNegotiationInfo.onTrue, ref: negotiationRef },
-      'negotiation': { close: openNegotiationInfo.onFalse, open: openDocumentationInfo.onTrue, ref: documentationRef },
-      'documentation': { close: openDocumentationInfo.onFalse, open: null, ref: null },
+      general: { close: openGeneralInfo.onFalse, open: openLocationInfo.onTrue, ref: locationRef },
+      location: {
+        close: openLocationInfo.onFalse,
+        open: openSelectablesInfo.onTrue,
+        ref: selectablesRef,
+      },
+      selectables: {
+        close: openSelectablesInfo.onFalse,
+        open: openNegotiationInfo.onTrue,
+        ref: negotiationRef,
+      },
+      negotiation: {
+        close: openNegotiationInfo.onFalse,
+        open: openDocumentationInfo.onTrue,
+        ref: documentationRef,
+      },
+      documentation: { close: openDocumentationInfo.onFalse, open: null, ref: null },
     };
 
     // Close current collapse
@@ -723,13 +741,18 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
       if (collapseMap[currentCollapseKey].ref?.current) {
         setTimeout(() => {
           // Scroll to element with offset for better visibility
-          const yOffset = currentCollapseKey === 'general' ? -900 : currentCollapseKey === 'location' ? -800 : -500; // 20px gap from the top
+          const yOffset =
+            currentCollapseKey === 'general'
+              ? -900
+              : currentCollapseKey === 'location'
+                ? -800
+                : -500; // 20px gap from the top
           const element = collapseMap[currentCollapseKey].ref.current;
           const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
 
           window.scrollTo({
             top: y,
-            behavior: 'smooth'
+            behavior: 'smooth',
           });
           // collapseMap[currentCollapseKey].ref.current.scrollIntoView({
           //   behavior: 'smooth',
@@ -742,47 +765,57 @@ export function CreateUpdatePropertyForm({ currentProperty, isEdit = false }: Pr
 
   return (
     <FormProvider {...methods}>
-        <Form methods={methods} onSubmit={onSubmit}>
-          <Stack spacing={{ xs: 3, md: 5 }} sx={{ mx: 'auto' }}>
-            <GeneralInformationForm
-              onCollapseToggle={openGeneralInfo.onToggle}
-              collapseValue={openGeneralInfo.value}
-              renderCollapseButton={renderCollapseButton}
-              onPressNext={() => onPressNext('general')}
-            />
-            <LocationInformationForm
-              ref={locationRef}
-              onCollapseToggle={openLocationInfo.onToggle}
-              collapseValue={openLocationInfo.value}
-              renderCollapseButton={renderCollapseButton}
-              onPressNext={() => onPressNext('location')}
-            />
-            {
-              attrFields?.length &&
-              <AttributesEquipmentUtilitiesServicesDistributionForm
-                ref={selectablesRef}
-                onCollapseToggle={openSelectablesInfo.onToggle}
-                collapseValue={openSelectablesInfo.value}
-                renderCollapseButton={renderCollapseButton}
-                onPressNext={() => onPressNext('selectables')}
-              />
-            }
-            <NegotiationInformationForm
-              ref={negotiationRef}
-              onCollapseToggle={openNegotiationInfo.onToggle}
-              collapseValue={openNegotiationInfo.value}
-              renderCollapseButton={renderCollapseButton}
-              onPressNext={() => onPressNext('negotiation')}
-            />
-            <DocumentationInformationForm
-              ref={documentationRef}
-              onCollapseToggle={openDocumentationInfo.onToggle}
-              collapseValue={openDocumentationInfo.value}
-              renderCollapseButton={renderCollapseButton}
-              onPressNext={() => onPressNext('documentation')}
-            />
+      <Form methods={methods} onSubmit={onSubmit}>
+        <Stack spacing={{ xs: 3, md: 5 }} sx={{ mx: 'auto' }}>
+          <GeneralInformationForm
+            onCollapseToggle={openGeneralInfo.onToggle}
+            collapseValue={openGeneralInfo.value}
+            renderCollapseButton={renderCollapseButton}
+            onPressNext={() => onPressNext('general')}
+          />
+          <LocationInformationForm
+            ref={locationRef}
+            onCollapseToggle={openLocationInfo.onToggle}
+            collapseValue={openLocationInfo.value}
+            renderCollapseButton={renderCollapseButton}
+            onPressNext={() => onPressNext('location')}
+          />
+          <AttributesEquipmentUtilitiesServicesDistributionForm
+            ref={selectablesRef}
+            onCollapseToggle={openSelectablesInfo.onToggle}
+            collapseValue={openSelectablesInfo.value}
+            renderCollapseButton={renderCollapseButton}
+            onPressNext={() => onPressNext('selectables')}
+          />
+
+          <NegotiationInformationForm
+            ref={negotiationRef}
+            onCollapseToggle={openNegotiationInfo.onToggle}
+            collapseValue={openNegotiationInfo.value}
+            renderCollapseButton={renderCollapseButton}
+            onPressNext={() => onPressNext('negotiation')}
+          />
+          <DocumentationInformationForm
+            ref={documentationRef}
+            onCollapseToggle={openDocumentationInfo.onToggle}
+            collapseValue={openDocumentationInfo.value}
+            renderCollapseButton={renderCollapseButton}
+            onPressNext={() => onPressNext('documentation')}
+          />
+
+          <Stack direction="row" justifyContent="flex-end" spacing={2}>
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={isSubmitting}
+              startIcon={isSubmitting && <Iconify icon="mdi:loading" className="animate-spin" />}
+            >
+              {isSubmitting ? 'Guardando...' : 'Guardar'}
+            </Button>
           </Stack>
-        </Form>
-      </FormProvider>
+        </Stack>
+      </Form>
+    </FormProvider>
   );
 }

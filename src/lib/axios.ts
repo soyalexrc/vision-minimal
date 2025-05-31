@@ -86,7 +86,7 @@ export const endpoints = {
     },
     list: '/property',
     create: '/property',
-    edit: '/property',
+    edit: '/property/edit',
     delete: '/property',
     details: '/property/details',
     search: '/property/search',

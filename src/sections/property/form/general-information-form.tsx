@@ -30,8 +30,6 @@ export default function GeneralInformationForm({collapseValue, onCollapseToggle,
 
   const watchedImages = watch('images')
 
-  console.log(watchedImages)
-
   const handleRemoveFile = useCallback(
     (inputFile: File | string) => {
       const filtered = watchedImages && watchedImages?.filter((file: any) => file !== inputFile);
@@ -110,10 +108,10 @@ export default function GeneralInformationForm({collapseValue, onCollapseToggle,
                 multiple
                 thumbnail
                 name="images"
+                accept={{ 'image/*': [] }}
                 maxSize={1073741824}
                 onRemove={handleRemoveFile}
                 onRemoveAll={handleRemoveAllFiles}
-                onUpload={() => console.info('ON UPLOAD')}
               />
             </Box>
           </Box>

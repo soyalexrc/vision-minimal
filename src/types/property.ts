@@ -105,12 +105,13 @@ export type IPropertyCategoryItem = {
 
 export type IPropertyItemCreateUpdate = {
   id?: string;
-  userId?: string;
+  userId: string;
   images?: string[];
-  distributions?: any;
-  attributes?: any;
-  equipments?: any;
-  utilities?: any;
+  distributions?: any[];
+  adjacencies?: any[];
+  attributes?: any[];
+  equipments?: any[];
+  utilities?: any[];
   furnishedAreas?: any;
   status: string;
   updatedby?: any;
@@ -120,21 +121,21 @@ export type IPropertyItemCreateUpdate = {
   generalInformation: {
     id?: string;
     code?: string;
-    publicationTitle?: string;
-    footageGround?: string;
-    footageBuilding?: string;
-    description?: string;
-    propertyType?: string;
+    publicationTitle: string;
+    footageGround: string;
+    footageBuilding: string;
+    description: string;
+    propertyType: string;
     zoning?: string;
     propertyCondition?: string;
     antiquity?: string;
     amountOfFloors?: string;
     typeOfWork?: string;
     propertiesPerFloor?: string;
-    handoverKeys?: boolean;
-    termsAndConditionsAccepted?: boolean;
-    isFurnished?: boolean;
-    isOccupiedByPeople?: boolean;
+    handoverKeys: boolean;
+    termsAndConditionsAccepted: boolean;
+    isFurnished: boolean;
+    isOccupiedByPeople: boolean;
   };
 
   locationInformation: {
@@ -144,8 +145,8 @@ export type IPropertyItemCreateUpdate = {
     tower?: string;
     amountOfFloors?: string;
     isClosedStreet?: string;
-    country?: string;
-    state?: string;
+    country: string;
+    state: string;
     municipality?: string;
     urbanization?: string;
     avenue?: string;
@@ -164,13 +165,13 @@ export type IPropertyItemCreateUpdate = {
 
   documentsInformation: {
     id?: string;
-    propertyDoc?: boolean;
-    CIorRIF?: boolean;
-    ownerCIorRIF?: boolean;
-    spouseCIorRIF?: boolean;
-    isCatastralRecordSameOwner?: boolean;
-    condominiumSolvency?: boolean;
-    mainProperty?: boolean;
+    propertyDoc: boolean;
+    CIorRIF: boolean;
+    ownerCIorRIF: boolean;
+    spouseCIorRIF: boolean;
+    isCatastralRecordSameOwner: boolean;
+    condominiumSolvency: boolean;
+    mainProperty: boolean;
     mortgageRelease?: string;
     condominiumSolvencyDetails?: string;
     power?: string;
@@ -187,28 +188,28 @@ export type IPropertyItemCreateUpdate = {
 
   negotiationInformation: {
     id?: string;
-    price?: string;
+    price: string;
     minimumNegotiation?: string;
     client?: string;
     reasonToSellOrRent?: string;
     realstateadvisername?: string;
     externaladvisername?: string;
     partOfPayment?: string;
-    operationType?: string;
+    operationType: string;
     ally?: string;
     allyname?: string;
-    propertyExclusivity?: string;
+    propertyExclusivity: string;
     realStateAdviser?: string;
     additional_price?: string;
     externalAdviser?: string;
     sellCommission?: string;
     rentCommission?: string;
     ownerPaysCommission?: string;
-    mouthToMouth?: boolean;
-    realStateGroups?: boolean;
-    realStateWebPages?: boolean;
-    socialMedia?: boolean;
-    publicationOnBuilding?: boolean;
+    mouthToMouth: boolean;
+    realStateGroups: boolean;
+    realStateWebPages: boolean;
+    socialMedia: boolean;
+    publicationOnBuilding: boolean;
   };
 };
 

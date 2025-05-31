@@ -45,12 +45,6 @@ const AdjacenciesTab = () => {
   const renderAdjacencyInput = (field: AdjacencyFormField, index: number, originalIndex: number) => {
     const { adjacency } = field;
     const fieldName = `adjacencies.${originalIndex}.value` as const;
-    const additionalInfoFieldName = `adjacencies.${originalIndex}.additionalInformation` as const;
-
-    // Watch the checkbox value to show/hide additional info field
-    const isChecked = watch(fieldName) === 'true';
-
-    // console.log('Rendering attribute input:', attribute.label, 'Type:', attribute.formType);
 
     return (
       <Box>
@@ -73,26 +67,6 @@ const AdjacenciesTab = () => {
             />
           )}
         />
-
-        {/* Conditional Additional Information Field */}
-        {isChecked && (
-          <Controller
-            name={additionalInfoFieldName}
-            control={control}
-            render={({ field: textField }) => (
-              <TextField
-                {...textField}
-                placeholder="Información adicional (Opcional)"
-                fullWidth
-                size="small"
-                variant="outlined"
-                sx={{ mt: 1 }}
-                multiline
-                rows={2}
-              />
-            )}
-          />
-        )}
       </Box>
     );
   };
@@ -152,13 +126,6 @@ const AdjacenciesTab = () => {
 
               <Controller
                 name={`adjacencies.${originalIndex}.valueType`}
-                control={control}
-                render={() => <input type="hidden" />}
-              />
-
-              {/*In your Grid render section, add this hidden field:*/}
-              <Controller
-                name={`adjacencies.${originalIndex}.additionalInformation`}
                 control={control}
                 render={() => <input type="hidden" />}
               />
