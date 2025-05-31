@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback } from 'react';
+import { useFormContext } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -13,8 +14,6 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 
 import { Field } from '../../../components/hook-form';
-import { useFormContext } from 'react-hook-form';
-import { useGetCategories } from '../../../actions/category';
 
 type Props = {
   collapseValue: boolean;

@@ -1,20 +1,19 @@
 import type { SWRConfiguration } from 'swr';
-import type { IProductItem } from 'src/types/product';
 
 import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
 
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
-import type {
-  IPropertyItem,
-  IPropertyItemPreview,
-  IPropertyCategoryItem,
-  AdjacencyFormField,
-  AttributeFormField, EquipmentFormField, UtilityFormField, DistributionFormField, IPropertyItemCreateUpdate,
-} from '../types/property';
-import type { PropertyFormSchemaType } from '../sections/property/form/create-update-property-form';
 import { UploadService } from '../utils/files/upload';
+
+import type { PropertyFormSchemaType } from '../sections/property/form/create-update-property-form';
+import type {
+  UtilityFormField,
+  AdjacencyFormField,
+  AttributeFormField,
+  EquipmentFormField, IPropertyItemPreview, IPropertyCategoryItem, DistributionFormField, IPropertyItemCreateUpdate,
+} from '../types/property';
 
 // ----------------------------------------------------------------------
 

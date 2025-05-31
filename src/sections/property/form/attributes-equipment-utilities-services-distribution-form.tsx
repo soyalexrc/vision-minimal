@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
 import { varAlpha } from 'minimal-shared/utils';
+import React, { useState, useEffect } from 'react';
 
 import Tab from '@mui/material/Tab';
 import Card from '@mui/material/Card';
@@ -16,7 +16,6 @@ import UtilitiesTab from './utilities-tab';
 import AttributesTab from './attributes-tab';
 import EquipmentsTab from './equipments-tab';
 import AdjacenciesTab from './adjacencies-tab';
-import { useParams } from '../../../routes/hooks';
 import DistributionsTab from './distributions-tab';
 
 
