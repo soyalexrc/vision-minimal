@@ -73,6 +73,7 @@ export const navData: NavSectionProps['data'] = [
         title: 'Clientes',
         path: paths.dashboard.clients.root,
         icon: ICONS.client,
+        allowedRoles: ['ADMINISTRADOR', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO'],
         children: [
           { title: 'Lista', path: paths.dashboard.clients.root },
           { title: 'Nuevo cliente ', path: paths.dashboard.clients.create },
@@ -80,6 +81,7 @@ export const navData: NavSectionProps['data'] = [
       },
       {
         title: 'Inmuebles',
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO'],
         path: paths.dashboard.properties.root,
         icon: ICONS.building,
         children: [
@@ -89,21 +91,25 @@ export const navData: NavSectionProps['data'] = [
       },
       {
         title: 'Usuarios',
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS'],
         path: paths.dashboard.users.root,
         icon: ICONS.user,
       },
       {
         title: 'Aliados',
         path: paths.dashboard.allies.root,
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS'],
         icon: ICONS.team,
       },
       {
         title: 'Asesores externos',
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS'],
         path: paths.dashboard.externalAdvisers.root,
         icon: ICONS.teamExternal,
       },
       {
         title: 'Propietarios',
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS'],
         path: paths.dashboard.owners.root,
         icon: ICONS.owner,
       },
@@ -116,19 +122,23 @@ export const navData: NavSectionProps['data'] = [
         title: 'Admimistración interna',
         path: paths.dashboard.admin.internal,
         icon: ICONS.job,
+        allowedRoles: ['ADMINISTRADOR', 'TI'],
       },
       {
         title: 'Gestión de archivos',
         path: paths.dashboard.admin.fileManager,
         icon: ICONS.folder,
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS'],
       },
       {
         title: 'Flujo de caja',
         path: paths.dashboard.admin.cashFlow,
         icon: ICONS.invoice,
+        allowedRoles: ['ADMINISTRADOR', 'TI'],
       },
       {
         title: 'Calculo de comision',
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS'],
         path: paths.dashboard.admin.commissions,
         icon: ICONS.calculator,
       },
