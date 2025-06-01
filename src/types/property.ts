@@ -7,6 +7,7 @@ export type IPropertyDataFilters = {
   status: string;
   propertyType: string[];
   operationType: string[];
+  isFeatured?: boolean;
 };
 
 export interface Attribute {
@@ -83,6 +84,7 @@ export type IPropertyItemPreview = {
   status: string;
   publicationTitle: string;
   coverUrl: string;
+  images: string[];
   propertyType: string;
   operationType: string;
   adviserName: string;
@@ -90,6 +92,7 @@ export type IPropertyItemPreview = {
   createdAt: IDateValue;
   updatedAt: IDateValue;
   isActive: boolean;
+  isFeatured: boolean;
   isPublished: boolean;
 }
 

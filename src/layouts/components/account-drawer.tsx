@@ -26,10 +26,11 @@ import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { AnimateBorder } from 'src/components/animate';
 
-import { useMockedUser } from 'src/auth/hooks';
+import { useAuthContext, useMockedUser } from 'src/auth/hooks';
 
 import { AccountButton } from './account-button';
 import { SignOutButton } from './sign-out-button';
+import { RoleType } from '../../utils/roles.mapper';
 
 // ----------------------------------------------------------------------
 
@@ -45,7 +46,12 @@ export type AccountDrawerProps = IconButtonProps & {
 export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
   const pathname = usePathname();
 
-  const { user } = useMockedUser();
+  // const { user } = useMockedUser();
+  const { user } = useAuthContext();
+
+  console.log('_user', user)
+
+  const displayName = user?.firstname +  ' ' + user?.lastname;
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
 
@@ -56,8 +62,8 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
         primaryBorder: { size: 120, sx: { color: 'primary.main' } },
       }}
     >
-      <Avatar src={user?.photoURL} alt={user?.displayName} sx={{ width: 1, height: 1 }}>
-        {user?.displayName?.charAt(0).toUpperCase()}
+      <Avatar src={user?.imageurl} alt={displayName} sx={{ width: 1, height: 1 }}>
+        {displayName?.charAt(0).toUpperCase()}
       </Avatar>
     </AnimateBorder>
   );
@@ -120,8 +126,8 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
     <>
       <AccountButton
         onClick={onOpen}
-        photoURL={user?.photoURL}
-        displayName={user?.displayName}
+        photoURL={user?.imageurl ?? ''}
+        displayName={displayName}
         sx={sx}
         {...other}
       />
@@ -159,49 +165,53 @@ export function AccountDrawer({ data = [], sx, ...other }: AccountDrawerProps) {
             {renderAvatar()}
 
             <Typography variant="subtitle1" noWrap sx={{ mt: 2 }}>
-              {user?.displayName}
+              {displayName}
             </Typography>
 
             <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5 }} noWrap>
               {user?.email}
             </Typography>
+
+            <Typography variant="h5" sx={{ color: 'text.secondary', mt: 0.5 }} noWrap>
+              {RoleType[user?.role]}
+            </Typography>
           </Box>
 
-          <Box
-            sx={{
-              p: 3,
-              gap: 1,
-              flexWrap: 'wrap',
-              display: 'flex',
-              justifyContent: 'center',
-            }}
-          >
-            {Array.from({ length: 3 }, (_, index) => (
-              <Tooltip
-                key={_mock.fullName(index + 1)}
-                title={`Switch to: ${_mock.fullName(index + 1)}`}
-              >
-                <Avatar
-                  alt={_mock.fullName(index + 1)}
-                  src={_mock.image.avatar(index + 1)}
-                  onClick={() => {}}
-                />
-              </Tooltip>
-            ))}
+          {/*<Box*/}
+          {/*  sx={{*/}
+          {/*    p: 3,*/}
+          {/*    gap: 1,*/}
+          {/*    flexWrap: 'wrap',*/}
+          {/*    display: 'flex',*/}
+          {/*    justifyContent: 'center',*/}
+          {/*  }}*/}
+          {/*>*/}
+          {/*  {Array.from({ length: 3 }, (_, index) => (*/}
+          {/*    <Tooltip*/}
+          {/*      key={_mock.fullName(index + 1)}*/}
+          {/*      title={`Switch to: ${_mock.fullName(index + 1)}`}*/}
+          {/*    >*/}
+          {/*      <Avatar*/}
+          {/*        alt={_mock.fullName(index + 1)}*/}
+          {/*        src={_mock.image.avatar(index + 1)}*/}
+          {/*        onClick={() => {}}*/}
+          {/*      />*/}
+          {/*    </Tooltip>*/}
+          {/*  ))}*/}
 
-            <Tooltip title="Add account">
-              <IconButton
-                sx={[
-                  (theme) => ({
-                    bgcolor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),
-                    border: `dashed 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.32)}`,
-                  }),
-                ]}
-              >
-                <Iconify icon="mingcute:add-line" />
-              </IconButton>
-            </Tooltip>
-          </Box>
+          {/*  <Tooltip title="Add account">*/}
+          {/*    <IconButton*/}
+          {/*      sx={[*/}
+          {/*        (theme) => ({*/}
+          {/*          bgcolor: varAlpha(theme.vars.palette.grey['500Channel'], 0.08),*/}
+          {/*          border: `dashed 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.32)}`,*/}
+          {/*        }),*/}
+          {/*      ]}*/}
+          {/*    >*/}
+          {/*      <Iconify icon="mingcute:add-line" />*/}
+          {/*    </IconButton>*/}
+          {/*  </Tooltip>*/}
+          {/*</Box>*/}
 
           {renderList()}
 

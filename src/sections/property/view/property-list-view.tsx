@@ -4,6 +4,8 @@
 import type { AxiosResponse } from 'axios';
 import type { GridRowSelectionModel, GridColumnVisibilityModel } from '@mui/x-data-grid';
 
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
 import { varAlpha } from 'minimal-shared/utils';
 import { useState, useEffect, useCallback } from 'react';
 import { useBoolean, useSetState } from 'minimal-shared/hooks';
@@ -34,7 +36,7 @@ import { PropertyGridTableToolbar } from '../property-table-toolbar';
 import { propertyColumns } from '../../../utils/columns/property-columns';
 import {
   deleteProperty, restoreProperty,
-  useGetProperties, deleteManyPropertys,
+  useGetProperties, deleteManyProperties, updatePropertyStatus, updatePropertyFeatured,
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';
@@ -57,6 +59,7 @@ const STATUS_OPTIONS = [
 export function PropertyListView() {
   const table = useTable({ defaultDense: true, defaultRowsPerPage: 25, defaultOrderBy: 'id' });
   const confirmDialog = useBoolean();
+  const downloadImagesLoading = useBoolean();
   const { properties, refresh, propertiesLoading } = useGetProperties();
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
   const [columnVisibilityModel, setColumnVisibilityModel] =
@@ -64,7 +67,7 @@ export function PropertyListView() {
   const [tableData, setTableData] = useState<IPropertyItemPreview[]>(properties);
   const [filterButtonEl, setFilterButtonEl] = useState<HTMLButtonElement | null>(null);
   const router = useRouter();
-  const filters = useSetState<IPropertyDataFilters>({ name: '', status: 'all', propertyType: [], operationType: [] });
+  const filters = useSetState<IPropertyDataFilters>({ name: '', status: 'all', propertyType: [], operationType: [], isFeatured: undefined });
 
   const { state: currentFilters, setState: updateFilters } = filters;
 
@@ -110,7 +113,7 @@ export function PropertyListView() {
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
-  const handleDeleteRow = async (id: number) => {
+  const handleDeleteRow = async (id: string) => {
     const promise = await (async () => {
       const response: AxiosResponse<any> = await deleteProperty(id);
       if (response.status === 200 || response.status === 201) {
@@ -129,7 +132,69 @@ export function PropertyListView() {
     refresh();
   };
 
-  const handleRestoreRow = async (id: number) => {
+  const handleActiveInactiveProperty = async (id: string, status: 'active' | 'inactive') => {
+    const promise = await (async () => {
+      const response: AxiosResponse<any> = await updatePropertyStatus(id, status);
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
+
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registro actualizado!',
+      error: (error) => error || 'Error al actualizar el registro!',
+    });
+
+    refresh();
+  };
+
+  const handleMarkFeaturedProperty = async (id: string, featured: boolean) => {
+    const promise = await (async () => {
+      const response: AxiosResponse<any> = await updatePropertyFeatured(id, featured);
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
+
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registro actualizado!',
+      error: (error) => error || 'Error al actualizar el registro!',
+    });
+
+    refresh();
+  };
+
+  async function handleDownloadAssets(images: string[], code: string) {
+    const zip = new JSZip();
+
+    const t = toast.loading('Se estan descargando las imagenes de el inmueble');
+    downloadImagesLoading.onTrue();
+    for (let i = 0; i < images.length; i++) {
+      try {
+        // const imageRef = ref(storage, images[i]);
+        // const blob = await getBlob(imageRef);
+        const response = await fetch(images[i]);
+        const blob = await response.blob();
+        zip.file(`${code}-${i + 1}.jpg`, blob);
+      } catch (error) {
+        console.error('Error downloading image:', images[i], error);
+      }
+    }
+
+    const zipBlob = await zip.generateAsync({ type: 'blob' });
+    saveAs(zipBlob, `IMAGENES_${code}.zip`);
+    toast.dismiss(t);
+    downloadImagesLoading.onFalse();
+    toast.success('Imagenes descargadas con exito!');
+  }
+
+  const handleRestoreRow = async (id: string) => {
     const promise = await (async () => {
       const response: AxiosResponse<any> = await restoreProperty(id);
       if (response.status === 200 || response.status === 201) {
@@ -150,7 +215,7 @@ export function PropertyListView() {
 
   const handleDeleteRows = async () => {
     const promise = await (async () => {
-      const response: AxiosResponse<any> = await deleteManyPropertys(selectedRowIds as number[]);
+      const response: AxiosResponse<any> = await deleteManyProperties(selectedRowIds as string[]);
       if (response.status === 200 || response.status === 201) {
         return response.data?.message;
       } else {
@@ -170,7 +235,11 @@ export function PropertyListView() {
   const handleFilterStatus = useCallback(
     (event: React.SyntheticEvent, newValue: string) => {
       table.onResetPage();
-      updateFilters({ status: newValue });
+      if (newValue === 'featured') {
+        updateFilters({ isFeatured: true, status: 'featured' });
+      } else {
+        updateFilters({ status: newValue, isFeatured: undefined });
+      }
     },
     [updateFilters, table]
   );
@@ -182,7 +251,7 @@ export function PropertyListView() {
       title="Eliminar"
       content={
         <>
-          Estas seguro de eliminar <strong> {selectedRowIds.length} </strong> Propertyes?
+          Estas seguro de eliminar <strong> {selectedRowIds.length} </strong> inmueble(s)?
         </>
       }
       action={
@@ -260,6 +329,17 @@ export function PropertyListView() {
                 }
               />
             ))}
+            <Tab value="featured" label="Destacado" iconPosition="end"  icon={
+              <Label
+                variant={
+                  ((currentFilters.isFeatured) && 'filled') ||
+                  'soft'
+                }
+                color="warning"
+              >
+                {tableData.filter((property) => property.isFeatured).length}
+              </Label>
+            }/>
           </Tabs>
 
           <Card
@@ -303,7 +383,9 @@ export function PropertyListView() {
 
                     <GridActionsCellItem
                       showInMenu
+                      disabled={downloadImagesLoading.value}
                       icon={<Iconify icon="lucide:image-down" />}
+                      onClick={() => handleDownloadAssets(params.row.images, params.row.code)}
                       label="Descargar imagenes"
                     />,
                     ...(params.row.status !== 'deleted'
@@ -320,11 +402,11 @@ export function PropertyListView() {
                     ? [
                           <GridActionsCellItem
                             showInMenu
-                            icon={<Iconify icon="uim:favorite" />}
-                            label="Marcar como favorito"
+                            icon={<Iconify icon={params.row.isFeatured ? 'uis:favorite' : "uit:favorite"} />}
+                            label={params.row.isFeatured ? 'Desmarcar favorito' : 'Marcar favorito'}
+                            onClick={() => handleMarkFeaturedProperty(params.row.id, !params.row.isFeatured)}
                             sx={{ color: 'warning.main' }}
                           />,
-
                           <GridActionsCellItem
                             showInMenu
                             icon={<Iconify icon="material-symbols:share" />}
@@ -334,6 +416,7 @@ export function PropertyListView() {
                             showInMenu
                             icon={<Iconify icon="lsicon:disable-outline" />}
                             label="Desactivar"
+                            onClick={() => handleActiveInactiveProperty(params.row.id, 'inactive')}
                             sx={{ color: 'error.main' }}
                           />,
                         ] : [
@@ -341,6 +424,7 @@ export function PropertyListView() {
                             showInMenu
                             icon={<Iconify icon="lets-icons:check-fill" />}
                             label="Activar"
+                            onClick={() => handleActiveInactiveProperty(params.row.id, 'active')}
                             sx={{ color: 'success.main' }}
                           />,
                         ]
@@ -494,7 +578,7 @@ type ApplyFilterProps = {
 };
 
 function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
-  const { name, status, operationType, propertyType } = filters;
+  const { name, status, operationType, propertyType, isFeatured } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
@@ -510,10 +594,13 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
     inputData = inputData.filter((user) => user.publicationTitle.toLowerCase().includes(name.toLowerCase()));
   }
 
-  if (status !== 'all') {
+  if (status !== 'all' && status !== 'featured') {
     inputData = inputData.filter((user) => user.status === status);
   }
 
+  if (isFeatured !== undefined) {
+    inputData = inputData.filter((property) => property.isFeatured);
+  }
 
   if (propertyType.length) {
     inputData = inputData.filter((product) => propertyType.includes(product.propertyType));

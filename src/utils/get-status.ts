@@ -1,6 +1,6 @@
 import type { LabelColor } from '../components/label';
 
-export type GetStatusType = 'active' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
+export type GetStatusType = 'active' | 'featured' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
 
 export type GetStatusReturnType = {
   color: string;
@@ -151,11 +151,11 @@ export const getStatus = (status: GetStatusType): GetStatusReturnType => {
         name: "Pendiente Documentos",
         variant: "warning"
       };
-    case 'pendingPay':
+    case 'featured':
       return {
         color: '#B76E00',
         backgroundColor: '#FFF1D6',
-        name: "Por pagar",
+        name: "Destacado",
         variant: "warning"
       };
     case 'reviewing':

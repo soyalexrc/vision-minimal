@@ -163,7 +163,7 @@ export function DashboardLayout({
           {/*/>*/}
 
           {/** @slot Notifications popover */}
-          <NotificationsDrawer data={_notifications} />
+          {/*<NotificationsDrawer data={_notifications} />*/}
 
           {/** @slot Contacts popover */}
           {/*<ContactsPopover data={_contacts} />*/}

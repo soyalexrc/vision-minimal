@@ -144,17 +144,27 @@ export async function createUpdateProperty(payload: PropertyFormSchemaType, type
   }
 }
 
-export async function deleteManyPropertys(ids: number[]) {
-  const url = `${endpoints.client.delete}/remove-many`;
+export async function deleteManyProperties(ids: string[]) {
+  const url = `${endpoints.property.delete}/remove-many`;
   return axios.post(url, { ids });
 }
 
-export async function deleteProperty(id: number) {
-  const url = `${endpoints.client.delete}/${id}`;
+export async function deleteProperty(id: string) {
+  const url = `${endpoints.property.delete}/${id}`;
   return axios.delete(url);
 }
 
-export async function restoreProperty(id: number) {
-  const url = `${endpoints.client.restore}`;
+export async function updatePropertyStatus(id: string, status: string) {
+  const url = `${endpoints.property.editStatus}/${id}`;
+  return axios.patch(url, { status });
+}
+
+export async function updatePropertyFeatured(id: string, isFeatured: boolean) {
+  const url = `${endpoints.property.editFeatured}/${id}`;
+  return axios.patch(url, { isFeatured });
+}
+
+export async function restoreProperty(id: string) {
+  const url = `${endpoints.property.restore}`;
   return axios.post(url, { id });
 }

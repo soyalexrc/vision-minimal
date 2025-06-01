@@ -87,6 +87,8 @@ export const endpoints = {
     list: '/property',
     create: '/property',
     edit: '/property/edit',
+    editStatus: '/property/status',
+    editFeatured: '/property/featured',
     delete: '/property',
     details: '/property/details',
     search: '/property/search',
@@ -126,6 +128,13 @@ export const endpoints = {
     details: '/api/post/details',
     latest: '/api/post/latest',
     search: '/api/post/search',
+  },
+  config: {
+    byId: '/config',
+    // list: '/api/post/list',
+    // details: '/api/post/details',
+    // latest: '/api/post/latest',
+    // search: '/api/post/search',
   },
   product: {
     list: '/api/product/list',

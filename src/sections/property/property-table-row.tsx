@@ -103,6 +103,22 @@ export function RenderCellStatus({ params, value }: ParamsProps & { value: GetSt
   );
 }
 
+export function RenderCellStatusAndFeatured({ params, value, featured }: ParamsProps & { value: GetStatusType, featured: boolean }) {
+  return (
+    <Stack direction="row" alignItems="center" spacing={1}>
+      <Label variant="soft" color={getStatus(value)?.variant || 'default'}>
+        {getStatus(value).name}
+      </Label>{' '}
+      {featured && (
+        <Tooltip title="Destacado">
+          <Iconify icon="material-symbols:star" sx={{ color: 'warning.main' }} />
+        </Tooltip>
+      )}
+      <RenderErrorWarning params={params} />
+    </Stack>
+  );
+}
+
 export function RenderCell({ params, value }: ParamsProps & { value: string }) {
   return (
     <Stack direction="row" spacing={0.5} sx={{ py: 1 }}>

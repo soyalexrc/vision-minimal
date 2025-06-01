@@ -12,7 +12,7 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 
 import axiosInstance from '../../../lib/axios';
-import { useRouter } from '../../../routes/hooks';
+import { useParams, useRouter } from '../../../routes/hooks';
 import { useAuthContext } from '../../../auth/hooks';
 import { Form } from '../../../components/hook-form';
 import { Iconify } from '../../../components/iconify';
@@ -20,7 +20,7 @@ import GeneralInformationForm from './general-information-form';
 import LocationInformationForm from './location-information-form';
 import NegotiationInformationForm from './negotiation-information-form';
 import DocumentationInformationForm from './documentation-information-form';
-import { useGetProperties, createUpdateProperty } from '../../../actions/property';
+import { useGetProperties, createUpdateProperty, useGetProperty } from '../../../actions/property';
 import AttributesEquipmentUtilitiesServicesDistributionForm from './attributes-equipment-utilities-services-distribution-form';
 
 import type {
@@ -269,7 +269,9 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
   };
   const { user } = useAuthContext();
   const router = useRouter();
+  const { id } = useParams<{ id: string }>();
   const { refresh } = useGetProperties();
+  const { refresh: refreshCurrent } = useGetProperty(id as any);
   const shortUser = {
     id: user?.id,
     username: user?.username,
@@ -696,7 +698,8 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
     try {
       await promise;
       reset();
-      await refresh();
+      refresh();
+      refreshCurrent();
       router.push('/dashboard/properties');
     } catch (error) {
       console.error(error);
