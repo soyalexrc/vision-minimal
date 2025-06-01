@@ -5,8 +5,9 @@ import Container from '@mui/material/Container';
 
 import { paths } from '../../../../../routes/paths';
 import { useParams } from '../../../../../routes/hooks';
+import { useAuthContext } from '../../../../../auth/hooks';
+import { RoleBasedGuard } from '../../../../../auth/guard';
 import { useGetClient } from '../../../../../actions/client';
-import { useSettingsContext } from '../../../../../components/settings';
 import { LoadingScreen } from '../../../../../components/loading-screen';
 import { CustomBreadcrumbs } from '../../../../../components/custom-breadcrumbs';
 import {
@@ -16,10 +17,19 @@ import {
 // ----------------------------------------------------------------------
 
 export default function Page() {
-  const settings = useSettingsContext();
   const { id } = useParams();
-
   const { client, clientLoading, clientError } = useGetClient(id as any)
+
+  const { user } = useAuthContext();
+
+  if (user && user.role === 'ASESOR_INMOBILIARIO') {
+    if (client && (client as any)?.adviserId) {
+      if ((client as any).adviserId !== String(user.id)) {
+        return <RoleBasedGuard allowedRoles={['NONE']} hasContent children={<div />} />;
+      }
+    }
+  }
+
 
   return (
     // <Container maxWidth={settings.themeStretch ? false : 'xl'}>

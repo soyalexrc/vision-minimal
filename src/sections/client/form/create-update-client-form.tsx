@@ -165,6 +165,8 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     subServiceName: null,
     subServiceId: null,
     username: null,
+    updatedby: { id: undefined, username: '', name: '', email: '' },
+    createdby: { id: undefined, username: '', name: '', email: '' },
     propertyDistribution: null,
   };
   const router = useRouter();

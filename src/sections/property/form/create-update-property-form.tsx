@@ -169,9 +169,9 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
     utilities: [],
     furnishedAreas: [],
     status: 'inactive',
-    updatedby: undefined,
+    updatedby: { id: undefined, username: '', name: '', email: '' },
+    createdby: { id: undefined, username: '', name: '', email: '' },
     changes: undefined,
-    createdby: undefined,
 
     generalInformation: {
       id: undefined,
@@ -272,6 +272,7 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
   const { id } = useParams<{ id: string }>();
   const { refresh } = useGetProperties();
   const { refresh: refreshCurrent } = useGetProperty(id as any);
+
   const shortUser = {
     id: user?.id,
     username: user?.username,
@@ -677,9 +678,9 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
         //   console.log('No changes made.');
         //   return 'No se detectaron cambios en el registro.';
         // }
-        response = await createUpdateProperty(data, 'update', currentProperty.id);
+        response = await createUpdateProperty({ ...data, updatedby: shortUser }, 'update', currentProperty.id);
       } else {
-        response = await createUpdateProperty(data, 'create');
+        response = await createUpdateProperty({ ...data, createdby: shortUser }, 'create');
       }
 
       if (response.status === 200 || response.status === 201) {

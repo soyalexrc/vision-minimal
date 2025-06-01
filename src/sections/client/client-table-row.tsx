@@ -30,6 +30,7 @@ import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 import type { IClientItem } from '../../types/client';
 import type { GetStatusType } from '../../utils/get-status';
+import { UserType } from '../../auth/types';
 
 // ----------------------------------------------------------------------
 
@@ -78,6 +79,25 @@ export function RenderCellStatus({ params, value }: ParamsProps & { value: GetSt
   );
 }
 
+export function ConditionalRenderCell({ params, value, user }: ParamsProps & { value: string, user?: UserType }) {
+  // Check ownership: does record.adviserId match current user.id?
+  console.log(params.row);
+  const hasAccess = !user ||
+    user.role !== "ASESOR_INMOBILIARIO" ||
+    !params.row.adviserId ||
+    params.row.adviserId === user?.id;
+
+  if (!hasAccess) {
+    return <span style={{ color: '#ccc' }}>***</span>; // Show placeholder
+  }
+
+  return (
+    <Stack direction="row" spacing={0.5} sx={{ py: 1 }}>
+      {value} <RenderErrorWarning params={params} />
+    </Stack>
+  );
+}
+
 export function RenderCell({ params, value }: ParamsProps & { value: string }) {
   return (
     <Stack direction="row" spacing={0.5} sx={{ py: 1 }}>
@@ -86,7 +106,18 @@ export function RenderCell({ params, value }: ParamsProps & { value: string }) {
   );
 }
 
-export function RenderCellPhone({ params, value }: ParamsProps & { value: string }) {
+export function RenderCellPhone({ params, value, user }: ParamsProps & { value: string, user: UserType }) {
+  // Check ownership: does record.adviserId match current user.id?
+  console.log(params.row);
+  const hasAccess = !user ||
+    user.role !== "ASESOR_INMOBILIARIO" ||
+    !params.row.adviserId ||
+    params.row.adviserId === user?.id;
+
+  if (!hasAccess) {
+    return <span style={{ color: '#ccc' }}>***</span>; // Show placeholder
+  }
+
   return (
     <Stack direction="row" spacing={0.5} sx={{ py: 1 }}>
       <NextLink href={`https://wa.me/${value}`} target="_blank" rel="noopener noreferrer">

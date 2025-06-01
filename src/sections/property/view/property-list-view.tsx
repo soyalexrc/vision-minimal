@@ -25,8 +25,8 @@ import { Label } from 'src/components/label';
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useTable, getComparator } from 'src/components/table';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import { useTable, rowInPage, getComparator } from 'src/components/table';
 
 import { useRouter } from '../../../routes/hooks';
 import { RouterLink } from '../../../routes/components';
@@ -40,6 +40,7 @@ import {
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';
+import { useAuthContext } from '../../../auth/hooks';
 
 // ----------------------------------------------------------------------
 
@@ -66,7 +67,7 @@ export function PropertyListView() {
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
   const [tableData, setTableData] = useState<IPropertyItemPreview[]>(properties);
   const [filterButtonEl, setFilterButtonEl] = useState<HTMLButtonElement | null>(null);
-  const router = useRouter();
+  const { user } = useAuthContext();
   const filters = useSetState<IPropertyDataFilters>({ name: '', status: 'all', propertyType: [], operationType: [], isFeatured: undefined });
 
   const { state: currentFilters, setState: updateFilters } = filters;
@@ -98,20 +99,13 @@ export function PropertyListView() {
     }
   }, [properties]);
 
-  // const filters = useSetState<IPropertyDataFilters>({ name: '', status: 'all' });
-  // const { state: currentFilters, setState: updateFilters } = filters;
-
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters: currentFilters,
   });
 
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
-
   const canReset = !!currentFilters.name || currentFilters.status !== 'all';
-
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleDeleteRow = async (id: string) => {
     const promise = await (async () => {
@@ -323,7 +317,7 @@ export function PropertyListView() {
                     }
                   >
                     {['active', 'concreted', 'inactive', 'rejected', 'deleted'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
+                      ? tableData.filter((property) => property.status === tab.value).length
                       : tableData.length}
                   </Label>
                 }
@@ -388,7 +382,7 @@ export function PropertyListView() {
                       onClick={() => handleDownloadAssets(params.row.images, params.row.code)}
                       label="Descargar imagenes"
                     />,
-                    ...(params.row.status !== 'deleted'
+                    ...(params.row.status !== 'deleted' && (user.role !== 'ASESOR_INMOBILIARIO' || params.row.userId == user.id)
                         ? [
                           <GridActionsLinkItem
                             showInMenu
@@ -415,15 +409,15 @@ export function PropertyListView() {
                           <GridActionsCellItem
                             showInMenu
                             icon={<Iconify icon="lsicon:disable-outline" />}
-                            label="Desactivar"
+                            label="Marcar como inactivo"
                             onClick={() => handleActiveInactiveProperty(params.row.id, 'inactive')}
-                            sx={{ color: 'error.main' }}
+                            sx={{ color: 'warning.main' }}
                           />,
                         ] : [
                           <GridActionsCellItem
                             showInMenu
                             icon={<Iconify icon="lets-icons:check-fill" />}
-                            label="Activar"
+                            label="Marcar como activo"
                             onClick={() => handleActiveInactiveProperty(params.row.id, 'active')}
                             sx={{ color: 'success.main' }}
                           />,

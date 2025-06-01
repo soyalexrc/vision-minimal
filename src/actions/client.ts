@@ -108,6 +108,11 @@ export async function updateClient(payload: ClientFormSchemaType, id: number) {
   return axios.patch(url, payload);
 }
 
+export async function changeClientStatus(id: number, statusTo: string) {
+  const url = `${endpoints.client.editStatus}/${id}`;
+  return axios.patch(url, { status: statusTo });
+}
+
 export async function deleteManyClients(ids: number[]) {
   const url = `${endpoints.client.delete}/remove-many`;
   return axios.post(url, { ids });

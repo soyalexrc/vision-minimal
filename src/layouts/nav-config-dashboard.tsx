@@ -73,7 +73,7 @@ export const navData: NavSectionProps['data'] = [
         title: 'Clientes',
         path: paths.dashboard.clients.root,
         icon: ICONS.client,
-        allowedRoles: ['ADMINISTRADOR', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO'],
+        allowedRoles: ['ADMINISTRADOR', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'TI'],
         children: [
           { title: 'Lista', path: paths.dashboard.clients.root },
           { title: 'Nuevo cliente ', path: paths.dashboard.clients.create },

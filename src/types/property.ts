@@ -94,6 +94,7 @@ export type IPropertyItemPreview = {
   isActive: boolean;
   isFeatured: boolean;
   isPublished: boolean;
+  userId: string;
 }
 
 

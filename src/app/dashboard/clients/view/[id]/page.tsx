@@ -5,28 +5,31 @@ import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 
 import { paths } from '../../../../../routes/paths';
+import { useAuthContext } from '../../../../../auth/hooks';
+import { RoleBasedGuard } from '../../../../../auth/guard';
 import { Iconify } from '../../../../../components/iconify';
 import { useGetClient } from '../../../../../actions/client';
 import { useParams, useRouter } from '../../../../../routes/hooks';
-import { useSettingsContext } from '../../../../../components/settings';
 import { LoadingScreen } from '../../../../../components/loading-screen';
 import { CustomBreadcrumbs } from '../../../../../components/custom-breadcrumbs';
-import {
-  CreateUpdateClientForm,
-} from '../../../../../sections/client/form/create-update-client-form';
+import { CreateUpdateClientForm } from '../../../../../sections/client/form/create-update-client-form';
 
 // ----------------------------------------------------------------------
 
 export default function Page() {
-  const settings = useSettingsContext();
   const { id } = useParams();
+  const { user } = useAuthContext();
   const router = useRouter();
 
-  console.log(id);
+  const { client, clientLoading, clientError } = useGetClient(id as any);
 
-  const { client, clientLoading, clientError } = useGetClient(id as any)
-
-  console.log(client);
+  if (user && user.role === 'ASESOR_INMOBILIARIO') {
+    if (client && (client as any)?.adviserId) {
+      if ((client as any).adviserId !== String(user.id)) {
+        return <RoleBasedGuard allowedRoles={['NONE']} hasContent children={<div />} />;
+      }
+    }
+  }
 
   return (
     // <Container maxWidth={settings.themeStretch ? false : 'xl'}>
@@ -41,7 +44,11 @@ export default function Page() {
         ]}
         action={
           <div>
-            <Button onClick={() => router.push(`/dashboard/clients/update/${id}`)} variant="contained" startIcon={<Iconify icon="pepicons-pencil:pen" />}>
+            <Button
+              onClick={() => router.push(`/dashboard/clients/update/${id}`)}
+              variant="contained"
+              startIcon={<Iconify icon="pepicons-pencil:pen" />}
+            >
               Editar cliente
             </Button>
           </div>
@@ -50,15 +57,9 @@ export default function Page() {
           mb: { xs: 3, md: 5 },
         }}
       />
-      {
-        clientLoading && <LoadingScreen />
-      }
-      {
-        clientError && <div>Error: {clientError}</div>
-      }
-      {
-        client && !clientLoading && <CreateUpdateClientForm currentClient={client as any} />
-      }
+      {clientLoading && <LoadingScreen />}
+      {clientError && <div>Error: {clientError}</div>}
+      {client && !clientLoading && <CreateUpdateClientForm currentClient={client as any} />}
     </Container>
   );
 }

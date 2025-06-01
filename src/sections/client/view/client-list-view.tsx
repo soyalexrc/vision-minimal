@@ -1,7 +1,6 @@
 'use client';
 
 import type { AxiosResponse } from 'axios';
-import type { TableHeadCellProps } from 'src/components/table';
 import type { GridRowSelectionModel, GridColumnVisibilityModel} from '@mui/x-data-grid';
 
 import { varAlpha } from 'minimal-shared/utils';
@@ -23,19 +22,19 @@ import { Label } from 'src/components/label';
 import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { useTable, getComparator } from 'src/components/table';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import { useTable, rowInPage, getComparator } from 'src/components/table';
 
-import { useRouter } from '../../../routes/hooks';
+import { useAuthContext } from '../../../auth/hooks';
 import { RouterLink } from '../../../routes/components';
 import { GridActionsLinkItem } from '../../product/view';
 import { EmptyContent } from '../../../components/empty-content';
 import { ClientGridTableToolbar } from '../client-table-toolbar';
-import { clientColumns } from '../../../utils/columns/client-columns';
+import { getClientColumns } from '../../../utils/columns/client-columns';
 import {
   deleteClient, restoreClient,
   useGetClients,
-  deleteManyClients,
+  deleteManyClients, changeClientStatus,
 } from '../../../actions/client';
 
 import type { IClientItem, IClientDataFilters } from '../../../types/client';
@@ -57,27 +56,6 @@ const STATUS_OPTIONS = [
   { value: 'deleted', label: 'Eliminado' },
 ];
 
-const TABLE_HEAD: TableHeadCellProps[] = [
-  { id: 'id', label: 'ID' },
-  { id: 'name', label: 'Nombre' },
-  { id: 'phone', label: 'Telefono', width: 180 },
-  { id: 'adviserName', label: 'Nombre de asesor' },
-  { id: 'serviceName', label: 'Servicio', width: 180 },
-  { id: 'propertytype', label: 'Tipo de inmueble', width: 180 },
-  { id: 'propertyOfInterest', label: 'Inmueble por el cual nos contacta', width: 180 },
-  { id: 'contactFrom', label: 'de donde nos contacta', width: 180 },
-  { id: 'specificRequirement', label: 'Detalle de la solicitud', width: 180 },
-  { id: 'requestracking', label: 'Seguimiento', width: 180 },
-  { id: 'status', label: 'Status', width: 100 },
-  { id: 'isinwaitinglist', label: 'Lista de espera', width: 180 },
-  { id: 'isPotentialInvestor', label: 'Potencial inversor', width: 180 },
-  { id: 'budget', label: 'Presupuesto', width: 180 },
-  { id: 'typeOfPerson', label: 'Perfil de cliente', width: 180 },
-  { id: 'allowyounger', label: 'Menores de edad', width: 180 },
-  { id: 'allowpets', label: 'Mascotas', width: 180 },
-  { id: '', width: 88 },
-];
-
 // ----------------------------------------------------------------------
 
 export function ClientListView() {
@@ -89,8 +67,8 @@ export function ClientListView() {
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
   const [tableData, setTableData] = useState<IClientItem[]>(clients);
   const [filterButtonEl, setFilterButtonEl] = useState<HTMLButtonElement | null>(null);
-  const router = useRouter();
   const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
+  const { user } = useAuthContext();
 
   const { state: currentFilters, setState: updateFilters } = filters;
 
@@ -110,7 +88,7 @@ export function ClientListView() {
   );
 
   const getTogglableColumns = () =>
-    clientColumns
+    getClientColumns(user)
       .filter((column) => !HIDE_COLUMNS_TOGGLABLE.includes(column.field))
       .map((column) => column.field);
 
@@ -120,20 +98,13 @@ export function ClientListView() {
     }
   }, [clients]);
 
-  // const filters = useSetState<IClientDataFilters>({ name: '', status: 'all' });
-  // const { state: currentFilters, setState: updateFilters } = filters;
-
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters: currentFilters,
   });
 
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
-
   const canReset = !!currentFilters.name || currentFilters.status !== 'all';
-
-  const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
   const handleDeleteRow = async (id: number) => {
     const promise = await (async () => {
@@ -176,6 +147,25 @@ export function ClientListView() {
   const handleDeleteRows = async () => {
     const promise = await (async () => {
       const response: AxiosResponse<any> = await deleteManyClients(selectedRowIds as number[]);
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
+
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registros eliminados!',
+      error: (error) => error || 'Error al eliminar los registros!',
+    });
+
+    refresh();
+  };
+
+  const handleChangeRowStatus = async (id: number, statusTo: string) => {
+    const promise = await (async () => {
+      const response: AxiosResponse<any> = await changeClientStatus(id, statusTo);
       if (response.status === 200 || response.status === 201) {
         return response.data?.message;
       } else {
@@ -279,7 +269,7 @@ export function ClientListView() {
                     }
                   >
                     {['active', 'concreted', 'inactive', 'rejected', 'deleted'].includes(tab.value)
-                      ? tableData.filter((user) => user.status === tab.value).length
+                      ? tableData.filter((property) => property.status === tab.value).length
                       : tableData.length}
                   </Label>
                 }
@@ -317,24 +307,45 @@ export function ClientListView() {
                   disableColumnMenu: true,
                   headerAlign: 'center',
                   getActions: (params) => [
-                    <GridActionsLinkItem
-                      showInMenu
-                      icon={<Iconify icon="solar:eye-bold" />}
-                      label="Ver detalle"
-                      href={paths.dashboard.clients.details(params.row.id)}
-                    />,
-                    ...(params.row.status !== 'deleted'
-                     ? [
+                    ...(user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id
+                      ? [
+                          <GridActionsLinkItem
+                            showInMenu
+                            icon={<Iconify icon="solar:eye-bold" />}
+                            label="Ver detalle"
+                            href={paths.dashboard.clients.details(params.row.id)}
+                          />,
+                        ]
+                      : []),
+                    ...(params.row.status !== 'deleted' &&
+                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id)
+                      ? [
                           <GridActionsLinkItem
                             showInMenu
                             icon={<Iconify icon="eva:edit-2-fill" />}
                             label="Editar"
                             href={paths.dashboard.clients.edit(params.row.id)}
-                          />
-                        ] : []
-                    ),
-                    ...(params.row.status !== 'deleted'
+                          />,
+                        ]
+                      : []),
+                    ...(params.row.status !== 'deleted' &&
+                    params.row.status !== 'concreted' &&
+                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id)
                       ? [
+                          <GridActionsCellItem
+                            showInMenu
+                            onClick={() => handleChangeRowStatus(params.row.id, params.row.status === 'active' ? 'inactive' : 'active')}
+                            icon={<Iconify icon={params.row.status === 'active' ? 'lsicon:disable-outline' : 'lets-icons:check-fill' } />}
+                            label={`Marcar como ${params.row.status === 'active' ? 'inactivo' : 'activo'}`}
+                            sx={{ color: params.row.status === 'active' ? 'warning.main' : 'success.main' }}
+                          />,
+                          <GridActionsCellItem
+                            showInMenu
+                            onClick={() => handleChangeRowStatus(params.row.id, 'concreted')}
+                            icon={<Iconify icon="lets-icons:check-fill" />}
+                            label="Marcar como concretado"
+                            sx={{ color: 'info.main' }}
+                          />,
                           <GridActionsCellItem
                             showInMenu
                             icon={<Iconify icon="solar:trash-bin-trash-bold" />}
@@ -344,7 +355,9 @@ export function ClientListView() {
                           />,
                         ]
                       : []),
-                    ...(params.row.status === 'deleted'
+
+                    ...(params.row.status === 'deleted' &&
+                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id)
                       ? [
                           <GridActionsCellItem
                             showInMenu
@@ -355,9 +368,9 @@ export function ClientListView() {
                           />,
                         ]
                       : []),
-                  ]
+                  ],
                 },
-                ...clientColumns,
+                ...getClientColumns(user),
               ]}
               loading={clientsLoading}
               getRowHeight={() => 'auto'}
