@@ -46,7 +46,7 @@ const RenderErrorWarning = ({ params }: ParamsProps) => {
       </Tooltip>
     );
   }
-  return <></>;
+  return null;
 };
 
 export function RenderCellProperty({ params, href }: ParamsProps & { href: string }) {

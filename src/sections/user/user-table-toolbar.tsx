@@ -35,16 +35,16 @@ export function UserTableToolbar({ filters, onResetPage }: Props) {
     [onResetPage, updateFilters]
   );
 
-  const handleFilterRole = useCallback(
-    (event: SelectChangeEvent<string[]>) => {
-      const newValue =
-        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-
-      onResetPage();
-      updateFilters({ role: newValue });
-    },
-    [onResetPage, updateFilters]
-  );
+  // const handleFilterRole = useCallback(
+  //   (event: SelectChangeEvent<string[]>) => {
+  //     const newValue =
+  //       typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
+  //
+  //     onResetPage();
+  //     updateFilters({ role: newValue });
+  //   },
+  //   [onResetPage, updateFilters]
+  // );
 
   const renderMenuActions = () => (
     <CustomPopover

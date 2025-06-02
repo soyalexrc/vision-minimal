@@ -66,7 +66,7 @@ export function UserListView() {
   const table = useTable({ defaultDense: true, defaultRowsPerPage: 25 });
   const quickCreateForm = useBoolean();
   const confirmDialog = useBoolean();
-  const { users, count, usersError, usersValidating, usersLoading, usersEmpty } = useGetUsers();
+  const { users } = useGetUsers();
 
   const [tableData, setTableData] = useState<IUserItem[]>(users);
 

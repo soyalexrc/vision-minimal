@@ -181,7 +181,7 @@ const AttributesTab = () => {
         let radioOptions: any[] = [];
         try {
           radioOptions = attribute.options ? JSON.parse(attribute.options) : [];
-        } catch (e) {
+        } catch (error) {
           console.error('Error parsing radio options:', attribute.options);
         }
 

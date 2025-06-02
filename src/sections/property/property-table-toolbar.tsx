@@ -59,7 +59,7 @@ export function PropertyGridTableToolbar({
   onOpenConfirmDeleteRows,
 }: CustomToolbarProps) {
   const { state: currentFilters, setState: updateFilters } = filters;
-  const { categories, categoriesLoading } = useGetCategories();
+  const { categories } = useGetCategories();
 
 
   // Local state for select filters
