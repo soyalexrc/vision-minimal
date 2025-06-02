@@ -23,29 +23,9 @@ type Props = {
   children: React.ReactNode;
 };
 
-const initialUserObj: UserType = {
-  lastname: '',
-  role: 'ASESOR_INMOBILIARIO',
-  imageurl: '',
-  status: '',
-  firstname: '',
-  createdat: '',
-  permissions: {},
-  pushtoken: '',
-  phonenumber: '',
-  email: '',
-  twofactorenabled: false,
-  username: '',
-  id: -1,
-  isactive: false,
-  issuperadmin: false,
-  lastlogin: '',
-  updatedat: '',
-}
-
 export function AuthProvider({ children }: Props) {
   const { state, setState } = useSetState<AuthState>({
-    user: initialUserObj,
+    user: null,
     loading: true,
   });
 
@@ -62,11 +42,11 @@ export function AuthProvider({ children }: Props) {
 
         setState({ user: { ...user, accessToken }, loading: false });
       } else {
-        setState({ user: initialUserObj, loading: false });
+        setState({ user: null, loading: false });
       }
     } catch (error) {
       console.error(error);
-      setState({ user: initialUserObj, loading: false });
+      setState({ user: null, loading: false });
     }
   }, [setState]);
 
@@ -83,7 +63,7 @@ export function AuthProvider({ children }: Props) {
 
   const memoizedValue = useMemo(
     () => ({
-      user: state.user ? { ...state.user, role: state.user?.role ?? 'admin' } : initialUserObj,
+      user: state.user ? { ...state.user, role: state.user?.role ?? 'admin' } : null,
       checkUserSession,
       loading: status === 'loading',
       authenticated: status === 'authenticated',

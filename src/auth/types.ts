@@ -21,7 +21,7 @@ export type UserType = {
 };
 
 export type AuthState = {
-  user: UserType;
+  user: UserType | null;
   loading: boolean;
 };
 
