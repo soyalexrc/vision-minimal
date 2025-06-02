@@ -1,11 +1,13 @@
 import type { GridColDef } from '@mui/x-data-grid';
 
 import { paths } from '../../routes/paths';
+import { formatCodeVINM } from '../format-string';
 import { RenderCellPrice } from '../../sections/product/product-table-row';
 import {
-  RenderCell, RenderCellProperty, RenderCellStatusAndFeatured,
+  RenderCell,
+  RenderCellProperty,
+  RenderCellStatusAndFeatured,
 } from '../../sections/property/property-table-row';
-import { formatCodeVINM } from '../format-string';
 
 export const propertyColumns: GridColDef[] = [
   {
@@ -13,11 +15,7 @@ export const propertyColumns: GridColDef[] = [
     headerName: 'Codigo',
     filterable: true,
     renderCell: (params) => (
-
-      <RenderCell
-        params={params}
-        value={params.row.code || formatCodeVINM(params.row.codeId)}
-      />
+      <RenderCell params={params} value={params.row.code || formatCodeVINM(params.row.codeId)} />
     ),
   },
   {
@@ -67,6 +65,12 @@ export const propertyColumns: GridColDef[] = [
     headerName: 'Estatus',
     flex: 1,
     minWidth: 130,
-    renderCell: (params) => <RenderCellStatusAndFeatured params={params} featured={params.row.isFeatured} value={params.row.status} />,
+    renderCell: (params) => (
+      <RenderCellStatusAndFeatured
+        params={params}
+        featured={params.row.isFeatured}
+        value={params.row.status}
+      />
+    ),
   },
 ];
