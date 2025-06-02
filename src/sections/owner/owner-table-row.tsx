@@ -21,10 +21,10 @@ import { CustomPopover } from 'src/components/custom-popover';
 import { fDate } from '../../utils/format-time';
 import { getStatus } from '../../utils/get-status';
 import { OwnerQuickEditForm } from './owner-quick-edit-form';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 import type { IOwnerItem } from '../../types/owner';
 import type { GetStatusType } from '../../utils/get-status';
-import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 

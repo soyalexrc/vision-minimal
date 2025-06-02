@@ -19,11 +19,11 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
 import { getStatus } from '../../utils/get-status';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 import { ExternalAdviserQuickEditForm } from './external-adviser-quick-edit-form';
 
 import type { GetStatusType } from '../../utils/get-status';
 import type { IExternalAdviserItem } from '../../types/external-adviser';
-import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 

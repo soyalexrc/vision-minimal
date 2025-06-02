@@ -41,11 +41,11 @@ import {
 import { OwnerTableRow } from '../owner-table-row';
 import { OwnerTableToolbar } from '../owner-table-toolbar';
 import { OwnerQuickEditForm } from '../owner-quick-edit-form';
+import { LoadingScreen } from '../../../components/loading-screen';
 import { OwnerTableFiltersResult } from '../owner-table-filters-result';
 import { deleteOwner, restoreOwner, useGetOwners, deleteManyOwners } from '../../../actions/owner';
 
 import type { IOwnerItem, IOwnerTableFilters } from '../../../types/owner';
-import { LoadingScreen } from '../../../components/loading-screen';
 
 // ----------------------------------------------------------------------
 

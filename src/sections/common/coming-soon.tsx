@@ -3,6 +3,7 @@
 import type { UseCountdownDateReturn } from 'minimal-shared/hooks';
 
 import React from 'react';
+import dayjs from 'dayjs';
 import { varAlpha } from 'minimal-shared/utils';
 import { useCountdownDate } from 'minimal-shared/hooks';
 
@@ -20,7 +21,6 @@ import { _socials } from 'src/_mock';
 import { ComingSoonIllustration } from 'src/assets/illustrations';
 
 import { Iconify } from 'src/components/iconify';
-import dayjs from 'dayjs';
 
 
 // ----------------------------------------------------------------------

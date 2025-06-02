@@ -20,10 +20,10 @@ import { CustomPopover } from 'src/components/custom-popover';
 
 import { getStatus } from '../../utils/get-status';
 import { AllyQuickEditForm } from './ally-quick-edit-form';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 import type { IAllyItem } from '../../types/ally';
 import type { GetStatusType } from '../../utils/get-status';
-import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 

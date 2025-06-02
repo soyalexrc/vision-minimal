@@ -39,6 +39,7 @@ import {
 } from 'src/components/table';
 
 import { getStatus } from '../../../utils/get-status';
+import { LoadingScreen } from '../../../components/loading-screen';
 import { ExternalAdviserTableRow } from '../external-adviser-table-row';
 import { ExternalAdviserTableToolbar } from '../external-adviser-table-toolbar';
 import { ExternalAdviserQuickEditForm } from '../external-adviser-quick-edit-form';
@@ -51,7 +52,6 @@ import {
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { IExternalAdviserItem, IExternalAdviserFilters } from '../../../types/external-adviser';
-import { LoadingScreen } from '../../../components/loading-screen';
 
 // ----------------------------------------------------------------------
 

@@ -42,9 +42,8 @@ import {
 import { UserTableRow } from '../user-table-row';
 import { useGetUsers } from '../../../actions/user';
 import { UserTableToolbar } from '../user-table-toolbar';
-import { UserTableFiltersResult } from '../user-table-filters-result';
-import { AllyQuickEditForm } from '../../ally/ally-quick-edit-form';
 import { UserQuickEditForm } from '../user-quick-edit-form';
+import { UserTableFiltersResult } from '../user-table-filters-result';
 
 
 // ----------------------------------------------------------------------

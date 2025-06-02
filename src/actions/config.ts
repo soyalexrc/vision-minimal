@@ -1,5 +1,4 @@
 import type { SWRConfiguration } from 'swr';
-import type { IPostItem } from 'src/types/blog';
 
 import useSWR from 'swr';
 import { useMemo } from 'react';

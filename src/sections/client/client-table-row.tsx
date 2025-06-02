@@ -28,9 +28,9 @@ import { fCurrency } from '../../utils/format-number';
 import { ClientQuickEditForm } from './client-quick-edit-form';
 import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
+import type { UserType } from '../../auth/types';
 import type { IClientItem } from '../../types/client';
 import type { GetStatusType } from '../../utils/get-status';
-import { UserType } from '../../auth/types';
 
 // ----------------------------------------------------------------------
 

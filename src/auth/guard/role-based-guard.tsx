@@ -2,6 +2,7 @@
 
 import type { Theme, SxProps } from '@mui/material/styles';
 
+import React from 'react';
 import { m } from 'framer-motion';
 
 import Container from '@mui/material/Container';
@@ -12,7 +13,6 @@ import { ForbiddenIllustration } from 'src/assets/illustrations';
 import { varBounce, MotionContainer } from 'src/components/animate';
 
 import { useAuthContext } from '../hooks';
-import React from 'react';
 
 // ----------------------------------------------------------------------
 

@@ -1,8 +1,8 @@
 import type { Dayjs, OpUnitType } from 'dayjs';
 
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
 import utc from 'dayjs/plugin/utc';
+import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 // ----------------------------------------------------------------------

@@ -29,7 +29,6 @@ import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   emptyRows,
-  rowInPage,
   TableNoData,
   getComparator,
   TableEmptyRows,
@@ -41,11 +40,11 @@ import {
 import { AllyTableRow } from '../ally-table-row';
 import { AllyTableToolbar } from '../ally-table-toolbar';
 import { AllyQuickEditForm } from '../ally-quick-edit-form';
+import { LoadingScreen } from '../../../components/loading-screen';
 import { AllyTableFiltersResult } from '../ally-table-filters-result';
 import { deleteAlly, restoreAlly, useGetAllies, deleteManyAllies } from '../../../actions/ally';
 
 import type { IAllyItem, IAllyTableFilters } from '../../../types/ally';
-import { LoadingScreen } from '../../../components/loading-screen';
 
 // ----------------------------------------------------------------------
 

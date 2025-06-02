@@ -12,15 +12,15 @@ import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 
 import axiosInstance from '../../../lib/axios';
-import { useParams, useRouter } from '../../../routes/hooks';
 import { useAuthContext } from '../../../auth/hooks';
 import { Form } from '../../../components/hook-form';
 import { Iconify } from '../../../components/iconify';
+import { useParams, useRouter } from '../../../routes/hooks';
 import GeneralInformationForm from './general-information-form';
 import LocationInformationForm from './location-information-form';
 import NegotiationInformationForm from './negotiation-information-form';
 import DocumentationInformationForm from './documentation-information-form';
-import { useGetProperties, createUpdateProperty, useGetProperty } from '../../../actions/property';
+import { useGetProperty, useGetProperties, createUpdateProperty } from '../../../actions/property';
 import AttributesEquipmentUtilitiesServicesDistributionForm from './attributes-equipment-utilities-services-distribution-form';
 
 import type {

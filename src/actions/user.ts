@@ -1,15 +1,12 @@
 import type { SWRConfiguration } from 'swr';
-import type { IProductItem } from 'src/types/product';
 
 import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
 
-import { fetcher, endpoints } from 'src/lib/axios';
+import axios, { fetcher, endpoints } from 'src/lib/axios';
 
 import type { IUserItem } from '../types/user';
-import type { ExternalAdviserQuickEditSchemaType } from '../sections/external-adviser/external-adviser-quick-edit-form';
-import axios from '../lib/axios';
-import { UserQuickEditSchemaType } from '../sections/user/user-quick-edit-form';
+import type { UserQuickEditSchemaType } from '../sections/user/user-quick-edit-form';
 
 // ----------------------------------------------------------------------
 

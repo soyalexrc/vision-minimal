@@ -1,4 +1,4 @@
-import { RoleType } from '../utils/roles.mapper';
+import type { RoleType } from '../utils/roles.mapper';
 
 export type UserType = {
   id: number;

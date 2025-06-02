@@ -3,8 +3,7 @@ import type { GridColDef } from '@mui/x-data-grid';
 import { paths } from '../../routes/paths';
 import { RenderCellPrice } from '../../sections/product/product-table-row';
 import {
-  RenderCell,
-  RenderCellProperty, RenderCellStatus, RenderCellStatusAndFeatured,
+  RenderCell, RenderCellProperty, RenderCellStatusAndFeatured,
 } from '../../sections/property/property-table-row';
 
 export const propertyColumns: GridColDef[] = [

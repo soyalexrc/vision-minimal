@@ -20,7 +20,6 @@ import { toast } from 'src/components/snackbar';
 import { Form, Field, schemaHelper } from 'src/components/hook-form';
 
 import { Iconify } from '../../components/iconify';
-import { fDateUTC } from '../../utils/format-time';
 import { RoleType } from '../../utils/roles.mapper';
 import { createUser, updateUser, useGetUsers } from '../../actions/user';
 

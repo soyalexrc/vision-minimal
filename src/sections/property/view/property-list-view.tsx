@@ -28,7 +28,7 @@ import { ConfirmDialog } from 'src/components/custom-dialog';
 import { useTable, getComparator } from 'src/components/table';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
-import { useRouter } from '../../../routes/hooks';
+import { useAuthContext } from '../../../auth/hooks';
 import { RouterLink } from '../../../routes/components';
 import { GridActionsLinkItem } from '../../product/view';
 import { EmptyContent } from '../../../components/empty-content';
@@ -40,7 +40,6 @@ import {
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';
-import { useAuthContext } from '../../../auth/hooks';
 
 // ----------------------------------------------------------------------
 
