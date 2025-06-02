@@ -9,7 +9,7 @@ import { JWT_STORAGE_KEY } from './constant';
 import { AuthContext } from '../auth-context';
 import { setSession, isValidToken } from './utils';
 
-import type { AuthState } from '../../types';
+import type { UserType, AuthState } from '../../types';
 
 // ----------------------------------------------------------------------
 
@@ -23,8 +23,31 @@ type Props = {
   children: React.ReactNode;
 };
 
+const initialUserObj: UserType = {
+  lastname: '',
+  role: 'ASESOR_INMOBILIARIO',
+  imageurl: '',
+  status: '',
+  firstname: '',
+  createdat: '',
+  permissions: {},
+  pushtoken: '',
+  phonenumber: '',
+  email: '',
+  twofactorenabled: false,
+  username: '',
+  id: -1,
+  isactive: false,
+  issuperadmin: false,
+  lastlogin: '',
+  updatedat: '',
+}
+
 export function AuthProvider({ children }: Props) {
-  const { state, setState } = useSetState<AuthState>({ user: null, loading: true });
+  const { state, setState } = useSetState<AuthState>({
+    user: initialUserObj,
+    loading: true,
+  });
 
   const checkUserSession = useCallback(async () => {
     try {
@@ -39,11 +62,11 @@ export function AuthProvider({ children }: Props) {
 
         setState({ user: { ...user, accessToken }, loading: false });
       } else {
-        setState({ user: null, loading: false });
+        setState({ user: initialUserObj, loading: false });
       }
     } catch (error) {
       console.error(error);
-      setState({ user: null, loading: false });
+      setState({ user: initialUserObj, loading: false });
     }
   }, [setState]);
 
@@ -60,7 +83,7 @@ export function AuthProvider({ children }: Props) {
 
   const memoizedValue = useMemo(
     () => ({
-      user: state.user ? { ...state.user, role: state.user?.role ?? 'admin' } : null,
+      user: state.user ? { ...state.user, role: state.user?.role ?? 'admin' } : initialUserObj,
       checkUserSession,
       loading: status === 'loading',
       authenticated: status === 'authenticated',
