@@ -33,6 +33,11 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
     const { users } = useGetUsers();
     const { advisers } = useGetExternalAdvisers();
     const { user } = useAuthContext();
+    const { watch } = useFormContext();
+
+    const watchedRealStateAdviser = watch('negotiationInformation.realStateAdviser');
+
+    console.log('watchedRealStateAdviser',watchedRealStateAdviser);
 
     return (
       <Card ref={ref}>
@@ -81,6 +86,7 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                   label="Asesor inmobilairio"
                   onChange={(event) => {
                     const selectedUserId = event.target.value;
+                    setValue('negotiationInformation.realStateAdviser', selectedUserId);
                     const selectedUser = users?.find(
                       (usr) => usr.id?.toString() === selectedUserId
                     );
@@ -105,6 +111,7 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                   label="Aliado (Opcional)"
                   onChange={(event) => {
                     const selectedAllyId = event.target.value;
+                    setValue('negotiationInformation.ally', selectedAllyId);
                     const selectedAlly = allies?.find(
                       (usr) => usr.id?.toString() === selectedAllyId
                     );
@@ -158,6 +165,7 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                   label="Captacion asesor externo (Opcional)"
                   onChange={(event) => {
                     const selectedAsviserId = event.target.value;
+                    setValue('negotiationInformation.externalAdviser', selectedAsviserId);
                     const selectedAsviser = advisers?.find(
                       (usr) => usr.id?.toString() === selectedAsviserId
                     );

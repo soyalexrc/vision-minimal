@@ -35,6 +35,7 @@ import type {
   DistributionFormField,
   IPropertyItemCreateUpdate,
 } from '../../../types/property';
+import { parseCurrency } from '../../../utils/format-number';
 
 export type PropertyFormSchemaType = z.infer<typeof PropertyFormSchema>;
 
@@ -120,7 +121,7 @@ export const PropertyFormSchema = z.object({
     attorneyFirstName: z.string().optional(),
     attorneyLastName: z.string().optional(),
     realStateTax: z.string().optional(),
-    owner: z.string().optional(),
+    owner: z.any().optional(),
   }),
 
   negotiationInformation: z.object({
@@ -133,12 +134,12 @@ export const PropertyFormSchema = z.object({
     externaladvisername: z.string().optional(),
     partOfPayment: z.string().optional(),
     operationType: z.string(),
-    ally: z.string().optional(),
+    ally: z.any().optional(),
     allyname: z.string().optional(),
     propertyExclusivity: z.string(),
-    realStateAdviser: z.string().optional(),
+    realStateAdviser: z.any().optional(),
     additional_price: z.string().optional(),
-    externalAdviser: z.string().optional(),
+    externalAdviser: z.any().optional(),
     sellCommission: z.string().optional(),
     rentCommission: z.string().optional(),
     ownerPaysCommission: z.string().optional(),
@@ -662,11 +663,11 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
 
     const data = {
       ...values,
-      // negotiationInformation: {
-      //   ...values.negotiationInformation,
-      //   price: parseCurrency(values.negotiationInformation.price),
-      //   minimumNegotiation: parseCurrency(values.negotiationInformation.minimumNegotiation),
-      // }
+      negotiationInformation: {
+        ...values.negotiationInformation,
+        price: parseCurrency(values.negotiationInformation.price),
+        minimumNegotiation: parseCurrency(values.negotiationInformation.minimumNegotiation),
+      }
     };
 
     const promise = await (async () => {
