@@ -16,6 +16,7 @@ import { useAuthContext } from '../../../auth/hooks';
 import { Form } from '../../../components/hook-form';
 import { Iconify } from '../../../components/iconify';
 import { useParams, useRouter } from '../../../routes/hooks';
+import { parseCurrency } from '../../../utils/format-number';
 import GeneralInformationForm from './general-information-form';
 import LocationInformationForm from './location-information-form';
 import NegotiationInformationForm from './negotiation-information-form';
@@ -35,7 +36,6 @@ import type {
   DistributionFormField,
   IPropertyItemCreateUpdate,
 } from '../../../types/property';
-import { parseCurrency } from '../../../utils/format-number';
 
 export type PropertyFormSchemaType = z.infer<typeof PropertyFormSchema>;
 
