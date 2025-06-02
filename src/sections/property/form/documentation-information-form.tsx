@@ -73,7 +73,6 @@ const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(
               {/*<Field.Text sx={{ gridColumn: '1 / -1' }} name="generalInformation.publicationTitle" label="Titulo" helperText="Este es el titulo que se mostrara en la URL y en las busquedas de google." />*/}
               {/*<Field.Text sx={{ gridColumn: '1 / -1' }} name="generalInformation.description" label="Descripcion" multiline minRows={4} helperText="Esta descripcion se mostrara en las busquedas de google." />*/}
 
-              {user.role !== 'ASESOR_INMOBILIARIO' && (
                 <Field.Select name="documentsInformation.owner" label="Propietario (Opcional)">
                   {owners?.map((owner) => (
                     <MenuItem key={owner.id} value={owner.id}>
@@ -81,7 +80,6 @@ const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                     </MenuItem>
                   ))}
                 </Field.Select>
-              )}
 
               <Box sx={{ gridColumn: '1 / -1' }}>
                 <Typography variant="h5">Datos de apoderado</Typography>.

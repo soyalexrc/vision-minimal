@@ -35,9 +35,7 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
     const { user } = useAuthContext();
     const { watch } = useFormContext();
 
-    const watchedRealStateAdviser = watch('negotiationInformation.realStateAdviser');
-
-    console.log('watchedRealStateAdviser',watchedRealStateAdviser);
+    const watchedOperationType = watch('negotiationInformation.operationType');
 
     return (
       <Card ref={ref}>
@@ -105,7 +103,6 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                   ))}
                 </Field.Select>
               )}
-              {user.role !== 'ASESOR_INMOBILIARIO' && (
                 <Field.Select
                   name="negotiationInformation.ally"
                   label="Aliado (Opcional)"
@@ -129,18 +126,23 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                     </MenuItem>
                   ))}
                 </Field.Select>
-              )}
               <Field.Select name="negotiationInformation.operationType" label="Tipo de operacion">
                 <MenuItem value="Venta">Venta</MenuItem>
                 <MenuItem value="Alquiler">Alquiler</MenuItem>
                 <MenuItem value="Venta y Alquiler">Venta y Alquiler</MenuItem>
                 <MenuItem value="Traspaso">Traspaso</MenuItem>
               </Field.Select>
-              <Field.Currency
-                size="medium"
-                name="negotiationInformation.additional_price"
-                label="Precio de alquiler"
-              />
+
+              {
+                watchedOperationType === 'Venta y Alquiler' && (
+                  <Field.Currency
+                    size="medium"
+                    name="negotiationInformation.additional_price"
+                    label="Precio de alquiler"
+                  />
+                )
+              }
+
               <Field.Select name="negotiationInformation.propertyExclusivity" label="Exclusividad">
                 <MenuItem value="No Aplica">No Aplica</MenuItem>
                 <MenuItem value="30 dias">30 dias</MenuItem>
@@ -159,7 +161,6 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                 name="negotiationInformation.rentCommission"
                 label="Comision de alquiler"
               />
-              {user.role !== 'ASESOR_INMOBILIARIO' && (
                 <Field.Select
                   name="negotiationInformation.externalAdviser"
                   label="Captacion asesor externo (Opcional)"
@@ -183,7 +184,6 @@ const NegotiationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                     </MenuItem>
                   ))}
                 </Field.Select>
-              )}
 
               <Box sx={{ gridColumn: '1 / -1' }}>
                 <Typography variant="subtitle1" sx={{ mb: 2 }}>

@@ -397,7 +397,7 @@ export function PropertyListView() {
                       onClick={() => handleDownloadAssets(params.row.images, params.row.code)}
                       label="Descargar imagenes"
                     />,
-                    ...(params.row.status !== 'deleted' && (user.role !== 'ASESOR_INMOBILIARIO' || params.row.userId == user.id)
+                    ...(params.row.status !== 'deleted' && (user.role !== 'ASESOR_INMOBILIARIO' || params.row.realStateAdviser == user.id)
                         ? [
                           <GridActionsLinkItem
                             showInMenu
@@ -442,7 +442,7 @@ export function PropertyListView() {
                           />,
                         ] : []
                     ),
-                    ...(params.row.status !== 'deleted'
+                    ...(params.row.status !== 'deleted' && user.role !== 'ASESOR_INMOBILIARIO'
                       ? [
                         <GridActionsCellItem
                           showInMenu

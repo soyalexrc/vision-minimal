@@ -138,7 +138,7 @@ export const PropertyFormSchema = z.object({
     allyname: z.string().optional(),
     propertyExclusivity: z.string(),
     realStateAdviser: z.any().optional(),
-    additional_price: z.string().optional(),
+    additional_price: z.any().optional(),
     externalAdviser: z.any().optional(),
     sellCommission: z.string().optional(),
     rentCommission: z.string().optional(),
@@ -667,6 +667,7 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
         ...values.negotiationInformation,
         price: parseCurrency(values.negotiationInformation.price),
         minimumNegotiation: parseCurrency(values.negotiationInformation.minimumNegotiation),
+        additional_price: values.negotiationInformation.additional_price ? parseCurrency(values.negotiationInformation.additional_price) : '',
       }
     };
 
