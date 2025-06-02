@@ -5,9 +5,21 @@ import { RenderCellPrice } from '../../sections/product/product-table-row';
 import {
   RenderCell, RenderCellProperty, RenderCellStatusAndFeatured,
 } from '../../sections/property/property-table-row';
+import { formatCodeVINM } from '../format-string';
 
 export const propertyColumns: GridColDef[] = [
-  { field: 'code', headerName: 'Codigo', filterable: true },
+  {
+    field: 'code',
+    headerName: 'Codigo',
+    filterable: true,
+    renderCell: (params) => (
+
+      <RenderCell
+        params={params}
+        value={params.row.code || formatCodeVINM(params.row.codeId)}
+      />
+    ),
+  },
   {
     field: 'publicationTitle',
     headerName: 'Titulo de publicacion',
