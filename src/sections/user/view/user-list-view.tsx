@@ -43,6 +43,8 @@ import { UserTableRow } from '../user-table-row';
 import { useGetUsers } from '../../../actions/user';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { UserTableFiltersResult } from '../user-table-filters-result';
+import { AllyQuickEditForm } from '../../ally/ally-quick-edit-form';
+import { UserQuickEditForm } from '../user-quick-edit-form';
 
 
 // ----------------------------------------------------------------------
@@ -63,7 +65,7 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 
 export function UserListView() {
   const table = useTable({ defaultDense: true, defaultRowsPerPage: 25 });
-
+  const quickCreateForm = useBoolean();
   const confirmDialog = useBoolean();
   const { users, count, usersError, usersValidating, usersLoading, usersEmpty } = useGetUsers();
 
@@ -120,6 +122,30 @@ export function UserListView() {
     [updateFilters, table]
   );
 
+  const renderQuickCreateForm = () => (
+    <UserQuickEditForm
+      currentUser={{
+        id: undefined,
+        email: '',
+        role: '',
+        firstname: '',
+        lastname: '',
+        phonenumber: '',
+        imageurl: '',
+        status: 'active',
+        isactive: true,
+        issuperadmin: false,
+        password: '',
+        permissions: {},
+        pushtoken: '',
+        twofactorenabled: false,
+        username: ''
+    }}
+      open={quickCreateForm.value}
+      onClose={quickCreateForm.onFalse}
+    />
+  );
+
   const renderConfirmDialog = () => (
     <ConfirmDialog
       open={confirmDialog.value}
@@ -158,6 +184,7 @@ export function UserListView() {
           action={
             <Button
               variant="contained"
+              onClick={quickCreateForm.onTrue}
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
               Nuevo usuario
@@ -298,6 +325,7 @@ export function UserListView() {
       </DashboardContent>
 
       {renderConfirmDialog()}
+      {renderQuickCreateForm()}
     </>
   );
 }

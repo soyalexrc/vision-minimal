@@ -104,7 +104,7 @@ export async function deleteOwner(id: number) {
 }
 
 export async function deleteManyOwners(ids: number[]) {
-  const url = `${endpoints.owner.delete}/delete/many`;
+  const url = `${endpoints.owner.delete}/remove-many`;
   return axios.post(url, { ids });
 }
 

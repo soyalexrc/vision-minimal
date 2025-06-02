@@ -104,7 +104,7 @@ export async function deleteExternalAdviser(id: number) {
 }
 
 export async function deleteManyExternalAdvisers(ids: number[]) {
-  const url = `${endpoints.externalAdviser.delete}/delete/many`;
+  const url = `${endpoints.externalAdviser.delete}/remove-many`;
   return axios.post(url, { ids });
 }
 

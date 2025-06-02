@@ -23,6 +23,7 @@ import { AllyQuickEditForm } from './ally-quick-edit-form';
 
 import type { IAllyItem } from '../../types/ally';
 import type { GetStatusType } from '../../utils/get-status';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 
@@ -160,7 +161,7 @@ export function AllyTableRow({ row, selected, onRestore, onSelectRow, onDeleteRo
           </Box>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatLocalVenezuelanPhone(row.phoneNumber)}</TableCell>
 
 
 

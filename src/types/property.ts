@@ -82,12 +82,14 @@ export interface AdjacencyFormField {
 export type IPropertyItemPreview = {
   id: string;
   status: string;
+  slug: string;
+  realStateAdviser: string;
   publicationTitle: string;
   coverUrl: string;
   images: string[];
   propertyType: string;
   operationType: string;
-  adviserName: string;
+  realstateadvisername: string;
   price: number;
   createdAt: IDateValue;
   updatedAt: IDateValue;

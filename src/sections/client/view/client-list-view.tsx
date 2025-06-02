@@ -287,7 +287,7 @@ export function ClientListView() {
             }}
           >
             <DataGrid
-              checkboxSelection
+              checkboxSelection={user.role !== 'ASESOR_INMOBILIARIO'}
               localeText={esES.components.MuiDataGrid.defaultProps.localeText}
               disableRowSelectionOnClick
               rows={dataFiltered}

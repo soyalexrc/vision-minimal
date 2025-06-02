@@ -7,6 +7,9 @@ import useSWR, { mutate } from 'swr';
 import { fetcher, endpoints } from 'src/lib/axios';
 
 import type { IUserItem } from '../types/user';
+import type { ExternalAdviserQuickEditSchemaType } from '../sections/external-adviser/external-adviser-quick-edit-form';
+import axios from '../lib/axios';
+import { UserQuickEditSchemaType } from '../sections/user/user-quick-edit-form';
 
 // ----------------------------------------------------------------------
 
@@ -44,54 +47,13 @@ export function useGetUsers() {
   return memoizedValue;
 }
 
-// ----------------------------------------------------------------------
 
-type ProductData = {
-  product: IProductItem;
-};
-
-export function useGetProduct(productId: string) {
-  const url = productId ? [endpoints.product.details, { params: { productId } }] : '';
-
-  const { data, isLoading, error, isValidating } = useSWR<ProductData>(url, fetcher, swrOptions);
-
-  const memoizedValue = useMemo(
-    () => ({
-      product: data?.product,
-      productLoading: isLoading,
-      productError: error,
-      productValidating: isValidating,
-    }),
-    [data?.product, error, isLoading, isValidating]
-  );
-
-  return memoizedValue;
+export async function createUser(payload: UserQuickEditSchemaType) {
+  const url = `${endpoints.user.create}`;
+  return axios.post(url, payload);
 }
 
-// ----------------------------------------------------------------------
-
-type SearchResultsData = {
-  results: IProductItem[];
-};
-
-export function useSearchProducts(query: string) {
-  const url = query ? [endpoints.product.search, { params: { query } }] : '';
-
-  const { data, isLoading, error, isValidating } = useSWR<SearchResultsData>(url, fetcher, {
-    ...swrOptions,
-    keepPreviousData: true,
-  });
-
-  const memoizedValue = useMemo(
-    () => ({
-      searchResults: data?.results || [],
-      searchLoading: isLoading,
-      searchError: error,
-      searchValidating: isValidating,
-      searchEmpty: !isLoading && !isValidating && !data?.results.length,
-    }),
-    [data?.results, error, isLoading, isValidating]
-  );
-
-  return memoizedValue;
+export async function updateUser(payload: UserQuickEditSchemaType, id: number) {
+  const url = `${endpoints.user.edit}/${id}`;
+  return axios.patch(url, payload);
 }

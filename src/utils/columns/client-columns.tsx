@@ -5,7 +5,8 @@ import {
   RenderCellPhone, RenderCellAmount,
   RenderCellStatus, ConditionalRenderCell,
 } from '../../sections/client/client-table-row';
-import { UserType } from '../../auth/types';
+
+import type { UserType } from '../../auth/types';
 
 export function getClientColumns(user: UserType): GridColDef[] {
   return [

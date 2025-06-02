@@ -145,6 +145,22 @@ export function PropertyListView() {
     refresh();
   };
 
+  const handleShareContent = async (slug: string, title : string) => {
+    if (navigator.share) {
+      navigator
+        .share({
+          title,
+          text: 'Mira estos increíbles inmuebles que te pueden interesar.',
+          url: 'https://visioninmobiliaria.com.ve/inmuebles/' + slug, // Gets the current URL
+        })
+        .then(() => console.log('Shared successfully'))
+        .catch((error) => console.error('Error sharing:', error));
+    } else {
+      navigator.clipboard.writeText('https://visioninmobiliaria.com.ve/inmuebles/' + slug);
+      toast.success('Link copiado al portapapeles');
+    }
+  }
+
   const handleMarkFeaturedProperty = async (id: string, featured: boolean) => {
     const promise = await (async () => {
       const response: AxiosResponse<any> = await updatePropertyFeatured(id, featured);
@@ -346,7 +362,7 @@ export function PropertyListView() {
             }}
           >
             <DataGrid
-              checkboxSelection
+              checkboxSelection={user.role !== 'ASESOR_INMOBILIARIO'}
               localeText={esES.components.MuiDataGrid.defaultProps.localeText}
               disableRowSelectionOnClick
               getRowId={(params) => params.id}
@@ -396,15 +412,27 @@ export function PropertyListView() {
                     ? [
                           <GridActionsCellItem
                             showInMenu
+                            icon={<Iconify icon="material-symbols:share" />}
+                            onClick={() => handleShareContent(params.row.slug, params.row.publicationTitle)}
+                            label="Compartir"
+                          />,
+                        ] : []
+                    ),
+                    ...(params.row.status === 'active' && user.role !== 'ASESOR_INMOBILIARIO'
+                    ? [
+                          <GridActionsCellItem
+                            showInMenu
                             icon={<Iconify icon={params.row.isFeatured ? 'uis:favorite' : "uit:favorite"} />}
-                            label={params.row.isFeatured ? 'Desmarcar favorito' : 'Marcar favorito'}
+                            label={params.row.isFeatured ? 'Desmarcar destacado' : 'Marcar destacado'}
                             onClick={() => handleMarkFeaturedProperty(params.row.id, !params.row.isFeatured)}
                             sx={{ color: 'warning.main' }}
                           />,
                           <GridActionsCellItem
                             showInMenu
-                            icon={<Iconify icon="material-symbols:share" />}
-                            label="Compartir"
+                            icon={<Iconify icon="lets-icons:check-fill" />}
+                            label="Marcar como activo"
+                            onClick={() => handleActiveInactiveProperty(params.row.id, 'active')}
+                            sx={{ color: 'success.main' }}
                           />,
                           <GridActionsCellItem
                             showInMenu
@@ -413,15 +441,7 @@ export function PropertyListView() {
                             onClick={() => handleActiveInactiveProperty(params.row.id, 'inactive')}
                             sx={{ color: 'warning.main' }}
                           />,
-                        ] : [
-                          <GridActionsCellItem
-                            showInMenu
-                            icon={<Iconify icon="lets-icons:check-fill" />}
-                            label="Marcar como activo"
-                            onClick={() => handleActiveInactiveProperty(params.row.id, 'active')}
-                            sx={{ color: 'success.main' }}
-                          />,
-                        ]
+                        ] : []
                     ),
                     ...(params.row.status !== 'deleted'
                       ? [

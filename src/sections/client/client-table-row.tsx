@@ -84,8 +84,7 @@ export function ConditionalRenderCell({ params, value, user }: ParamsProps & { v
   console.log(params.row);
   const hasAccess = !user ||
     user.role !== "ASESOR_INMOBILIARIO" ||
-    !params.row.adviserId ||
-    params.row.adviserId === user?.id;
+    params.row.adviserId == user?.id;
 
   if (!hasAccess) {
     return <span style={{ color: '#ccc' }}>***</span>; // Show placeholder
@@ -111,8 +110,7 @@ export function RenderCellPhone({ params, value, user }: ParamsProps & { value: 
   console.log(params.row);
   const hasAccess = !user ||
     user.role !== "ASESOR_INMOBILIARIO" ||
-    !params.row.adviserId ||
-    params.row.adviserId === user?.id;
+    params.row.adviserId == user?.id;
 
   if (!hasAccess) {
     return <span style={{ color: '#ccc' }}>***</span>; // Show placeholder

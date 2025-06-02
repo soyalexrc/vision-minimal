@@ -52,7 +52,7 @@ export async function deleteAlly(id: number) {
 }
 
 export async function deleteManyAllies(ids: number[]) {
-  const url = `${endpoints.ally.delete}/delete/many`;
+  const url = `${endpoints.ally.delete}/remove-many`;
   return axios.post(url, { ids });
 }
 

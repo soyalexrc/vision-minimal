@@ -24,6 +24,7 @@ import { OwnerQuickEditForm } from './owner-quick-edit-form';
 
 import type { IOwnerItem } from '../../types/owner';
 import type { GetStatusType } from '../../utils/get-status';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 
@@ -159,7 +160,7 @@ export function OwnerTableRow({ row, selected, onRestore, onSelectRow, onDeleteR
           </Box>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatLocalVenezuelanPhone(row.phoneNumber)}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.birthdate ? fDate(row.birthdate) : '-'}</TableCell>
         <TableCell>
           <Label

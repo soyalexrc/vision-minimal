@@ -680,7 +680,16 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
         // }
         response = await createUpdateProperty({ ...data, updatedby: shortUser }, 'update', currentProperty.id);
       } else {
-        response = await createUpdateProperty({ ...data, createdby: shortUser }, 'create');
+        response = await createUpdateProperty({
+          ...data,
+          userId: user.id.toString(),
+          createdby: shortUser,
+          negotiationInformation: {
+            ...data.negotiationInformation,
+            realStateAdviser: user.role === 'ASESOR_INMOBILIARIO' ? user.id.toString() : data.negotiationInformation.realStateAdviser,
+            realstateadvisername: user.role === 'ASESOR_INMOBILIARIO' ? user.firstname + ' ' + user.lastname : data.negotiationInformation.realstateadvisername,
+          }
+        }, 'create');
       }
 
       if (response.status === 200 || response.status === 201) {

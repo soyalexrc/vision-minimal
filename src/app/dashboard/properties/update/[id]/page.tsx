@@ -12,8 +12,8 @@ import { LoadingScreen } from '../../../../../components/loading-screen';
 import { CreateUpdatePropertyForm } from '../../../../../sections/property/form/create-update-property-form';
 
 import type { IPropertyItemCreateUpdate } from '../../../../../types/property';
-import { useAuthContext } from '../../../../../auth/hooks';
-import { RoleBasedGuard } from '../../../../../auth/guard';
+// import { useAuthContext } from '../../../../../auth/hooks';
+// import { RoleBasedGuard } from '../../../../../auth/guard';
 
 
 // ----------------------------------------------------------------------
@@ -24,15 +24,15 @@ export default function Page() {
   const { property, propertyLoading, propertyError } = useGetProperty(id as string)
 
 
-  const { user } = useAuthContext();
+  // const { user } = useAuthContext();
 
-  if (user && user.role === 'ASESOR_INMOBILIARIO') {
-    if (property && (property as any)?.userId) {
-      if ((property as any).userId !== String(user.id)) {
-        return <RoleBasedGuard allowedRoles={['NONE']} hasContent children={<div />} />;
-      }
-    }
-  }
+  // if (user && user.role === 'ASESOR_INMOBILIARIO') {
+  //   if (property && (property as any)?.userId) {
+  //     if ((property as any).userId !== String(user.id)) {
+  //       return <RoleBasedGuard allowedRoles={['NONE']} hasContent children={<div />} />;
+  //     }
+  //   }
+  // }
 
 
   return (

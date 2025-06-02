@@ -100,6 +100,8 @@ export const endpoints = {
     list: '/user',
     details: '/user/details',
     search: '/user/search',
+    create: '/user',
+    edit: '/user',
   },
   owner: {
     list: '/owner',

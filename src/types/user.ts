@@ -75,21 +75,21 @@ export type IUserCard = {
 };
 
 export type IUserItem = {
-  id: string;
+  id?: number;
   firstname: string;
   lastname: string;
-  city: string;
   role: string;
   email: string;
-  state: string;
   status: string;
-  address: string;
-  country: string;
-  zipCode: string;
-  company: string;
-  avatarUrl: string;
+  imageurl?: string;
   phonenumber: string;
-  isVerified: boolean;
+  isactive: boolean
+  password: string;
+  permissions: any;
+  username: string;
+  pushtoken: string,
+  twofactorenabled: boolean,
+  issuperadmin: boolean,
 };
 
 export type IUserAccountBillingHistory = {

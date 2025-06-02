@@ -38,11 +38,11 @@ export const propertyColumns: GridColDef[] = [
     renderCell: (params) => <RenderCell params={params} value={params.row.operationType} />,
   },
   {
-    field: 'adviserName',
+    field: 'realstateadvisername',
     headerName: 'Asesor',
     flex: 1,
     minWidth: 200,
-    renderCell: (params) => <RenderCell params={params} value={params.row.adviserName} />,
+    renderCell: (params) => <RenderCell params={params} value={params.row.realstateadvisername} />,
   },
   {
     field: 'price',

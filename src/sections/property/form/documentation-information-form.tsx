@@ -14,6 +14,8 @@ import CardHeader from '@mui/material/CardHeader';
 import Typography from '@mui/material/Typography';
 
 import { Field } from '../../../components/hook-form';
+import { useAuthContext } from '../../../auth/hooks';
+import { useGetOwners } from '../../../actions/owner';
 
 type Props = {
   collapseValue: boolean;
@@ -24,10 +26,9 @@ type Props = {
 
 const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(
   ({ collapseValue, onCollapseToggle, renderCollapseButton, onPressNext }: Props, ref) => {
-
     const { watch, setValue } = useFormContext();
 
-    const watchedImages = watch('documents')
+    const watchedImages = watch('documents');
 
     const handleRemoveFile = useCallback(
       (inputFile: File | string) => {
@@ -40,6 +41,9 @@ const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(
     const handleRemoveAllFiles = useCallback(() => {
       setValue('documents', [], { shouldValidate: true });
     }, [setValue]);
+
+    const { user } = useAuthContext();
+    const { owners } = useGetOwners();
 
     return (
       <Card ref={ref}>
@@ -69,11 +73,15 @@ const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(
               {/*<Field.Text sx={{ gridColumn: '1 / -1' }} name="generalInformation.publicationTitle" label="Titulo" helperText="Este es el titulo que se mostrara en la URL y en las busquedas de google." />*/}
               {/*<Field.Text sx={{ gridColumn: '1 / -1' }} name="generalInformation.description" label="Descripcion" multiline minRows={4} helperText="Esta descripcion se mostrara en las busquedas de google." />*/}
 
-              <Field.Select name="documentsInformation.owner" label="Propietario">
-                <MenuItem value="No aplica">No aplica</MenuItem>
-                <MenuItem value="Obra gris">Obra gris</MenuItem>
-                <MenuItem value="Obra blanca">Obra blanca</MenuItem>
-              </Field.Select>
+              {user.role !== 'ASESOR_INMOBILIARIO' && (
+                <Field.Select name="documentsInformation.owner" label="Propietario (Opcional)">
+                  {owners?.map((owner) => (
+                    <MenuItem key={owner.id} value={owner.id}>
+                      {owner.name} {owner.lastname}
+                    </MenuItem>
+                  ))}
+                </Field.Select>
+              )}
 
               <Box sx={{ gridColumn: '1 / -1' }}>
                 <Typography variant="h5">Datos de apoderado</Typography>.
@@ -178,8 +186,6 @@ const DocumentationInformationForm = React.forwardRef<HTMLDivElement, Props>(
                   onRemoveAll={handleRemoveAllFiles}
                 />
               </Box>
-
-
             </Box>
             <Stack direction="row" justifyContent="flex-end" onClick={onPressNext}>
               <Button type="button" variant="contained" color="primary">

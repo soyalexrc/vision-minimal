@@ -23,6 +23,7 @@ import { ExternalAdviserQuickEditForm } from './external-adviser-quick-edit-form
 
 import type { GetStatusType } from '../../utils/get-status';
 import type { IExternalAdviserItem } from '../../types/external-adviser';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
 
 // ----------------------------------------------------------------------
 
@@ -159,7 +160,7 @@ export function ExternalAdviserTableRow({ row, selected, editHref, onRestore, on
           </Box>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatLocalVenezuelanPhone(row.phoneNumber)}</TableCell>
         <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.realStateCompanyName}</TableCell>
 
 
