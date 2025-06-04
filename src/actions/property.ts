@@ -8,16 +8,16 @@ import axios, { fetcher, endpoints } from 'src/lib/axios';
 import { UploadService } from '../utils/files/upload';
 
 import type { PropertyFormSchemaType } from '../sections/property/form/create-update-property-form';
-import {
+import type {
   UtilityFormField,
   AdjacencyFormField,
   AttributeFormField,
   EquipmentFormField,
+  IPropertyItemDetail,
   IPropertyItemPreview,
   IPropertyCategoryItem,
   DistributionFormField,
   IPropertyItemCreateUpdate,
-  IPropertyItemDetail,
 } from '../types/property';
 
 // ----------------------------------------------------------------------

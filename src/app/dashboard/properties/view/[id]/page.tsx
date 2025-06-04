@@ -9,10 +9,9 @@ import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import { useParams } from '../../../../../routes/hooks';
 import { useGetPropertyDetail } from '../../../../../actions/property';
 import { LoadingScreen } from '../../../../../components/loading-screen';
-import { CreateUpdatePropertyForm } from '../../../../../sections/property/form/create-update-property-form';
-
-import type { IPropertyItemCreateUpdate, IPropertyItemDetail } from '../../../../../types/property';
 import PropertyDetailsView from '../../../../../sections/property/view/property-details-view';
+
+import type { IPropertyItemDetail } from '../../../../../types/property';
 // import { useAuthContext } from '../../../../../auth/hooks';
 // import { RoleBasedGuard } from '../../../../../auth/guard';
 

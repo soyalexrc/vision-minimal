@@ -8,18 +8,19 @@ import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Chip from '@mui/material/Chip';
 import Paper from '@mui/material/Paper';
+import { List, ListItem } from '@mui/material';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
+import ListItemText from '@mui/material/ListItemText';
+import ListItemIcon from '@mui/material/ListItemIcon';
 
 import { Lightbox, useLightBox } from 'src/components/lightbox';
 
-import type { IPropertyItemDetail } from '../../../types/property';
-import { List, ListItem } from '@mui/material';
-import ListItemText from '@mui/material/ListItemText';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import { Iconify } from '../../../components/iconify';
-import { formatCodeVINM } from '../../../utils/format-string';
 import { fCurrency } from '../../../utils/format-number';
+import { formatCodeVINM } from '../../../utils/format-string';
+
+import type { IPropertyItemDetail } from '../../../types/property';
 
 type Props = {
   currentProperty: IPropertyItemDetail;
