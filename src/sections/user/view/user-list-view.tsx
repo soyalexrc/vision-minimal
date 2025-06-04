@@ -43,6 +43,7 @@ import { UserTableRow } from '../user-table-row';
 import { useGetUsers } from '../../../actions/user';
 import { UserTableToolbar } from '../user-table-toolbar';
 import { UserQuickEditForm } from '../user-quick-edit-form';
+import { LoadingScreen } from '../../../components/loading-screen';
 import { UserTableFiltersResult } from '../user-table-filters-result';
 
 
@@ -66,7 +67,7 @@ export function UserListView() {
   const table = useTable({ defaultDense: true, defaultRowsPerPage: 25 });
   const quickCreateForm = useBoolean();
   const confirmDialog = useBoolean();
-  const { users } = useGetUsers();
+  const { users, usersLoading, usersError } = useGetUsers();
 
   const [tableData, setTableData] = useState<IUserItem[]>(users);
 
@@ -266,49 +267,82 @@ export function UserListView() {
               }
             />
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headCells={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id!.toString())
-                    )
-                  }
-                />
+            {
+              usersLoading && (
+                <Box
+                  sx={{
+                    height: 400,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LoadingScreen />
+                </Box>
+              )
+            }
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <UserTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id!.toString())}
-                        onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id!.toString())}
-                        editHref=""
-                      />
-                    ))}
+            {
+              usersError && (
+                <Box
+                  sx={{
+                    p: 2,
+                    textAlign: 'center',
+                    color: 'error.main',
+                  }}
+                >
+                  Error al cargar los aliados. Por favor, intente nuevamente.
+                </Box>
+              )
+            }
 
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+
+            {
+              !usersError && !usersLoading && users &&
+              <Scrollbar>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headCells={TABLE_HEAD}
+                    rowCount={dataFiltered.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        dataFiltered.map((row) => row.id!.toString())
+                      )
+                    }
                   />
 
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
+                  <TableBody>
+                    {dataFiltered
+                      .slice(
+                        table.page * table.rowsPerPage,
+                        table.page * table.rowsPerPage + table.rowsPerPage
+                      )
+                      .map((row) => (
+                        <UserTableRow
+                          key={row.id}
+                          row={row}
+                          selected={table.selected.includes(row.id!.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id!.toString())}
+                          onDeleteRow={() => handleDeleteRow(row.id!.toString())}
+                          editHref=""
+                        />
+                      ))}
+
+                    <TableEmptyRows
+                      height={table.dense ? 56 : 56 + 20}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    />
+
+                    <TableNoData notFound={notFound} />
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            }
           </Box>
 
           <TablePaginationCustom

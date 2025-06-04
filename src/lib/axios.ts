@@ -91,7 +91,7 @@ export const endpoints = {
     editStatus: '/property/status',
     editFeatured: '/property/featured',
     delete: '/property',
-    details: '/property/details',
+    detail: '/property/detail',
     search: '/property/search',
     restore: '/property/restore',
   },

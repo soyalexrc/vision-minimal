@@ -82,7 +82,7 @@ export function UserQuickEditForm({ currentUser, open, onClose }: Props) {
     mode: 'all',
     resolver: zodResolver(UserQuickEditSchema),
     defaultValues,
-    values: currentUser,
+    values: currentUser ? {...currentUser, password: ''} : defaultValues,
   });
 
   const showPassword = useBoolean();
@@ -156,8 +156,8 @@ export function UserQuickEditForm({ currentUser, open, onClose }: Props) {
 
             <Field.Text name="firstname" label="Nombre" />
             <Field.Text name="lastname" label="Apellido" />
-            <Field.Text name="username" label="Nombre de usuario" />
-            <Field.Text name="email" label="Correo electornico" />
+            <Field.Text disabled={Boolean(currentUser?.id)} name="username" label="Nombre de usuario" />
+            <Field.Text disabled={Boolean(currentUser?.id)} name="email" label="Correo electornico" />
             <Field.Phone name="phonenumber" label="Numero de telefono" />
             <Field.Text
               name="password"

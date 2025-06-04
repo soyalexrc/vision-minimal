@@ -8,11 +8,16 @@ import axios, { fetcher, endpoints } from 'src/lib/axios';
 import { UploadService } from '../utils/files/upload';
 
 import type { PropertyFormSchemaType } from '../sections/property/form/create-update-property-form';
-import type {
+import {
   UtilityFormField,
   AdjacencyFormField,
   AttributeFormField,
-  EquipmentFormField, IPropertyItemPreview, IPropertyCategoryItem, DistributionFormField, IPropertyItemCreateUpdate,
+  EquipmentFormField,
+  IPropertyItemPreview,
+  IPropertyCategoryItem,
+  DistributionFormField,
+  IPropertyItemCreateUpdate,
+  IPropertyItemDetail,
 } from '../types/property';
 
 // ----------------------------------------------------------------------
@@ -37,6 +42,10 @@ type IPropertyCategoryItemData = {
 
 type PropertyData = {
   data: IPropertyItemCreateUpdate;
+}
+
+type PropertyDetailData = {
+  data: IPropertyItemDetail
 }
 
 export function useGetProperties() {
@@ -107,6 +116,30 @@ export function useGetProperty(id: string) {
 }
 
 // ----------------------------------------------------------------------
+
+
+export function useGetPropertyDetail(id: string) {
+  const url = endpoints.property.detail + '/' + id;
+
+  const { data, isLoading, error, isValidating } = useSWR<PropertyDetailData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      property: data?.data || {},
+      propertyLoading: isLoading,
+      propertyError: error,
+      propertyValidating: isValidating,
+      propertyEmpty: !isLoading && !isValidating && !data?.data,
+      refresh: () => mutate(url)
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+// ----------------------------------------------------------------------
+
 
 export async function createUpdateProperty(payload: PropertyFormSchemaType, type: 'create' | 'update', id?: string | number) {
   const imagesUploaded = payload.images.filter((image: any) => typeof image === 'string' && image.startsWith('http'));

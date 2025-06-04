@@ -98,8 +98,7 @@ export type IPropertyItemPreview = {
   isFeatured: boolean;
   isPublished: boolean;
   userId: string;
-}
-
+};
 
 export type IPropertyCategoryItem = {
   id?: number;
@@ -108,7 +107,116 @@ export type IPropertyCategoryItem = {
   titlePlural: string;
   isFeatured: boolean;
   image?: string;
-}
+};
+
+export type IPropertyItemDetail = {
+  id: string;
+  images: string[];
+  slug: string;
+  userId: string;
+  codeId: number;
+  realStateAdviser: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+  isFeatured: boolean;
+  publicationTitle: string;
+  code: string;
+  propertyType: string;
+  footageBuilding: string;
+  footageGround: string;
+  description: string;
+  price: string;
+  state: string;
+  avenue: string;
+  city: string;
+  country: string;
+  howToGet: string;
+  municipality: string;
+  referencePoint: string;
+  urbanization: string;
+  street: string;
+  isClosedStreet: string;
+  negotiationInformation: {
+    id: string;
+    propertyId: string;
+    price: string;
+    minimumNegotiation: string;
+    client: string;
+    reasonToSellOrRent: string;
+    partOfPayment: string;
+    mouthToMouth: boolean;
+    realStateGroups: boolean;
+    realStateWebPages: boolean;
+    socialMedia: boolean;
+    publicationOnBuilding: boolean;
+    operationType: string;
+    propertyExclusivity: string;
+    ownerPaysCommission: string;
+    rentCommission: string;
+    sellCommission: string;
+    ally: string;
+    externalAdviser: string;
+    realStateAdviser: string;
+    additionalPrice: string;
+    realstateadvisername: string;
+    externaladvisername: string;
+    allyname: string;
+  };
+  attributes: {
+    attributeId: number;
+    value: string;
+    valueType: string;
+    createdAt: string;
+    attribute: {
+      id: number;
+      label: string;
+      placeholder: string | null;
+      options: string | null;
+      formType: string;
+    };
+  }[];
+  equipments: {
+    equipmentId: number;
+    brand?: string;
+    additionalInformation?: string;
+    createdAt: string;
+    equipment: {
+      id: number;
+      title: string;
+      description?: string;
+    };
+  }[];
+  distributions: {
+    distributionId: number;
+    additionalInformation?: string;
+    createdAt: string;
+    distribution: {
+      id: number;
+      title: string;
+      description?: string;
+    };
+  }[];
+  utilities: {
+    utilityId: number;
+    createdAt: string;
+    additionalInformation?: string;
+    utility: {
+      id: number;
+      title: string;
+      description?: string;
+    };
+  }[];
+  adjacencies: {
+    adjacencyId: number;
+    createdAt: string;
+    adjacency: {
+      id: number;
+      title: string;
+      description?: string;
+    };
+  }[];
+};
 
 export type IPropertyItemCreateUpdate = {
   id?: string;

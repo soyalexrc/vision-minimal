@@ -94,7 +94,7 @@
     "swr": "^2.3.3",
     "turndown": "^7.2.0",
     "wrangler": "^4.14.4",
-    "yet-another-react-lightbox": "^3.23.0",
+    "yet-another-react-lightbox": "^3.23.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
