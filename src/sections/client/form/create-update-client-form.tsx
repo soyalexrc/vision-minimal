@@ -314,26 +314,29 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
           {watchedContactFrom === 'Referido' && (
             <Field.Text disabled={!isEdit} name="referrer" label="Nombre del referido" />
           )}
-          <Field.Select
-            disabled={!isEdit}
-            size="small"
-            sx={{ gridColumn: '1 / -1' }}
-            name="assignedto"
-            label="Asignar a"
-            onChange={(e) => {
-              const userObj = JSON.parse(e.target.value);
-              methods.setValue('assignedto', userObj);
-            }}
-            value={
-              methods.watch('assignedto')?.id ? JSON.stringify(methods.watch('assignedto')) : ''
-            }
-          >
-            {users.map((usr) => (
-              <MenuItem key={usr.id} value={JSON.stringify({ id: usr.id, name: usr.firstname + ' ' + usr.lastname, email: usr.email, username: usr.username })}>
-                {usr.firstname} {usr.lastname}
-              </MenuItem>
-            ))}
-          </Field.Select>
+          {
+            user?.role !== 'ASESOR_INMOBILIARIO' &&
+            <Field.Select
+              disabled={!isEdit}
+              size="small"
+              sx={{ gridColumn: '1 / -1' }}
+              name="assignedto"
+              label="Asignar a"
+              onChange={(e) => {
+                const userObj = JSON.parse(e.target.value);
+                methods.setValue('assignedto', userObj);
+              }}
+              value={
+                methods.watch('assignedto')?.id ? JSON.stringify(methods.watch('assignedto')) : ''
+              }
+            >
+              {users.map((usr) => (
+                <MenuItem key={usr.id} value={JSON.stringify({ id: usr.id, name: usr.firstname + ' ' + usr.lastname, email: usr.email, username: usr.username })}>
+                  {usr.firstname} {usr.lastname}
+                </MenuItem>
+              ))}
+            </Field.Select>
+          }
           <Field.Checkbox
             disabled={!isEdit}
             name="isPotentialInvestor"
