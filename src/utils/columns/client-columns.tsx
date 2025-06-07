@@ -33,13 +33,33 @@ export function getClientColumns(user: UserType): GridColDef[] {
         <RenderCellPhone user={user} params={params} value={params.row.phone} />
       ),
     },
+    // {
+    //   field: 'adviserName',
+    //   headerName: 'Nombre de asesor',
+    //   flex: 1,
+    //   minWidth: 200,
+    //   renderCell: (params) => (
+    //     <RenderCell params={params} value={params.row.adviserName} />
+    //   ),
+    // },
     {
-      field: 'adviserName',
-      headerName: 'Nombre de asesor',
+      field: 'createdby',
+      headerName: 'Creado por',
       flex: 1,
       minWidth: 200,
+      valueGetter: (_, row) => row.createdby?.name || '',
       renderCell: (params) => (
-        <RenderCell params={params} value={params.row.adviserName} />
+        <RenderCell params={params} value={params.row.createdby?.name} />
+      ),
+    },
+    {
+      field: 'assignedto.name',
+      headerName: 'Asignado a',
+      flex: 1,
+      minWidth: 200,
+      valueGetter: (_, row) => row.assignedto?.name || '',
+      renderCell: (params) => (
+        <RenderCell params={params} value={params.row.assignedto?.name} />
       ),
     },
     {
@@ -155,9 +175,9 @@ export function getClientColumns(user: UserType): GridColDef[] {
       headerName: 'Menores de edad',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => (
-        <RenderCellStatus params={params} value={params.row.allowyounger ? 'yes' : 'no'} />
-      ),
+      renderCell: (params) => {
+        const value = params.row.allowyounger === '' ? 'N/A' : params.row.allowyounger === 'Si' ? 'yes' : params.row.allowyounger;
+        return <RenderCellStatus params={params} value={value} />},
     },
     {
       field: 'allowpets',

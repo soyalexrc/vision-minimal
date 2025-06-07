@@ -57,6 +57,12 @@ const nextConfig: NextConfig = {
         hostname: 'storage.cloud.google.com',
         pathname: '**',
       },
+      {
+        protocol: 'https',
+        port: '',
+        hostname: 'bucket.visioninmobiliaria.com.ve',
+        pathname: '**',
+      },
     ],
   },
 };

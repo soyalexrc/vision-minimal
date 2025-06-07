@@ -158,7 +158,7 @@ type Props = {
 export function CreateUpdatePropertyForm({ currentProperty}: Props) {
   const defaultValues: PropertyFormSchemaType = {
     id: undefined,
-    userId: 'TEST',
+    userId: '',
     images: [],
     documents: [],
     // documents: ['https://bucket.visioninmobiliaria.com.ve/images/1748585345043-z31n58s0h89.pdf'],

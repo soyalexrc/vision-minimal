@@ -13,6 +13,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 
+import { useGetUsers } from '../../../actions/user';
 import { toast } from '../../../components/snackbar';
 import { useAuthContext } from '../../../auth/hooks';
 import { Iconify } from '../../../components/iconify';
@@ -47,6 +48,7 @@ export type ClientFormSchemaType = z.infer<typeof ClientFormSchema>;
 export const ClientFormSchema = z.object({
   id: z.number().optional(),
   updatedby: z.any().optional(),
+  assignedto: z.any().optional(),
   changes: z.any().optional(),
   createdby: z.any().optional(),
   name: z.string({ required_error: 'Este campo es requerido' }).min(3, 'Minimo 3 caracteres'),
@@ -116,8 +118,8 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     phone: '',
     isPotentialInvestor: false,
     referrer: '',
-    adviserId: 'test',
-    adviserName: 'test',
+    adviserId: '',
+    adviserName: '',
     usageProperty: '',
     requirementStatus: '',
     contactFrom: '',
@@ -167,13 +169,19 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     username: null,
     updatedby: { id: undefined, username: '', name: '', email: '' },
     createdby: { id: undefined, username: '', name: '', email: '' },
+    assignedto: { id: undefined, username: '', name: '', email: '' },
     propertyDistribution: null,
   };
   const router = useRouter();
   const { id } = useParams();
-  const { user } = useAuthContext()
+  const { user } = useAuthContext();
 
-  const shortUser = { id: user?.id, username: user?.username, name: user?.firstname + ' ' + user?.lastname, email: user?.email }
+  const shortUser = {
+    id: user?.id,
+    username: user?.username,
+    name: user?.firstname + ' ' + user?.lastname,
+    email: user?.email,
+  };
 
   const methods = useForm<ClientFormSchemaType>({
     mode: 'all',
@@ -217,6 +225,7 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
   const { refresh } = useGetClients();
   const { refresh: refreshCurrent } = useGetClient(id as any);
   const { services } = useGetServices();
+  const { users } = useGetUsers();
   const { categories } = useGetCategories();
 
   const onSubmit = handleSubmit(async (values) => {
@@ -236,11 +245,10 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     const promise = await (async () => {
       let response: AxiosResponse<any>;
       if (currentClient?.id) {
-
         const changes = getChangedFields(data, currentClient);
 
         if (Object.keys(changes).length === 0) {
-          console.log("No changes made.");
+          console.log('No changes made.');
           return 'No se detectaron cambios en el registro.';
         }
         response = await updateClient({ ...data, updatedby: shortUser, changes }, currentClient.id);
@@ -276,7 +284,18 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     <Form methods={methods} onSubmit={onSubmit}>
       {/* --- Sección: Información básica --- */}
       <Section title="Información básica">
-        <Grid columns="repeat(3, 1fr)">
+        <Box
+          sx={{
+            rowGap: 3,
+            columnGap: 2,
+            display: 'grid',
+            gridTemplateColumns: {
+              xs: 'repeat(1, 1fr)',
+              md: 'repeat(2, 1fr)',
+              lg: 'repeat(3, 1fr)',
+            },
+          }}
+        >
           <Field.Text disabled={!isEdit} size="small" name="name" label="Nombre" />
           <Field.Phone disabled={!isEdit} size="small" name="phone" label="Teléfono" />
           {/*<Field.Text size="small" name="email" label="Correo electrónico" />*/}
@@ -295,6 +314,26 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
           {watchedContactFrom === 'Referido' && (
             <Field.Text disabled={!isEdit} name="referrer" label="Nombre del referido" />
           )}
+          <Field.Select
+            disabled={!isEdit}
+            size="small"
+            sx={{ gridColumn: '1 / -1' }}
+            name="assignedto"
+            label="Asignar a"
+            onChange={(e) => {
+              const userObj = JSON.parse(e.target.value);
+              methods.setValue('assignedto', userObj);
+            }}
+            value={
+              methods.watch('assignedto')?.id ? JSON.stringify(methods.watch('assignedto')) : ''
+            }
+          >
+            {users.map((usr) => (
+              <MenuItem key={usr.id} value={JSON.stringify({ id: usr.id, name: usr.firstname + ' ' + usr.lastname, email: usr.email, username: usr.username })}>
+                {usr.firstname} {usr.lastname}
+              </MenuItem>
+            ))}
+          </Field.Select>
           <Field.Checkbox
             disabled={!isEdit}
             name="isPotentialInvestor"
@@ -307,12 +346,19 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
             name="isInWaitingList"
             label="Esta en lista de espera"
           />
-        </Grid>
+        </Box>
       </Section>
 
       {/* --- Sección: Información de servicio --- */}
       <Section title="Servicio e Interés">
-        <Grid columns="repeat(2, 1fr)">
+        <Box
+          sx={{
+            rowGap: 3,
+            columnGap: 2,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+          }}
+        >
           <Field.Select disabled={!isEdit} size="small" name="serviceName" label="Tipo de servicio">
             {services?.map((s) => (
               <MenuItem key={s.id} value={s.title}>
@@ -453,20 +499,34 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
             registerFieldPrefix="essentialFeatures"
           />
           {/*</Stack>*/}
-        </Grid>
+        </Box>
       </Section>
 
       {/* --- Sección: Presupuesto --- */}
       <Section title="Presupuesto">
-        <Grid columns="repeat(2, 1fr)">
+        <Box
+          sx={{
+            rowGap: 3,
+            columnGap: 2,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+          }}
+        >
           <Field.Currency disabled={!isEdit} size="small" name="budgetfrom" label="Desde" />
           <Field.Currency disabled={!isEdit} size="small" name="budgetto" label="Hasta" />
-        </Grid>
+        </Box>
       </Section>
 
       {/* --- Sección: Perfil del cliente --- */}
       <Section title="Perfil del cliente">
-        <Grid columns="repeat(2, 1fr)">
+        <Box
+          sx={{
+            rowGap: 3,
+            columnGap: 2,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+          }}
+        >
           <Field.Select disabled={!isEdit} name="typeOfPerson" label="Tipo de persona">
             <MenuItem value="Natural">Natural</MenuItem>
             <MenuItem value="Juridica">Jurídica</MenuItem>
@@ -489,12 +549,19 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
               )}
             </>
           )}
-        </Grid>
+        </Box>
       </Section>
 
       {/* --- Sección: Otros --- */}
       <Section title="Otros">
-        <Grid columns="repeat(2, 1fr)">
+        <Box
+          sx={{
+            rowGap: 3,
+            columnGap: 2,
+            display: 'grid',
+            gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+          }}
+        >
           <Field.Select
             disabled={!isEdit}
             size="small"
@@ -553,7 +620,7 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
             <MenuItem value="inactive">Inactivo</MenuItem>
             <MenuItem value="concreted">Concretado</MenuItem>
           </Field.Select>
-        </Grid>
+        </Box>
       </Section>
 
       {/*  Button to submit*/}

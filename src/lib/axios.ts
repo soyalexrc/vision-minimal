@@ -50,6 +50,9 @@ export const endpoints = {
     search: '/ally/search',
     delete: '/ally'
   },
+  cashflow: {
+    list: '/cashflow',
+  },
   service: {
     list: '/service',
     create: '/service',

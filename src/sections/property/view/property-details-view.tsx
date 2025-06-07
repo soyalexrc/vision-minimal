@@ -301,21 +301,20 @@ export default function PropertyDetailsView({currentProperty}: Props) {
               </Typography>
               <Box sx={{ mb: 3 }}>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  property.LocationInformation.municipality, property.LocationInformation.state,
-                  property.LocationInformation.country
+                  {currentProperty.municipality}, {currentProperty.state}, {currentProperty.country}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Urbanización:</strong> property.LocationInformation.urbanization
+                  <strong>Urbanización:</strong> {currentProperty.urbanization}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Av:</strong> property.LocationInformation.avenue
+                  <strong>Av:</strong> {currentProperty.avenue}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
-                  <strong>Calle:</strong> property.LocationInformation.street
+                  <strong>Calle:</strong> {currentProperty.street}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 1 }}>
                   <strong>¿Se encuentra en calle cerrada?:</strong>{' '}
-                  property.LocationInformation.isClosedStreet
+                  {currentProperty.isClosedStreet}
                 </Typography>
               </Box>
 
