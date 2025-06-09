@@ -15,7 +15,7 @@ import { formatPatterns } from 'src/utils/format-time';
 
 type RHFDatePickerProps = DatePickerProps<Dayjs> & {
   name: string;
-  size: 'small' | 'medium';
+  size?: 'small' | 'medium';
 };
 
 export function RHFDatePicker({ name, slotProps, size, ...other }: RHFDatePickerProps) {
