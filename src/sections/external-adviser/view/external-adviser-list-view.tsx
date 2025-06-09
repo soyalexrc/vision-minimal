@@ -39,6 +39,7 @@ import {
 } from 'src/components/table';
 
 import { getStatus } from '../../../utils/get-status';
+import { LoadingScreen } from '../../../components/loading-screen';
 import { ExternalAdviserTableRow } from '../external-adviser-table-row';
 import { ExternalAdviserTableToolbar } from '../external-adviser-table-toolbar';
 import { ExternalAdviserQuickEditForm } from '../external-adviser-quick-edit-form';
@@ -72,7 +73,7 @@ export function ExternalAdviserListView() {
   const quickCreateForm = useBoolean();
 
   const confirmDialog = useBoolean();
-  const { advisers, count, advisersError, advisersValidating, advisersLoading, advisersEmpty, refetch } = useGetExternalAdvisers();
+  const { advisers, advisersError, advisersLoading, advisersEmpty, refetch } = useGetExternalAdvisers();
 
   const [tableData, setTableData] = useState<IExternalAdviserItem[]>(advisers);
 
@@ -310,53 +311,87 @@ export function ExternalAdviserListView() {
               }
             />
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headCells={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id!.toString())
-                    )
-                  }
-                />
+            {
+              advisersLoading && (
+                <Box
+                  sx={{
+                    height: 400,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LoadingScreen />
+                </Box>
+              )
+            }
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <ExternalAdviserTableRow
-                        key={row.id}
-                        row={row}
-                        onRestore={() => handleRestoreRow(row.id!)}
-                        selected={table.selected.includes(row.id!.toString())}
-                        onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id!)}
-                        editHref={paths.dashboard.allies.edit(row.id!)}
-                      />
-                    ))}
+            {
+              advisersError && (
+                <Box
+                  sx={{
+                    p: 2,
+                    textAlign: 'center',
+                    color: 'error.main',
+                  }}
+                >
+                  Error al cargar los aliados. Por favor, intente nuevamente.
+                </Box>
+              )
+            }
 
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+            {
+              !advisersError && !advisersLoading && advisers &&
+              <Scrollbar>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headCells={TABLE_HEAD}
+                    rowCount={dataFiltered.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        dataFiltered.map((row) => row.id!.toString())
+                      )
+                    }
                   />
 
-                  {
-                    advisersEmpty &&
-                    <TableNoData notFound={notFound} />
-                  }
-                </TableBody>
-              </Table>
-            </Scrollbar>
+                  <TableBody>
+                    {dataFiltered
+                      .slice(
+                        table.page * table.rowsPerPage,
+                        table.page * table.rowsPerPage + table.rowsPerPage
+                      )
+                      .map((row) => (
+                        <ExternalAdviserTableRow
+                          key={row.id}
+                          row={row}
+                          onRestore={() => handleRestoreRow(row.id!)}
+                          selected={table.selected.includes(row.id!.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id!.toString())}
+                          onDeleteRow={() => handleDeleteRow(row.id!)}
+                          editHref={paths.dashboard.allies.edit(row.id!)}
+                        />
+                      ))}
+
+                    <TableEmptyRows
+                      height={table.dense ? 56 : 56 + 20}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    />
+
+                    {
+                      advisersEmpty &&
+                      <TableNoData notFound={notFound} />
+                    }
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+
+            }
+
           </Box>
 
           <TablePaginationCustom

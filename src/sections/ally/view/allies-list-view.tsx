@@ -29,7 +29,6 @@ import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import {
   useTable,
   emptyRows,
-  rowInPage,
   TableNoData,
   getComparator,
   TableEmptyRows,
@@ -41,6 +40,7 @@ import {
 import { AllyTableRow } from '../ally-table-row';
 import { AllyTableToolbar } from '../ally-table-toolbar';
 import { AllyQuickEditForm } from '../ally-quick-edit-form';
+import { LoadingScreen } from '../../../components/loading-screen';
 import { AllyTableFiltersResult } from '../ally-table-filters-result';
 import { deleteAlly, restoreAlly, useGetAllies, deleteManyAllies } from '../../../actions/ally';
 
@@ -66,7 +66,7 @@ export function AllyListView() {
 
 
   const confirmDialog = useBoolean();
-  const { allies, count, alliesError, alliesValidating, alliesLoading, alliesEmpty, refetch } = useGetAllies();
+  const { allies, alliesError, alliesLoading, alliesEmpty, refetch } = useGetAllies();
 
   const [tableData, setTableData] = useState<IAllyItem[]>([]);
 
@@ -82,8 +82,6 @@ export function AllyListView() {
     comparator: getComparator(table.order, table.orderBy),
     filters: currentFilters,
   });
-
-  const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
 
   const canReset =
     !!currentFilters.name || currentFilters.status !== 'all';
@@ -309,54 +307,86 @@ export function AllyListView() {
               }
             />
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headCells={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id!.toString())
-                    )
-                  }
-                />
+            {
+              alliesLoading && (
+                <Box
+                  sx={{
+                    height: 400,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LoadingScreen />
+                </Box>
+              )
+            }
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <AllyTableRow
-                        key={row.id}
-                        row={row}
-                        onRestore={() => handleRestoreRow(row.id!)}
-                        selected={table.selected.includes(row.id!.toString())}
-                        onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id!)}
-                        editHref={paths.dashboard.allies.edit(row.id!)}
-                      />
-                    ))}
+            {
+              alliesError && (
+                <Box
+                  sx={{
+                    p: 2,
+                    textAlign: 'center',
+                    color: 'error.main',
+                  }}
+                >
+                  Error al cargar los aliados. Por favor, intente nuevamente.
+                </Box>
+              )
+            }
 
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+            {
+              !alliesLoading && !alliesError && allies &&
+              <Scrollbar>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headCells={TABLE_HEAD}
+                    rowCount={dataFiltered.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        dataFiltered.map((row) => row.id!.toString())
+                      )
+                    }
                   />
 
-                  {
-                    alliesEmpty && (
-                      <TableNoData notFound={notFound} />
-                    )
-                  }
-                </TableBody>
-              </Table>
-            </Scrollbar>
+                  <TableBody>
+                    {dataFiltered
+                      .slice(
+                        table.page * table.rowsPerPage,
+                        table.page * table.rowsPerPage + table.rowsPerPage
+                      )
+                      .map((row) => (
+                        <AllyTableRow
+                          key={row.id}
+                          row={row}
+                          onRestore={() => handleRestoreRow(row.id!)}
+                          selected={table.selected.includes(row.id!.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id!.toString())}
+                          onDeleteRow={() => handleDeleteRow(row.id!)}
+                          editHref={paths.dashboard.allies.edit(row.id!)}
+                        />
+                      ))}
+
+                    <TableEmptyRows
+                      height={table.dense ? 56 : 56 + 20}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    />
+
+                    {
+                      alliesEmpty && (
+                        <TableNoData notFound={notFound} />
+                      )
+                    }
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            }
           </Box>
 
           <TablePaginationCustom

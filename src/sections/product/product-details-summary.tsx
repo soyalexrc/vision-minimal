@@ -92,7 +92,7 @@ export function ProductDetailsSummary({
       if (!existProduct) {
         onAddToCart?.({ ...data, colors: [values.colors] });
       }
-      router.push(paths.dashboard.clients.checkout);
+      router.push(paths.dashboard.clients.list);
     } catch (error) {
       console.error(error);
     }

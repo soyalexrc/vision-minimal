@@ -2,7 +2,6 @@ import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { createInstance } from 'i18next';
 import resourcesToBackend from 'i18next-resources-to-backend';
-// eslint-disable-next-line import/no-unresolved
 import { initReactI18next } from 'react-i18next/initReactI18next';
 
 import { defaultNS, cookieName, i18nOptions, fallbackLng } from './locales-config';

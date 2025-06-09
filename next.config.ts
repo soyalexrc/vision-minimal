@@ -43,6 +43,28 @@ const nextConfig: NextConfig = {
       },
     },
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        port: '',
+        hostname: 'storage.cloud.google.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        port: '',
+        hostname: 'bucket.visioninmobiliaria.com.ve',
+        pathname: '**',
+      },
+    ],
+  },
 };
 
 export default nextConfig;

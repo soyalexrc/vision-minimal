@@ -18,7 +18,7 @@ export function CartIcon({ totalItems, sx, ...other }: Props) {
   return (
     <Box
       component={RouterLink}
-      href={paths.product.checkout}
+      href={paths.dashboard.properties.list}
       sx={[
         (theme) => ({
           right: 0,

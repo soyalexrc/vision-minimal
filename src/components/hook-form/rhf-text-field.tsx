@@ -50,6 +50,9 @@ export function RHFTextField({
           helperText={error?.message ?? helperText}
           slotProps={{
             ...slotProps,
+            inputLabel: {
+              shrink: true
+            },
             htmlInput: {
               autoComplete: 'off',
               ...slotProps?.htmlInput,

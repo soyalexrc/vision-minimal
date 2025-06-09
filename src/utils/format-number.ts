@@ -1,4 +1,4 @@
-// eslint-disable-next-line import/no-unresolved
+ 
 import { formatNumberLocale } from 'src/locales';
 
 // ----------------------------------------------------------------------
@@ -18,6 +18,7 @@ function processInput(inputValue: InputNumberValue): number | null {
   if (inputValue == null || Number.isNaN(inputValue)) return null;
   return Number(inputValue);
 }
+
 
 // ----------------------------------------------------------------------
 
@@ -105,3 +106,8 @@ export function fData(inputValue: InputNumberValue) {
 
   return fm;
 }
+
+export const parseCurrency = (value: string): number => {
+  if (!value) return 0;
+  return Number(value.replace(/[^0-9.-]+/g, ''));
+};

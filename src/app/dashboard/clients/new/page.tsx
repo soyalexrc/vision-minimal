@@ -1,11 +1,36 @@
-import { CONFIG } from 'src/global-config';
+'use client';
 
-import { BlankView } from 'src/sections/blank/view';
+
+import Container from '@mui/material/Container';
+
+import { paths } from '../../../../routes/paths';
+import { useSettingsContext } from '../../../../components/settings';
+import { CustomBreadcrumbs } from '../../../../components/custom-breadcrumbs';
+import {
+  CreateUpdateClientForm,
+} from '../../../../sections/client/form/create-update-client-form';
 
 // ----------------------------------------------------------------------
 
-export const metadata = { title: `Nuevo cliente - ${CONFIG.appName}` };
-
 export default function Page() {
-  return <BlankView title="Nuevo cliente" />;
+  const settings = useSettingsContext();
+
+  return (
+    // <Container maxWidth={settings.themeStretch ? false : 'xl'}>
+    <Container maxWidth="xl">
+      <CustomBreadcrumbs
+        heading="Nuevo Cliente"
+        links={[
+          { name: 'Inicio', href: paths.dashboard.root },
+          { name: 'Gestion' },
+          { name: 'Clientes', href: paths.dashboard.clients.list },
+          { name: 'Nuevo cliente' },
+        ]}
+        sx={{
+          mb: { xs: 3, md: 5 },
+        }}
+      />
+      <CreateUpdateClientForm isEdit />
+    </Container>
+  );
 }

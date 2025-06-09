@@ -1,14 +1,13 @@
-import { mutate, SWRConfiguration } from 'swr';
+import type { SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
 
-import useSWR from 'swr';
 import { useMemo } from 'react';
+import useSWR, { mutate } from 'swr';
 
-import { fetcher, endpoints } from 'src/lib/axios';
-import { IExternalAdviserItem } from '../types/external-adviser';
-import axios from '../lib/axios';
-import { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
-import { ExternalAdviserQuickEditSchemaType } from '../sections/external-adviser/external-adviser-quick-edit-form';
+import axios, { fetcher, endpoints } from 'src/lib/axios';
+
+import type { IExternalAdviserItem } from '../types/external-adviser';
+import type { ExternalAdviserQuickEditSchemaType } from '../sections/external-adviser/external-adviser-quick-edit-form';
 
 
 // ----------------------------------------------------------------------
@@ -105,7 +104,7 @@ export async function deleteExternalAdviser(id: number) {
 }
 
 export async function deleteManyExternalAdvisers(ids: number[]) {
-  const url = `${endpoints.externalAdviser.delete}/delete/many`;
+  const url = `${endpoints.externalAdviser.delete}/remove-many`;
   return axios.post(url, { ids });
 }
 

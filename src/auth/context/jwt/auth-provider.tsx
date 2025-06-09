@@ -9,7 +9,7 @@ import { JWT_STORAGE_KEY } from './constant';
 import { AuthContext } from '../auth-context';
 import { setSession, isValidToken } from './utils';
 
-import type { AuthState } from '../../types';
+import type { UserType, AuthState } from '../../types';
 
 // ----------------------------------------------------------------------
 
@@ -24,7 +24,10 @@ type Props = {
 };
 
 export function AuthProvider({ children }: Props) {
-  const { state, setState } = useSetState<AuthState>({ user: null, loading: true });
+  const { state, setState } = useSetState<AuthState>({
+    user: null,
+    loading: true,
+  });
 
   const checkUserSession = useCallback(async () => {
     try {
@@ -60,7 +63,7 @@ export function AuthProvider({ children }: Props) {
 
   const memoizedValue = useMemo(
     () => ({
-      user: state.user ? { ...state.user, role: state.user?.role ?? 'admin' } : null,
+      user: state.user || {} as UserType,
       checkUserSession,
       loading: status === 'loading',
       authenticated: status === 'authenticated',

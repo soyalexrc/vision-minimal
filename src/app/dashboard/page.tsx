@@ -1,11 +1,11 @@
 import { CONFIG } from 'src/global-config';
 
-import { BlankView } from 'src/sections/blank/view';
+import { BlankView } from '../../sections/blank/view';
 
 // ----------------------------------------------------------------------
 
-export const metadata = { title: `Panel de control - ${CONFIG.appName}` };
+export const metadata = { title: `Inicio - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <BlankView title="Página uno" />;
+  return <BlankView title="Pagina inicial" />;
 }

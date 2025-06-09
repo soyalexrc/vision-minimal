@@ -19,8 +19,8 @@ type ParamsProps = {
   params: GridCellParams;
 };
 
-export function RenderCellPrice({ params }: ParamsProps) {
-  return fCurrency(params.row.price);
+export function RenderCellPrice({ params, value }: ParamsProps & { value?: number | string }) {
+  return fCurrency(value);
 }
 
 export function RenderCellPublish({ params }: ParamsProps) {

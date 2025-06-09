@@ -1,6 +1,6 @@
 import SimpleBar from 'simplebar-react';
-import { mergeClasses } from 'minimal-shared/utils';
 import { useRef, useEffect } from 'react';
+import { mergeClasses } from 'minimal-shared/utils';
 
 import { styled } from '@mui/material/styles';
 
@@ -58,6 +58,7 @@ export function Scrollbar({
     scrollElement.addEventListener('mouseup', handleMouseUp);
     scrollElement.addEventListener('mousemove', handleMouseMove);
 
+    // eslint-disable-next-line consistent-return
     return () => {
       scrollElement.removeEventListener('mousedown', handleMouseDown);
       scrollElement.removeEventListener('mouseleave', handleMouseLeave);

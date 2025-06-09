@@ -6,7 +6,6 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
-import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
@@ -14,6 +13,7 @@ import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import IconButton from '@mui/material/IconButton';
+import Typography from '@mui/material/Typography';
 
 import { RouterLink } from 'src/routes/components';
 
@@ -22,13 +22,16 @@ import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
-import { IAllyItem } from '../../types/ally';
+import { getStatus } from '../../utils/get-status';
 import { UserQuickEditForm } from './user-quick-edit-form';
+import { formatLocalVenezuelanPhone } from '../../utils/format-phone';
+
+import type { GetStatusType } from '../../utils/get-status';
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  row: IAllyItem;
+  row: IUserItem;
   selected: boolean;
   editHref: string;
   onSelectRow: () => void;
@@ -42,7 +45,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
 
   const renderQuickEditForm = () => (
     <UserQuickEditForm
-      currentAlly={row}
+      currentUser={row}
       open={quickEditForm.value}
       onClose={quickEditForm.onFalse}
     />
@@ -107,6 +110,10 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
           />
         </TableCell>
 
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <Typography variant="body2">{row.id}</Typography>
+        </TableCell>
+
         <TableCell>
           <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
             {/*<Avatar alt={row.name} src={row.name} />*/}
@@ -118,7 +125,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
                 color="inherit"
                 sx={{ cursor: 'pointer' }}
               >
-                {row.name} {row.lastname}
+                {row.firstname} {row.lastname}
               </Link>
               <Box component="span" sx={{ color: 'text.disabled' }}>
                 {row.email}
@@ -127,7 +134,11 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
           </Box>
         </TableCell>
 
-        <TableCell sx={{ whiteSpace: 'nowrap' }}>{row.phoneNumber}</TableCell>
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>
+          <Typography variant="body2">{row.role}</Typography>
+        </TableCell>
+
+        <TableCell sx={{ whiteSpace: 'nowrap' }}>{formatLocalVenezuelanPhone(row.phonenumber)}</TableCell>
 
 
 
@@ -142,7 +153,7 @@ export function UserTableRow({ row, selected, editHref, onSelectRow, onDeleteRow
               'default'
             }
           >
-            {row.status}
+            {getStatus(row.status as GetStatusType).name}
           </Label>
         </TableCell>
 

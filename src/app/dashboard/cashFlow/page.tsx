@@ -1,11 +1,11 @@
 import { CONFIG } from 'src/global-config';
 
-import { BlankView } from 'src/sections/blank/view';
+import { CashFlowListView } from '../../../sections/cashflow/view/cashflow-list-view';
 
 // ----------------------------------------------------------------------
 
 export const metadata = { title: `Flujo de caja - ${CONFIG.appName}` };
 
 export default function Page() {
-  return <BlankView title="Flujo de caja" />;
+  return <CashFlowListView />;
 }

@@ -30,6 +30,18 @@ export type IClientItem = {
   propertytype: string;
   typeOfPerson: string;
   allowpets: string;
+  createdby?: {
+    name: string;
+    email: string;
+    username: string;
+    id: number;
+  },
+  assignedto?: {
+    name: string;
+    email: string;
+    username: string;
+    id: number;
+  },
   allowyounger: string;
   propertyOfInterest?: string;
   budgetfrom: number;

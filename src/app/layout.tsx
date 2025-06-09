@@ -2,6 +2,8 @@ import 'src/global.css';
 
 import type { Metadata, Viewport } from 'next';
 
+import { Toaster } from 'sonner';
+
 import InitColorSchemeScript from '@mui/material/InitColorSchemeScript';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
 
@@ -15,7 +17,7 @@ import { detectSettings } from 'src/components/settings/server';
 import { SettingsDrawer, defaultSettings, SettingsProvider } from 'src/components/settings';
 
 import { AuthProvider } from 'src/auth/context/jwt';
-import { Toaster } from 'sonner';
+
 import { LocalizationProvider } from '../locales';
 
 // ----------------------------------------------------------------------

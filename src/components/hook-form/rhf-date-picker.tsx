@@ -15,9 +15,10 @@ import { formatPatterns } from 'src/utils/format-time';
 
 type RHFDatePickerProps = DatePickerProps<Dayjs> & {
   name: string;
+  size?: 'small' | 'medium';
 };
 
-export function RHFDatePicker({ name, slotProps, ...other }: RHFDatePickerProps) {
+export function RHFDatePicker({ name, slotProps, size, ...other }: RHFDatePickerProps) {
   const { control } = useFormContext();
 
   return (
@@ -34,6 +35,7 @@ export function RHFDatePicker({ name, slotProps, ...other }: RHFDatePickerProps)
             ...slotProps,
             textField: {
               fullWidth: true,
+              size,
               error: !!error,
               helperText: error?.message ?? (slotProps?.textField as TextFieldProps)?.helperText,
               ...slotProps?.textField,

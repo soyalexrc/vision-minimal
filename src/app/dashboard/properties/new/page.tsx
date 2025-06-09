@@ -1,11 +1,29 @@
-import { CONFIG } from 'src/global-config';
+'use client';
 
-import { BlankView } from 'src/sections/blank/view';
+import { paths } from 'src/routes/paths';
+
+import { DashboardContent } from 'src/layouts/dashboard';
+
+import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
+
+import { CreateUpdatePropertyForm } from '../../../../sections/property/form/create-update-property-form';
 
 // ----------------------------------------------------------------------
 
-export const metadata = { title: `Nuevo inmueble - ${CONFIG.appName}` };
-
 export default function Page() {
-  return <BlankView title="Nuevo inmueble" />;
+  return (
+    <DashboardContent>
+      <CustomBreadcrumbs
+        heading="Nuevo inmueble"
+        links={[
+          { name: 'Inicio', href: paths.dashboard.root },
+          { name: 'Inmuebles', href: paths.dashboard.properties.root },
+          { name: 'Nuevo inmueble' },
+        ]}
+        sx={{ mb: { xs: 3, md: 5 } }}
+      />
+
+      <CreateUpdatePropertyForm />
+    </DashboardContent>
+  );
 }

@@ -2,6 +2,7 @@
 
 import type { Theme, SxProps } from '@mui/material/styles';
 
+import React from 'react';
 import { m } from 'framer-motion';
 
 import Container from '@mui/material/Container';
@@ -10,6 +11,8 @@ import Typography from '@mui/material/Typography';
 import { ForbiddenIllustration } from 'src/assets/illustrations';
 
 import { varBounce, MotionContainer } from 'src/components/animate';
+
+import { useAuthContext } from '../hooks';
 
 // ----------------------------------------------------------------------
 
@@ -21,7 +24,6 @@ import { varBounce, MotionContainer } from 'src/components/animate';
 
 export type RoleBasedGuardProp = {
   sx?: SxProps<Theme>;
-  currentRole: string;
   hasContent?: boolean;
   allowedRoles: string | string[];
   children: React.ReactNode;
@@ -31,10 +33,10 @@ export function RoleBasedGuard({
   sx,
   children,
   hasContent,
-  currentRole,
   allowedRoles,
 }: RoleBasedGuardProp) {
-  if (currentRole && allowedRoles && !allowedRoles.includes(currentRole)) {
+  const { user } = useAuthContext();
+  if (user && user.role && allowedRoles && !allowedRoles.includes(user.role)) {
     return hasContent ? (
       <Container
         component={MotionContainer}
@@ -42,13 +44,13 @@ export function RoleBasedGuard({
       >
         <m.div variants={varBounce('in')}>
           <Typography variant="h3" sx={{ mb: 2 }}>
-            Permission denied
+            Permiso denegado
           </Typography>
         </m.div>
 
         <m.div variants={varBounce('in')}>
           <Typography sx={{ color: 'text.secondary' }}>
-            You do not have permission to access this page.
+            No cuentas con permiso para acceder a este contenido.
           </Typography>
         </m.div>
 

@@ -1,7 +1,7 @@
 'use client';
 
-import type { IUserTableFilters } from 'src/types/user';
 import type { TableHeadCellProps } from 'src/components/table';
+import type { IUserItem, IUserTableFilters } from 'src/types/user';
 
 import { varAlpha } from 'minimal-shared/utils';
 import { useState, useEffect, useCallback } from 'react';
@@ -18,9 +18,7 @@ import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
 
 import { paths } from 'src/routes/paths';
-import { RouterLink } from 'src/routes/components';
 
-import { _roles } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
@@ -42,19 +40,22 @@ import {
 } from 'src/components/table';
 
 import { UserTableRow } from '../user-table-row';
-import { useGetAllies } from '../../../actions/ally';
+import { useGetUsers } from '../../../actions/user';
 import { UserTableToolbar } from '../user-table-toolbar';
+import { UserQuickEditForm } from '../user-quick-edit-form';
+import { LoadingScreen } from '../../../components/loading-screen';
 import { UserTableFiltersResult } from '../user-table-filters-result';
 
-import type { IAllyItem } from '../../../types/ally';
 
 // ----------------------------------------------------------------------
 
 const STATUS_OPTIONS = [{ value: 'all', label: 'Todos' }, { value: 'active', label: 'Activos' }, { value: 'deleted', label: 'Eliminados' }];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
-  { id: 'name', label: 'Nombre' },
-  { id: 'phoneNumber', label: 'Telefono', width: 180 },
+  { id: 'id', label: 'ID' },
+  { id: 'firstname', label: 'Nombre' },
+  { id: 'role', label: 'Rol' },
+  { id: 'phonenumber', label: 'Telefono', width: 180 },
   // { id: 'company', label: 'Compania', width: 220 },
   { id: 'status', label: 'Status', width: 100 },
   { id: '', width: 88 },
@@ -63,16 +64,16 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 // ----------------------------------------------------------------------
 
 export function UserListView() {
-  const table = useTable();
-
+  const table = useTable({ defaultDense: true, defaultRowsPerPage: 25 });
+  const quickCreateForm = useBoolean();
   const confirmDialog = useBoolean();
-  const { allies, count, alliesError, alliesValidating, alliesLoading, alliesEmpty } = useGetAllies();
+  const { users, usersLoading, usersError } = useGetUsers();
 
-  const [tableData, setTableData] = useState<IAllyItem[]>([]);
+  const [tableData, setTableData] = useState<IUserItem[]>(users);
 
   useEffect(() => {
-    setTableData(allies || []);
-  }, [allies]);
+    setTableData(users);
+  }, [users]);
 
   const filters = useSetState<IUserTableFilters>({ name: '', role: [], status: 'all' });
   const { state: currentFilters, setState: updateFilters } = filters;
@@ -121,6 +122,30 @@ export function UserListView() {
     [updateFilters, table]
   );
 
+  const renderQuickCreateForm = () => (
+    <UserQuickEditForm
+      currentUser={{
+        id: undefined,
+        email: '',
+        role: '',
+        firstname: '',
+        lastname: '',
+        phonenumber: '',
+        imageurl: '',
+        status: 'active',
+        isactive: true,
+        issuperadmin: false,
+        password: '',
+        permissions: {},
+        pushtoken: '',
+        twofactorenabled: false,
+        username: ''
+    }}
+      open={quickCreateForm.value}
+      onClose={quickCreateForm.onFalse}
+    />
+  );
+
   const renderConfirmDialog = () => (
     <ConfirmDialog
       open={confirmDialog.value}
@@ -158,9 +183,8 @@ export function UserListView() {
           ]}
           action={
             <Button
-              component={RouterLink}
-              href={paths.dashboard.allies.create}
               variant="contained"
+              onClick={quickCreateForm.onTrue}
               startIcon={<Iconify icon="mingcute:add-line" />}
             >
               Nuevo usuario
@@ -243,49 +267,82 @@ export function UserListView() {
               }
             />
 
-            <Scrollbar>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headCells={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id!.toString())
-                    )
-                  }
-                />
+            {
+              usersLoading && (
+                <Box
+                  sx={{
+                    height: 400,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LoadingScreen />
+                </Box>
+              )
+            }
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <UserTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id!.toString())}
-                        onSelectRow={() => table.onSelectRow(row.id!.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id!.toString())}
-                        editHref={paths.dashboard.allies.edit(row.id!)}
-                      />
-                    ))}
+            {
+              usersError && (
+                <Box
+                  sx={{
+                    p: 2,
+                    textAlign: 'center',
+                    color: 'error.main',
+                  }}
+                >
+                  Error al cargar los aliados. Por favor, intente nuevamente.
+                </Box>
+              )
+            }
 
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+
+            {
+              !usersError && !usersLoading && users &&
+              <Scrollbar>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headCells={TABLE_HEAD}
+                    rowCount={dataFiltered.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        dataFiltered.map((row) => row.id!.toString())
+                      )
+                    }
                   />
 
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
+                  <TableBody>
+                    {dataFiltered
+                      .slice(
+                        table.page * table.rowsPerPage,
+                        table.page * table.rowsPerPage + table.rowsPerPage
+                      )
+                      .map((row) => (
+                        <UserTableRow
+                          key={row.id}
+                          row={row}
+                          selected={table.selected.includes(row.id!.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id!.toString())}
+                          onDeleteRow={() => handleDeleteRow(row.id!.toString())}
+                          editHref=""
+                        />
+                      ))}
+
+                    <TableEmptyRows
+                      height={table.dense ? 56 : 56 + 20}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    />
+
+                    <TableNoData notFound={notFound} />
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            }
           </Box>
 
           <TablePaginationCustom
@@ -301,6 +358,7 @@ export function UserListView() {
       </DashboardContent>
 
       {renderConfirmDialog()}
+      {renderQuickCreateForm()}
     </>
   );
 }
@@ -308,7 +366,7 @@ export function UserListView() {
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  inputData: IAllyItem[];
+  inputData: IUserItem[];
   filters: IUserTableFilters;
   comparator: (a: any, b: any) => number;
 };
@@ -327,7 +385,7 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (name) {
-    inputData = inputData.filter((user) => user.name.toLowerCase().includes(name.toLowerCase()));
+    inputData = inputData.filter((user) => user.firstname.toLowerCase().includes(name.toLowerCase()));
   }
 
   if (status !== 'all') {

@@ -1,6 +1,7 @@
 import type { Dayjs, OpUnitType } from 'dayjs';
 
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -77,6 +78,16 @@ export function fDateTime(date: DatePickerFormat, template?: string): string {
  * @output 17 Apr 2022
  */
 export function fDate(date: DatePickerFormat, template?: string): string {
+  if (!isValidDate(date)) {
+    return 'Invalid date';
+  }
+
+  return dayjs(date).format(template ?? formatPatterns.date);
+}
+
+export function fDateUTC(date: DatePickerFormat, template?: string): string {
+  dayjs.extend(utc);
+
   if (!isValidDate(date)) {
     return 'Invalid date';
   }

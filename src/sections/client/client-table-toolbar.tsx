@@ -1,25 +1,30 @@
-import type { IUserTableFilters } from 'src/types/user';
-import type { SelectChangeEvent } from '@mui/material/Select';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
+import type {
+  GridSlotProps,
+  GridRowSelectionModel} from '@mui/x-data-grid';
 
 import { useCallback } from 'react';
 import { usePopover } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
-import Select from '@mui/material/Select';
+import Button from '@mui/material/Button';
 import MenuList from '@mui/material/MenuList';
 import MenuItem from '@mui/material/MenuItem';
-import Checkbox from '@mui/material/Checkbox';
 import TextField from '@mui/material/TextField';
-import InputLabel from '@mui/material/InputLabel';
 import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
-import OutlinedInput from '@mui/material/OutlinedInput';
 import InputAdornment from '@mui/material/InputAdornment';
+import { GridToolbarExport, GridToolbarContainer ,
+  GridToolbarQuickFilter,
+  GridToolbarFilterButton,
+  GridToolbarColumnsButton,
+} from '@mui/x-data-grid';
 
 import { Iconify } from 'src/components/iconify';
 import { CustomPopover } from 'src/components/custom-popover';
-import { IClientDataFilters } from '../../types/client';
+
+import { ClientTableFiltersResult } from './client-table-filters-result';
+
+import type { IClientDataFilters } from '../../types/client';
 
 // ----------------------------------------------------------------------
 
@@ -41,16 +46,6 @@ export function ClientTableToolbar({ filters, onResetPage }: Props) {
     [onResetPage, updateFilters]
   );
 
-  const handleFilterRole = useCallback(
-    (event: SelectChangeEvent<string[]>) => {
-      const newValue =
-        typeof event.target.value === 'string' ? event.target.value.split(',') : event.target.value;
-
-      onResetPage();
-      updateFilters({ role: newValue });
-    },
-    [onResetPage, updateFilters]
-  );
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -60,16 +55,6 @@ export function ClientTableToolbar({ filters, onResetPage }: Props) {
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
-        <MenuItem onClick={() => menuActions.onClose()}>
-          <Iconify icon="solar:printer-minimalistic-bold" />
-          Imprimir
-        </MenuItem>
-
-        <MenuItem onClick={() => menuActions.onClose()}>
-          <Iconify icon="solar:import-bold" />
-          Importar
-        </MenuItem>
-
         <MenuItem onClick={() => menuActions.onClose()}>
           <Iconify icon="solar:export-bold" />
           Exportar
@@ -122,6 +107,84 @@ export function ClientTableToolbar({ filters, onResetPage }: Props) {
       </Box>
 
       {renderMenuActions()}
+    </>
+  );
+}
+
+type CustomToolbarProps = GridSlotProps['toolbar'] & {
+  canReset: boolean;
+  filteredResults: number;
+  selectedRowIds: GridRowSelectionModel;
+  filters: UseSetStateReturn<IClientDataFilters>;
+
+  onOpenConfirmDeleteRows: () => void;
+};
+
+export function ClientGridTableToolbar({
+  filters,
+  canReset,
+  selectedRowIds,
+  filteredResults,
+  setFilterButtonEl,
+  onOpenConfirmDeleteRows,
+}: CustomToolbarProps) {
+  return (
+    <>
+      <GridToolbarContainer>
+        {/*<ClientTableToolbar filters={filters} onResetPage={() => {}} />*/}
+
+        <GridToolbarQuickFilter placeholder="Buscar..." sx={{ flex: 1 }} />
+
+        <Box
+          sx={{
+            gap: 1,
+            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}
+        >
+
+          {/*{!!selectedRowIds.length && (*/}
+          {/*  <Button*/}
+          {/*    size="small"*/}
+          {/*    color="success"*/}
+          {/*    startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}*/}
+          {/*    onClick={onOpenConfirmDeleteRows}*/}
+          {/*  >*/}
+          {/*    Marcar como concretado ({selectedRowIds.length})*/}
+          {/*  </Button>*/}
+          {/*)}*/}
+
+          {!!selectedRowIds.length && (
+            <Button
+              size="small"
+              color="error"
+              startIcon={<Iconify icon="solar:trash-bin-trash-bold" />}
+              onClick={onOpenConfirmDeleteRows}
+            >
+              Eliminar ({selectedRowIds.length})
+            </Button>
+          )}
+
+          {/*<GridToolbarColumnsButton />*/}
+          {/*<GridToolbarFilterButton ref={setFilterButtonEl} slotProps={{  }} />*/}
+          {/*<GridToolbarExport />*/}
+
+          <GridToolbarColumnsButton />
+          <GridToolbarFilterButton ref={setFilterButtonEl} slotProps={{}} />
+          <GridToolbarExport printOptions={{ disableToolbarButton: true }} csvOptions={{ fileName: 'clientes' }} />
+        </Box>
+      </GridToolbarContainer>
+
+      {canReset && (
+        <ClientTableFiltersResult
+          onResetPage={() => {}}
+          filters={filters}
+          totalResults={filteredResults}
+          sx={{ p: 2.5, pt: 0 }}
+        />
+      )}
     </>
   );
 }

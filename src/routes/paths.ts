@@ -62,17 +62,24 @@ export const paths = {
     users: {
       root: `${ROOTS.DASHBOARD}/users`,
       list: `${ROOTS.DASHBOARD}/users`,
-      create: `${ROOTS.DASHBOARD}/users/new`,
     },
     externalAdvisers: {
       root: `${ROOTS.DASHBOARD}/external-advisers`,
       list: `${ROOTS.DASHBOARD}/external-advisers`,
       create: `${ROOTS.DASHBOARD}/external-advisers/new`,
     },
+    cashFlow: {
+      root: `${ROOTS.DASHBOARD}/cashFlow`,
+      list: `${ROOTS.DASHBOARD}/cashFlow`,
+      create: `${ROOTS.DASHBOARD}/cashFlow/new`,
+    },
     properties: {
       root: `${ROOTS.DASHBOARD}/properties`,
       list: `${ROOTS.DASHBOARD}/properties`,
       create: `${ROOTS.DASHBOARD}/properties/new`,
+      edit: (id: number | string) => `${ROOTS.DASHBOARD}/properties/update/${id}`,
+      details: (id: number | string) => `${ROOTS.DASHBOARD}/properties/view/${id}`,
+
     },
     admin: {
       internal: `${ROOTS.DASHBOARD}/admin-internal`,

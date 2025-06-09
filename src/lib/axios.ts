@@ -50,10 +50,70 @@ export const endpoints = {
     search: '/ally/search',
     delete: '/ally'
   },
+  cashflow: {
+    list: '/cashflow',
+    people: '/cashflow/person',
+    properties: '/cashflow/property',
+    transactionTypes: '/transaction-types',
+    waysToPay: '/ways-to-pay',
+    currencies: '/currencies',
+    entities: '/entities',
+  },
+  subService: {
+    list: '/service/subservice'
+  },
+  service: {
+    list: '/service',
+    create: '/service',
+    edit: '/service',
+    restore: '/service/restore',
+    details: '/service/details',
+    search: '/service/search',
+    delete: '/service'
+  },
+  category: {
+    list: '/category',
+    create: '/category',
+    edit: '/category',
+    restore: '/category/restore',
+    details: '/category/details',
+    search: '/category/search',
+    delete: '/category'
+  },
   client: {
     list: '/client',
-    details: '/ally/details',
-    search: '/ally/search',
+    create: '/client',
+    edit: '/client',
+    editStatus: '/client/status',
+    delete: '/client',
+    details: '/client/details',
+    search: '/client/search',
+    restore: '/client/restore',
+  },
+  property: {
+    category: {
+      list: '/category',
+      create: '/category',
+      edit: '/category',
+      delete: '/category',
+    },
+    list: '/property',
+    create: '/property',
+    edit: '/property/edit',
+    editStatus: '/property/status',
+    editFeatured: '/property/featured',
+    delete: '/property',
+    detail: '/property/detail',
+    search: '/property/search',
+    restore: '/property/restore',
+  },
+
+  user: {
+    list: '/user',
+    details: '/user/details',
+    search: '/user/search',
+    create: '/user',
+    edit: '/user',
   },
   owner: {
     list: '/owner',
@@ -83,6 +143,13 @@ export const endpoints = {
     details: '/api/post/details',
     latest: '/api/post/latest',
     search: '/api/post/search',
+  },
+  config: {
+    byId: '/config',
+    // list: '/api/post/list',
+    // details: '/api/post/details',
+    // latest: '/api/post/latest',
+    // search: '/api/post/search',
   },
   product: {
     list: '/api/product/list',
