@@ -5,7 +5,7 @@ import useSWR, { mutate } from 'swr';
 
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
-import { IServiceItem, ISubServiceItem } from '../types/service';
+import type { IServiceItem, ISubServiceItem } from '../types/service';
 import type { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
 
 // ----------------------------------------------------------------------

@@ -6,15 +6,15 @@ import useSWR, { mutate } from 'swr';
 
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
-import {
-  ICashFlowItem, ICurrency,
-  IEntity,
-  IPersonCashFlow,
-  IPropertyCashFlow,
-  ITransactionType,
-  IWayToPay,
-} from '../types/cashflow';
 import type { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
+import type {
+  IEntity, ICurrency,
+  IWayToPay,
+  ICashFlowItem,
+  IPersonCashFlow,
+  ITransactionType,
+  IPropertyCashFlow,
+} from '../types/cashflow';
 
 // ----------------------------------------------------------------------
 
