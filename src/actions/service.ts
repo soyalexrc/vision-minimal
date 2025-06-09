@@ -5,7 +5,7 @@ import useSWR, { mutate } from 'swr';
 
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
-import type { IServiceItem } from '../types/service';
+import { IServiceItem, ISubServiceItem } from '../types/service';
 import type { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
 
 // ----------------------------------------------------------------------
@@ -36,6 +36,32 @@ export function useGetServices() {
       servicesValidating: isValidating,
       servicesEmpty: !isLoading && !isValidating && !data?.data?.length,
       count: data?.total || 0,
+      refetch: () => mutate(url),
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+// ----------------------------------------------------------------------
+
+type SubServicesData = {
+  data: ISubServiceItem[];
+}
+
+export function useGetSubServices() {
+  const url = endpoints.subService.list;
+
+  const { data, isLoading, error, isValidating } = useSWR<SubServicesData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      subServices: data?.data || [],
+      subServicesLoading: isLoading,
+      subServicesError: error,
+      subServicesValidating: isValidating,
+      subServicesEmpty: !isLoading && !isValidating && !data?.data?.length,
       refetch: () => mutate(url),
     }),
     [data?.data, error, isLoading, isValidating]

@@ -52,6 +52,15 @@ export const endpoints = {
   },
   cashflow: {
     list: '/cashflow',
+    people: '/cashflow/person',
+    properties: '/cashflow/property',
+    transactionTypes: '/transaction-types',
+    waysToPay: '/ways-to-pay',
+    currencies: '/currencies',
+    entities: '/entities',
+  },
+  subService: {
+    list: '/service/subservice'
   },
   service: {
     list: '/service',

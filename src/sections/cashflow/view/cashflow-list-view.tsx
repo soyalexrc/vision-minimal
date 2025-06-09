@@ -164,9 +164,20 @@ export function CashFlowListView() {
           heading="Flujo de caja"
           links={[
             { name: 'Inicio', href: paths.dashboard.root },
+            { name: 'Administración' },
             { name: 'Flujo de Caja', href: paths.dashboard.cashFlow.root },
             { name: 'Listado' },
           ]}
+          action={
+            <Button
+              component="a"
+              href={paths.dashboard.cashFlow.create}
+              variant="contained"
+              startIcon={<Iconify icon="solar:plus-bold" />}
+            >
+              Nueva transacción
+            </Button>
+          }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
 

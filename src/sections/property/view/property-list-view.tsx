@@ -388,8 +388,6 @@ export function PropertyListView() {
                       label="Ver detalle"
                       href={paths.dashboard.properties.details(params.row.id)}
                     />,
-
-
                     <GridActionsCellItem
                       showInMenu
                       disabled={downloadImagesLoading.value}
@@ -428,13 +426,6 @@ export function PropertyListView() {
                           />,
                           <GridActionsCellItem
                             showInMenu
-                            icon={<Iconify icon="lets-icons:check-fill" />}
-                            label="Marcar como activo"
-                            onClick={() => handleActiveInactiveProperty(params.row.id, 'active')}
-                            sx={{ color: 'success.main' }}
-                          />,
-                          <GridActionsCellItem
-                            showInMenu
                             icon={<Iconify icon="lsicon:disable-outline" />}
                             label="Marcar como inactivo"
                             onClick={() => handleActiveInactiveProperty(params.row.id, 'inactive')}
@@ -461,6 +452,17 @@ export function PropertyListView() {
                           label="Restaurar"
                           onClick={() => handleRestoreRow(params.row.id)}
                           sx={{ color: 'info.main' }}
+                        />,
+                      ]
+                      : []),
+                    ...(user.role !== 'ASESOR_INMOBILIARIO' && (params.row.status !== 'deleted' && params.row.status !== 'active')
+                      ? [
+                        <GridActionsCellItem
+                          showInMenu
+                          icon={<Iconify icon="lets-icons:check-fill" />}
+                          label="Marcar como activo"
+                          onClick={() => handleActiveInactiveProperty(params.row.id, 'active')}
+                          sx={{ color: 'success.main' }}
                         />,
                       ]
                       : []),

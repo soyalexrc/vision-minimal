@@ -68,10 +68,39 @@ export type ICashFlowPayment = {
   "transactionTypeData": ICashFlowPaymentTransactionType
 };
 
-export type IOrderDelivery = {
-  shipBy: string;
-  speedy: string;
-  trackingNumber: string;
+export type IPersonCashFlow = {
+  id: number;
+  name: string;
+  source: string;
+};
+
+export type ITransactionType = {
+  id: number;
+  name: string;
+  description?: string;
+};
+
+export type IWayToPay = {
+  id: number;
+  name: string;
+};
+
+export type IEntity = {
+  id: number;
+  name: string;
+};
+
+export type ICurrency = {
+  id: number;
+  name: string;
+  code: string,
+  symbol: string;
+};
+
+export type IPropertyCashFlow = {
+  id: number;
+  name: string;
+  location: string
 };
 
 export type ICashFlowTotalAmount = {

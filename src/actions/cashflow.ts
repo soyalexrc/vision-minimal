@@ -6,9 +6,15 @@ import useSWR, { mutate } from 'swr';
 
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
-import type { IAllyItem } from '../types/ally';
+import {
+  ICashFlowItem, ICurrency,
+  IEntity,
+  IPersonCashFlow,
+  IPropertyCashFlow,
+  ITransactionType,
+  IWayToPay,
+} from '../types/cashflow';
 import type { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
-import { ICashFlowItem } from '../types/cashflow';
 
 // ----------------------------------------------------------------------
 
@@ -36,6 +42,174 @@ export function useGetCashFlows() {
       cashflowError: error,
       cashflowValidating: isValidating,
       cashflowEmpty: !isLoading && !isValidating && !data?.data?.length,
+      refetch: () => mutate(url),
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+
+// ----------------------------------------------------------------------
+
+type PeopleCashFlowData = {
+  data: IPersonCashFlow[];
+}
+
+export function useGetCashFlowPeople() {
+  const url = endpoints.cashflow.people;
+
+  const { data, isLoading, error, isValidating } = useSWR<PeopleCashFlowData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      cashflowPeople: data?.data || [],
+      cashflowPeopleLoading: isLoading,
+      cashflowPeopleError: error,
+      cashflowPeopleValidating: isValidating,
+      cashflowPeopleEmpty: !isLoading && !isValidating && !data?.data?.length,
+      refetch: () => mutate(url),
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+
+// ----------------------------------------------------------------------
+
+// ----------------------------------------------------------------------
+
+type TransactionTypesData = {
+  data: ITransactionType[];
+}
+
+export function useGetCashFlowTransactionTypes() {
+  const url = endpoints.cashflow.transactionTypes;
+
+  const { data, isLoading, error, isValidating } = useSWR<TransactionTypesData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      transactionTypes: data?.data || [],
+      transactionTypesLoading: isLoading,
+      transactionTypesError: error,
+      transactionTypesValidating: isValidating,
+      transactionTypesEmpty: !isLoading && !isValidating && !data?.data?.length,
+      refetch: () => mutate(url),
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+
+// ----------------------------------------------------------------------
+
+
+type WaysToPayData = {
+  data: IWayToPay[];
+}
+
+export function useGetCashFlowWaysToPay() {
+  const url = endpoints.cashflow.waysToPay;
+
+  const { data, isLoading, error, isValidating } = useSWR<WaysToPayData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      waysToPay: data?.data || [],
+      waysToPayLoading: isLoading,
+      waysToPayError: error,
+      waysToPayValidating: isValidating,
+      waysToPayEmpty: !isLoading && !isValidating && !data?.data?.length,
+      refetch: () => mutate(url),
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+
+// ----------------------------------------------------------------------
+
+// ----------------------------------------------------------------------
+
+
+type CurrenciesData = {
+  data: ICurrency[];
+}
+
+export function useGetCashFlowCurrencies() {
+  const url = endpoints.cashflow.currencies;
+
+  const { data, isLoading, error, isValidating } = useSWR<CurrenciesData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      currencies: data?.data || [],
+      currenciesLoading: isLoading,
+      currenciesError: error,
+      currenciesValidating: isValidating,
+      currenciesEmpty: !isLoading && !isValidating && !data?.data?.length,
+      refetch: () => mutate(url),
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+
+// ----------------------------------------------------------------------
+
+type EntitiesData = {
+  data: IEntity[];
+}
+
+export function useGetCashFlowEntities() {
+  const url = endpoints.cashflow.entities;
+
+  const { data, isLoading, error, isValidating } = useSWR<EntitiesData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      entities: data?.data || [],
+      entitiesLoading: isLoading,
+      entitiesError: error,
+      entitiesValidating: isValidating,
+      entitiesEmpty: !isLoading && !isValidating && !data?.data?.length,
+      refetch: () => mutate(url),
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
+
+// ----------------------------------------------------------------------
+
+type PropertyCashFlowData = {
+  data: IPropertyCashFlow[];
+}
+
+export function useGetCashFlowProperties() {
+  const url = endpoints.cashflow.properties;
+
+  const { data, isLoading, error, isValidating } = useSWR<PropertyCashFlowData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      cashflowProperties: data?.data || [],
+      cashflowPropertiesLoading: isLoading,
+      cashflowPropertiesError: error,
+      cashflowPropertiesValidating: isValidating,
+      cashflowPropertiesEmpty: !isLoading && !isValidating && !data?.data?.length,
       refetch: () => mutate(url),
     }),
     [data?.data, error, isLoading, isValidating]
