@@ -17,6 +17,7 @@ import type {
 } from '../types/cashflow';
 import { CashFlowSchemaType } from 'src/sections/cashflow/form/create-update-cashflow-form';
 import { UploadService } from 'src/utils/files/upload';
+import { AxiosResponse } from 'axios';
 
 // ----------------------------------------------------------------------
 
@@ -305,6 +306,20 @@ export async function deleteAlly(id: number) {
   const url = `${endpoints.ally.delete}/${id}`;
   return axios.delete(url);
 }
+
+type CreatePersonResponse = {
+  data: {
+    id: number;
+    name: string;
+    source: string;
+  }
+}
+
+export async function createExternalPerson({ name, source }: { name: string; source: string }): Promise<AxiosResponse<CreatePersonResponse>> {
+  const url = endpoints.cashflow.createPerson;
+  return axios.post(url, { name, source });
+}
+
 
 export async function deleteManyAllies(ids: number[]) {
   const url = `${endpoints.ally.delete}/remove-many`;

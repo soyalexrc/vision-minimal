@@ -24,15 +24,18 @@ import {
   useGetCashFlowTransactionTypes,
   createCashFlow,
   updateCashFlow,
+  createExternalPerson,
 } from '../../../actions/cashflow';
 
 import type { ICashFlowItem } from '../../../types/cashflow';
 import { parseCurrency } from 'src/utils/format-number';
 import utc from 'dayjs/plugin/utc';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { getChangedFields } from 'src/utils/form';
 import { AxiosResponse } from 'axios';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
+import { Iconify } from '../../../components/iconify/iconify';
 
 export const MONTHS = [
   'ENERO',
@@ -135,7 +138,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
   };
   const router = useRouter();
   const { id } = useParams();
-  const { cashflowPeople } = useGetCashFlowPeople();
+  const { cashflowPeople, refetch: refetchPeople } = useGetCashFlowPeople();
   const { cashflowProperties } = useGetCashFlowProperties();
   const { transactionTypes } = useGetCashFlowTransactionTypes();
   const { waysToPay } = useGetCashFlowWaysToPay();
@@ -143,6 +146,10 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
   const { entities } = useGetCashFlowEntities();
   const { services } = useGetServices();
   const { subServices } = useGetSubServices()
+
+   const [openPersonDialog, setOpenPersonDialog] = useState(false);
+  const [newPersonName, setNewPersonName] = useState('');
+ 
 
   const shortUser = {
     id: user?.id,
@@ -175,6 +182,15 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     control,
     name: 'payments',
   });
+
+  const handleCreatePerson = async () => {
+    // Replace with your API call to create a person
+    const response = await createExternalPerson({ name: newPersonName, source: 'CASH_FLOW' });
+    refetchPeople();
+    methods.setValue('person', response.data.data.id);
+    setOpenPersonDialog(false);
+    setNewPersonName('');
+  };
 
   const onSubmit = handleSubmit(async (values) => {
    const data = {
@@ -297,7 +313,8 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     }, [setValue]);
 
   return (
-    <Form methods={methods} onSubmit={onSubmit}>
+    <>
+      <Form methods={methods} onSubmit={onSubmit}>
       {/* --- Sección: Información básica --- */}
       <Section title="Información básica">
         <Box
@@ -314,7 +331,9 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
         >
           <Field.DatePicker disableFuture disabled={!isEdit} size="small" name="date" label="Fecha" />
 
-          <Field.Autocomplete
+          <Stack direction="row" alignItems="center" gap={1}>
+            <Field.Autocomplete
+            sx={{ flexGrow: 1 }}
             name="person"
             label="Persona"
             size="small"
@@ -322,7 +341,6 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             getOptionLabel={(option) => option.name || ''}
             isOptionEqualToValue={(option, value) => option.id === value?.id}
             onChange={(_, newValue) => {
-              // Set just the ID in the form value if newValue exists
               methods.setValue('person', newValue ? newValue.id : null);
             }}
             renderOption={(props, option) => (
@@ -333,6 +351,10 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             // Convert the ID back to the full object for display purposes
             value={cashflowPeople.find((person) => person.id === methods.watch('person')) || null}
           />
+          <IconButton>
+            <Iconify icon="eva:plus-fill" />
+          </IconButton>
+          </Stack>
           <Field.Autocomplete
             name="property"
             label="Inmueble (opcional)"
@@ -614,6 +636,24 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
         )}
       </Stack>
     </Form>
+    <Dialog open={openPersonDialog} onClose={() => setOpenPersonDialog(false)}>
+    <DialogTitle>Crear nueva persona</DialogTitle>
+    <DialogContent>
+      <TextField
+        autoFocus
+        margin="dense"
+        label="Nombre"
+        fullWidth
+        value={newPersonName}
+        onChange={(e) => setNewPersonName(e.target.value)}
+      />
+    </DialogContent>
+    <DialogActions>
+      <Button onClick={() => setOpenPersonDialog(false)}>Cancelar</Button>
+      <Button onClick={handleCreatePerson} disabled={!newPersonName.trim()}>Crear</Button>
+    </DialogActions>
+  </Dialog>
+    </>
   );
 }
 
