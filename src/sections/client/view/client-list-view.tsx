@@ -215,6 +215,26 @@ export function ClientListView() {
     />
   );
 
+  function onCopyInfo(row: IClientItem) {
+    const copyText = `
+      Numero de cliente: ${row.id}
+      Nombre: ${row.name}
+      Teléfono: ${row.phone}
+      Nos contacta desde: ${row.contactFrom}
+      Tipo de inmueble: ${row.propertytype}
+      Inmueble de interés: ${row.propertyOfInterest}
+      Requerimiento especifico: ${row.specificRequirement}
+      Servicio: ${row.serviceName}
+    `;
+
+    navigator.clipboard.writeText(copyText).then(() => {
+      toast.success('Información del cliente copiada al portapapeles');
+    }).catch((error) => {
+      toast.error('Error al copiar la información del cliente');
+      console.error('Error copying text: ', error);
+    });
+  }
+
   return (
     <>
       <DashboardContent>
@@ -328,6 +348,12 @@ export function ClientListView() {
                           />,
                         ]
                       : []),
+                       <GridActionsCellItem
+                            showInMenu
+                            onClick={() => onCopyInfo(params.row)}
+                            icon={<Iconify icon="material-symbols:share" />}
+                            label="Copiar información"
+                          />,
                     ...(params.row.status !== 'deleted' &&
                     params.row.status !== 'concreted' &&
                     (user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id)

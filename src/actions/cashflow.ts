@@ -15,6 +15,8 @@ import type {
   ITransactionType,
   IPropertyCashFlow,
 } from '../types/cashflow';
+import { CashFlowSchemaType } from 'src/sections/cashflow/form/create-update-cashflow-form';
+import { UploadService } from 'src/utils/files/upload';
 
 // ----------------------------------------------------------------------
 
@@ -271,6 +273,33 @@ export function useSearchProducts(query: string) {
 }
 
 // ----------------------------------------------------------------------
+
+
+export async function createCashFlow(payload: CashFlowSchemaType, createdBy: any) {
+    const attachmentsUploaded = payload.attachments.filter((image: any) => typeof image === 'string' && image.startsWith('http'));
+    const attachmentsToUpload = payload.attachments.filter((image: any) => typeof image === 'object' && image instanceof File);
+  
+    if (attachmentsToUpload.length > 0) {
+      const newAttachments  = await UploadService.uploadMultiple(attachmentsToUpload, 'cashflow');
+      payload.attachments = [...attachmentsUploaded, ...newAttachments.urls];
+      console.log('newAttachments', newAttachments);
+    }
+  const url = `${endpoints.cashflow.create}`;
+  return axios.post(url, {...payload, createdBy});
+}
+
+export async function updateCashFlow(payload: CashFlowSchemaType, updatedby: any, id: number) {
+    const attachmentsUploaded = payload.attachments.filter((image: any) => typeof image === 'string' && image.startsWith('http'));
+    const attachmentsToUpload = payload.attachments.filter((image: any) => typeof image === 'object' && image instanceof File);
+  
+    if (attachmentsToUpload.length > 0) {
+      const newAttachments  = await UploadService.uploadMultiple(attachmentsToUpload, 'cashflow');
+      payload.attachments = [...attachmentsUploaded, ...newAttachments.urls];
+      console.log('newAttachments', newAttachments);
+    }
+  const url = `${endpoints.cashflow.edit}`;
+  return axios.put(`${url}/${id}`, {...payload, updatedby});
+}
 
 export async function deleteAlly(id: number) {
   const url = `${endpoints.ally.delete}/${id}`;

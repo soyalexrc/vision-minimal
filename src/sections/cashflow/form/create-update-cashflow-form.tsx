@@ -22,9 +22,17 @@ import {
   useGetCashFlowProperties,
   useGetCashFlowCurrencies,
   useGetCashFlowTransactionTypes,
+  createCashFlow,
+  updateCashFlow,
 } from '../../../actions/cashflow';
 
 import type { ICashFlowItem } from '../../../types/cashflow';
+import { parseCurrency } from 'src/utils/format-number';
+import utc from 'dayjs/plugin/utc';
+import { useCallback } from 'react';
+import { toast } from 'sonner';
+import { getChangedFields } from 'src/utils/form';
+import { AxiosResponse } from 'axios';
 
 export const MONTHS = [
   'ENERO',
@@ -41,6 +49,26 @@ export const MONTHS = [
   'DICIEMBRE',
 ];
 
+const emptyPayment = {
+        id: 0,
+        amount: 0,
+        canon: false,
+        contract: false,
+        currency: 0,
+        entity: 0,
+        guarantee: false,
+        incomeByThird: 0,
+        observation: '',
+        pendingToCollect: 0,
+        reason: '',
+        service: '',
+        serviceType: '',
+        taxPayer: '',
+        totalDue: 0,
+        transactionType: 0,
+        wayToPay: 0,
+      };
+
 export type CashFlowSchemaType = z.infer<typeof CashFlowSchema>;
 
 export const CashFlowSchema = z.object({
@@ -48,11 +76,12 @@ export const CashFlowSchema = z.object({
   property: z.number().nullable().optional(),
   person: z.number().nullable().optional(),
   owner: z.number().nullable().optional(),
+  user: z.number().optional(),
   client: z.number().nullable().optional(),
-  date: z.date(),
+  date: z.any(),
   month: z.string(),
   location: z.string().optional(),
-  attachments: z.array(z.string()).optional(),
+  attachments: z.any().optional(),
   temporalTransactionId: z.any().optional(),
   isTemporalTransaction: z.any().optional(),
   payments: z.array(
@@ -84,43 +113,28 @@ type Props = {
 };
 
 export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Props) {
+  const { user } = useAuthContext();
   const defaultValues: CashFlowSchemaType = {
     id: undefined,
     property: null,
     person: null,
     owner: null,
     client: null,
+    user: user.id,
     date: new Date(),
     month: '',
     location: '',
     attachments: [],
-    temporalTransactionId: undefined,
-    isTemporalTransaction: undefined,
+    temporalTransactionId: null,
+    isTemporalTransaction: false,
     payments: [
       {
-        id: 0,
-        amount: 0,
-        canon: false,
-        contract: false,
-        currency: 0,
-        entity: 0,
-        guarantee: false,
-        incomeByThird: 0,
-        observation: '',
-        pendingToCollect: 0,
-        reason: '',
-        service: '',
-        serviceType: '',
-        taxPayer: '',
-        totalDue: 0,
-        transactionType: 0,
-        wayToPay: 0,
+        ...emptyPayment,
       },
     ],
   };
   const router = useRouter();
   const { id } = useParams();
-  const { user } = useAuthContext();
   const { cashflowPeople } = useGetCashFlowPeople();
   const { cashflowProperties } = useGetCashFlowProperties();
   const { transactionTypes } = useGetCashFlowTransactionTypes();
@@ -146,6 +160,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
   const {
     reset,
+    setValue,
     handleSubmit,
     watch,
     control,
@@ -161,40 +176,51 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     name: 'payments',
   });
 
-  const onSubmit = handleSubmit(async (data) => {
-    // const promise = await (async () => {
-    //   let response: AxiosResponse<any>;
-    //   if (currentCashFlow?.id) {
-    //     const changes = getChangedFields(data, currentCashFlow);
-    //
-    //     if (Object.keys(changes).length === 0) {
-    //       console.log('No changes made.');
-    //       return 'No se detectaron cambios en el registro.';
-    //     }
-    //     response = await updateClient({ ...data, updatedby: shortUser }, currentCashFlow.id);
-    //   } else {
-    //     response = await createClient({ ...data, createdby: shortUser });
-    //   }
-    //
-    //   if (response.status === 200 || response.status === 201) {
-    //     return response.data?.message;
-    //   } else {
-    //     throw new Error(response.data?.message);
-    //   }
-    // })();
+  const onSubmit = handleSubmit(async (values) => {
+   const data = {
+      ...values,
+      payments: values.payments.map((payment) => ({
+        ...payment,
+        amount: parseCurrency(payment.amount),
+        totalDue: parseCurrency(payment.totalDue),
+        pendingToCollect: parseCurrency(payment.pendingToCollect),
+        incomeByThird: parseCurrency(payment.incomeByThird),
+      })),
+    };
 
-    // toast.promise(promise, {
-    //   loading: 'Cargando...',
-    //   success: (message: string) => message || 'Registro actualizado!',
-    //   error: (error) => error || 'Error al actualizar el registro!',
-    // });
+    const promise = await (async () => {
+      let response: AxiosResponse<any>;
+      if (currentCashFlow?.id) {
+        const changes = getChangedFields(data, currentCashFlow);
+    
+        if (Object.keys(changes).length === 0) {
+          console.log('No changes made.');
+          return 'No se detectaron cambios en el registro.';
+        }
+        response = await updateCashFlow(data, shortUser, currentCashFlow.id);
+      } else {
+        response = await createCashFlow(data, shortUser);
+      }
+    
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
+
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registro actualizado!',
+      error: (error) => error || 'Error al actualizar el registro!',
+    });
 
     try {
-      // await promise;
-      // reset();
+      await promise;
+      reset();
       // refresh();
       // refreshCurrent();
-      // router.push('/dashboard/clients');
+      router.push('/dashboard/cashFlow');
     } catch (error) {
       console.error(error);
     }
@@ -255,6 +281,21 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     return subServices.filter(sub => sub.serviceId === fullService.id);
   }
 
+
+    const watchedAttachments = watch('attachments')
+  
+    const handleRemoveFile = useCallback(
+      (inputFile: File | string) => {
+        const filtered = watchedAttachments && watchedAttachments?.filter((file: any) => file !== inputFile);
+        setValue('attachments', filtered);
+      },
+      [setValue, watchedAttachments]
+    );
+  
+    const handleRemoveAllFiles = useCallback(() => {
+      setValue('attachments', [], { shouldValidate: true });
+    }, [setValue]);
+
   return (
     <Form methods={methods} onSubmit={onSubmit}>
       {/* --- Sección: Información básica --- */}
@@ -271,7 +312,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             },
           }}
         >
-          <Field.DatePicker disabled={!isEdit} size="small" name="date" label="Fecha" />
+          <Field.DatePicker disableFuture disabled={!isEdit} size="small" name="date" label="Fecha" />
 
           <Field.Autocomplete
             name="person"
@@ -301,7 +342,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             isOptionEqualToValue={(option, value) => option.id === value?.id}
             onChange={(_, newValue) => {
               // Set just the ID in the form value if newValue exists
-              methods.setValue('person', newValue ? newValue.id : null);
+              methods.setValue('property', newValue ? newValue.id : null);
             }}
             renderOption={(props, option) => (
               <li {...props} key={option.id}>
@@ -309,7 +350,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
               </li>
             )}
             // Convert the ID back to the full object for display purposes
-            value={cashflowPeople.find((person) => person.id === methods.watch('person')) || null}
+            value={cashflowProperties.find((property) => property.id === methods.watch('property')) || null}
           />
           <Field.Select disabled={!isEdit} size="small" name="month" label="Mes">
             {MONTHS.map((month) => (
@@ -524,6 +565,33 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
           </Box>
         ))}
       </Section>
+      
+            <Box display="flex" justifyContent="center" my={3}>
+        <Button onClick={() => appendPayment({ ...emptyPayment })} variant="contained" >+ Agregar Pago adicional</Button>
+      </Box>
+
+      <Box sx={{ gridColumn: '1 / -1' }} >
+         <Typography variant="h5" mb={2}>Cargar Evidencias</Typography>
+         <Field.Upload
+           multiple
+           thumbnail
+           accept={{
+            'image/*': [],
+            'application/pdf': [],
+            'application/vnd.ms-excel': [],
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [],
+            'application/msword': [],
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document': [],
+            'video/*': [],
+           }}
+           name="attachments"
+           maxSize={1073741824}
+           onRemove={handleRemoveFile}
+           onRemoveAll={handleRemoveAllFiles}
+         />
+          </Box>
+
+
 
       {/*  Button to submit*/}
       <Stack direction="row" justifyContent="flex-end" gap={4} mt={2} mb={5}>

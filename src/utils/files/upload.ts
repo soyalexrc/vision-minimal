@@ -19,10 +19,11 @@ export class UploadService {
   /**
    * Upload a single file
    */
-  static async uploadSingle(file: File): Promise<UploadResult> {
+  static async uploadSingle(file: File, folder: string = 'images'): Promise<UploadResult> {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('folder', folder);
 
       const response = await axiosInstance.post<UploadResult>(`r2/upload/single`, formData);
 
@@ -43,9 +44,10 @@ export class UploadService {
   /**
    * Upload multiple files
    */
-  static async uploadMultiple(files: File[]): Promise<MultipleUploadResult> {
+  static async uploadMultiple(files: File[], folder: string = 'images'): Promise<MultipleUploadResult> {
     try {
       const formData = new FormData();
+      formData.append('folder', folder);
       files.forEach(file => {
         formData.append('files', file);
       });

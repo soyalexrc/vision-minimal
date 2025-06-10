@@ -1,6 +1,7 @@
 import type { AxiosRequestConfig } from 'axios';
 
 import axios from 'axios';
+import { create } from 'domain';
 
 import { CONFIG } from 'src/global-config';
 
@@ -52,6 +53,8 @@ export const endpoints = {
   },
   cashflow: {
     list: '/cashflow',
+    create: '/cashflow',
+    edit: '/cashflow',
     people: '/cashflow/person',
     properties: '/cashflow/property',
     transactionTypes: '/transaction-types',
