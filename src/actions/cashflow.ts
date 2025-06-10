@@ -1,6 +1,10 @@
+import type { AxiosResponse } from 'axios';
 import type { SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
-import type { CashFlowSchemaType } from 'src/sections/cashflow/form/create-update-cashflow-form';
+import type {
+  CashFlowSchemaType,
+  ExternalPersonSchemaType, ExternalPropertySchemaType,
+} from 'src/sections/cashflow/form/create-update-cashflow-form';
 
 import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
@@ -18,9 +22,6 @@ import type {
   ITransactionType,
   IPropertyCashFlow,
 } from '../types/cashflow';
-import { CashFlowSchemaType } from 'src/sections/cashflow/form/create-update-cashflow-form';
-import { UploadService } from 'src/utils/files/upload';
-import { AxiosResponse } from 'axios';
 
 // ----------------------------------------------------------------------
 
@@ -282,7 +283,7 @@ export function useSearchProducts(query: string) {
 export async function createCashFlow(payload: CashFlowSchemaType, createdBy: any) {
     const attachmentsUploaded = payload.attachments.filter((image: any) => typeof image === 'string' && image.startsWith('http'));
     const attachmentsToUpload = payload.attachments.filter((image: any) => typeof image === 'object' && image instanceof File);
-  
+
     if (attachmentsToUpload.length > 0) {
       const newAttachments  = await UploadService.uploadMultiple(attachmentsToUpload, 'cashflow');
       payload.attachments = [...attachmentsUploaded, ...newAttachments.urls];
@@ -295,7 +296,7 @@ export async function createCashFlow(payload: CashFlowSchemaType, createdBy: any
 export async function updateCashFlow(payload: CashFlowSchemaType, updatedby: any, id: number) {
     const attachmentsUploaded = payload.attachments.filter((image: any) => typeof image === 'string' && image.startsWith('http'));
     const attachmentsToUpload = payload.attachments.filter((image: any) => typeof image === 'object' && image instanceof File);
-  
+
     if (attachmentsToUpload.length > 0) {
       const newAttachments  = await UploadService.uploadMultiple(attachmentsToUpload, 'cashflow');
       payload.attachments = [...attachmentsUploaded, ...newAttachments.urls];
@@ -318,9 +319,14 @@ type CreatePersonResponse = {
   }
 }
 
-export async function createExternalPerson({ name, source }: { name: string; source: string }): Promise<AxiosResponse<CreatePersonResponse>> {
+export async function createExternalPerson(payload: ExternalPersonSchemaType): Promise<AxiosResponse<CreatePersonResponse>> {
   const url = endpoints.cashflow.createPerson;
-  return axios.post(url, { name, source });
+  return axios.post(url, payload);
+}
+
+export async function createExternalProperty(payload: ExternalPropertySchemaType): Promise<AxiosResponse<CreatePersonResponse>> {
+  const url = endpoints.cashflow.createProperty;
+  return axios.post(url, payload);
 }
 
 

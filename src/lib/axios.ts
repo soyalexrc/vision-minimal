@@ -55,6 +55,7 @@ export const endpoints = {
     create: '/cashflow',
     edit: '/cashflow',
     createPerson: '/cashflow/person',
+    createProperty: '/cashflow/property',
     people: '/cashflow/person',
     properties: '/cashflow/property',
     transactionTypes: '/transaction-types',
