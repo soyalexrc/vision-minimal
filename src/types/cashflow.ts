@@ -155,6 +155,7 @@ export type ICashFlowItem = {
   payments: ICashFlowPayment[];
   attachments: string[];
   property?: number;
+  type: string;
   total_amount: ICashFlowTotalAmount[];
   propertydata?: ICashFlowPropertyData;
   clientdata?: ICashFlowClientData;

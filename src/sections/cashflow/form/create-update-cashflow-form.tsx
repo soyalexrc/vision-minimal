@@ -1,26 +1,33 @@
 import type { AxiosResponse } from 'axios';
 
 import { z } from 'zod';
+import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { useState, useCallback } from 'react';
+import { varAlpha } from 'minimal-shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import Tabs from '@mui/material/Tabs';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
-import { Dialog, TextField, DialogTitle, DialogActions, DialogContent } from '@mui/material';
+import { Dialog, DialogTitle, DialogActions, DialogContent } from '@mui/material';
 
 import { getChangedFields } from 'src/utils/form';
 import { parseCurrency } from 'src/utils/format-number';
 
+import { Label } from '../../../components/label';
 import { useAuthContext } from '../../../auth/hooks';
+import { Iconify } from '../../../components/iconify';
 import { Form, Field } from '../../../components/hook-form';
 import { useParams, useRouter } from '../../../routes/hooks';
+import { useGetProperties } from '../../../actions/property';
 import { useGetServices, useGetSubServices } from '../../../actions/service';
 import {
   createCashFlow,
@@ -28,15 +35,14 @@ import {
   useGetCashFlowPeople,
   createExternalPerson,
   useGetCashFlowEntities,
+  createExternalProperty,
   useGetCashFlowWaysToPay,
   useGetCashFlowProperties,
   useGetCashFlowCurrencies,
   useGetCashFlowTransactionTypes,
-  createExternalProperty,
 } from '../../../actions/cashflow';
 
-import type { ICashFlowItem } from '../../../types/cashflow';
-import { Iconify } from '../../../components/iconify';
+import type { ICashFlowItem, IPropertyCashFlow } from '../../../types/cashflow';
 
 export const MONTHS = [
   'ENERO',
@@ -58,8 +64,8 @@ const emptyPayment = {
   amount: 0,
   canon: false,
   contract: false,
-  currency: 0,
-  entity: 0,
+  currency: null,
+  entity: null,
   guarantee: false,
   incomeByThird: 0,
   observation: '',
@@ -69,8 +75,8 @@ const emptyPayment = {
   serviceType: '',
   taxPayer: '',
   totalDue: 0,
-  transactionType: 0,
-  wayToPay: 0,
+  transactionType: null,
+  wayToPay: null,
 };
 
 export type CashFlowSchemaType = z.infer<typeof CashFlowSchema>;
@@ -96,6 +102,7 @@ export const CashFlowSchema = z.object({
   client: z.number().nullable().optional(),
   date: z.any(),
   month: z.string().optional(),
+  type: z.string().optional(),
   location: z.string().optional(),
   attachments: z.any().optional(),
   temporalTransactionId: z.any().optional(),
@@ -111,10 +118,10 @@ export const CashFlowSchema = z.object({
       service: z.string(),
       taxPayer: z.string().optional(),
       amount: z.any().optional(),
-      currency: z.number().optional(),
-      wayToPay: z.number().optional(),
-      entity: z.number().optional(),
-      transactionType: z.number().optional(),
+      currency: z.number().nullable().optional(),
+      wayToPay: z.number().nullable().optional(),
+      entity: z.number().nullable().optional(),
+      transactionType: z.number().nullable().optional(),
       totalDue: z.any().optional(),
       incomeByThird: z.any().optional(),
       pendingToCollect: z.any().optional(),
@@ -141,6 +148,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     month: '',
     location: '',
     attachments: [],
+    type: 'regular',
     temporalTransactionId: null,
     isTemporalTransaction: false,
     payments: [
@@ -199,6 +207,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
   const onSubmit = handleSubmit(async (values) => {
     const data = {
       ...values,
+      date: dayjs(values.date).format('YYYY-MM-DD'),
       payments: values.payments.map((payment) => ({
         ...payment,
         amount: parseCurrency(payment.amount),
@@ -248,12 +257,13 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
   function showWayToPay(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType !== 2 && transactionType !== 5;
+    // return transactionType !== 2 && transactionType !== 5;
+    return true;
   }
 
   function showEntity(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType === 1 || transactionType === 2 || transactionType === 3;
+    return transactionType === 1 || transactionType === 3;
   }
 
   function showAmount(i: number) {
@@ -410,6 +420,17 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             {/*</Field.Select>*/}
 
             <Field.Text disabled={!isEdit} size="small" name="location" label="Ubicacion" />
+            <Field.Select
+              disabled={!isEdit}
+              size="small"
+              name="type"
+              label="Tipo de transacción"
+            >
+              <MenuItem value="regular">Regular</MenuItem>
+              <MenuItem value="change">Cambio</MenuItem>
+              <MenuItem value="return">Devolución</MenuItem>
+              <MenuItem value="refund">Reintegro</MenuItem>
+            </Field.Select>
           </Box>
         </Section>
 
@@ -601,7 +622,6 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                   </Box>
                 )}
 
-
                 {/*<Field.Currency*/}
                 {/*  disabled={!isEdit}*/}
                 {/*  size="small"*/}
@@ -696,6 +716,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
       />
       <ExternalPropertyDialogForm
         open={openPropertyDialog}
+        cashflowProperties={cashflowProperties}
         setOpen={setOpenPropertyDialog}
         onSubmitFinished={async (idProperty: number) => {
           setValue('property', idProperty);
@@ -762,12 +783,15 @@ const ExternalPersonDialogForm = ({
 const ExternalPropertyDialogForm = ({
   open,
   setOpen,
+  cashflowProperties,
   onSubmitFinished,
 }: {
   open: boolean;
+  cashflowProperties: IPropertyCashFlow[];
   setOpen: (value: boolean) => void;
   onSubmitFinished: (id: number) => void;
 }) => {
+  const { properties } = useGetProperties();
   const methods = useForm<ExternalPropertySchemaType>({
     mode: 'all',
     resolver: zodResolver(ExternalPropertySchema),
@@ -790,21 +814,104 @@ const ExternalPropertyDialogForm = ({
     reset();
   });
 
+  const [tabValue, setTabValue] = useState('form');
+
+  const handleChangeTab = useCallback(
+    (event: React.SyntheticEvent, newValue: string) => {
+      setTabValue(newValue);
+    },
+    [tabValue, setTabValue]
+  );
+
+  const filteredProperties = properties.filter(p =>
+    // Only include properties with a valid publication title
+    p.publicationTitle && p.publicationTitle.trim() !== '' &&
+    // And only include those that don't exist in cashflowProperties
+    !cashflowProperties.some(cfp => cfp.name === p.publicationTitle)
+  );
   return (
     <Dialog open={open} onClose={() => setOpen(false)}>
       <Form methods={methods} onSubmit={onLocalSubmit}>
-        <DialogTitle>Crear nueva persona</DialogTitle>
+        <DialogTitle>Crear nuevo inmueble</DialogTitle>
         <DialogContent>
-          <Field.Text sx={{ mt: 1 }} name="name" label="Nombre" />
-          <Field.Text sx={{ mt: 3 }} name="location" label="Ubicacion (opcional)" />
+          <Tabs
+            value={tabValue}
+            onChange={handleChangeTab}
+            sx={[
+              (theme) => ({
+                px: 2.5,
+                boxShadow: `inset 0 -2px 0 0 ${varAlpha(theme.vars.palette.grey['500Channel'], 0.08)}`,
+              }),
+            ]}
+          >
+            <Tab iconPosition="end" value="form" label="Formulario" />
+            <Tab iconPosition="end" value="select" label="Seleccionar de inventario"
+            icon={
+              <Label
+                variant={(tabValue === 'select' && 'filled') || 'soft'}
+                color="default"
+              >
+                {filteredProperties.length}
+              </Label>
+            }/>
+          </Tabs>
+
+          {tabValue === 'form' && (
+            <Box mt={2}>
+              <Field.Text sx={{ mt: 1 }} name="name" label="Nombre" />
+              <Field.Text sx={{ mt: 3 }} name="location" label="Ubicacion (opcional)" />
+            </Box>
+          )}
+
+          {tabValue === 'select' && (
+            <Box display="flex" justifyContent="center" alignItems="center" mt={2} height={141}>
+              <Field.Autocomplete
+                name="name"
+                sx={{ width: 406 }}
+                label="Seleccionar"
+                options={filteredProperties}
+                getOptionLabel={(option) => option.publicationTitle || ''}
+                isOptionEqualToValue={(option, value) => {
+                  console.log({ option: option.publicationTitle, value });
+                  // For text comparison since we're storing the title
+                  return option.publicationTitle === value;
+                }}
+                onChange={(_, newValue) => {
+                  // Set the publication title directly
+                  methods.setValue('name', newValue ? newValue.publicationTitle : '');
+                  // Optionally set location too if available
+                  if (newValue?.address) {
+                    methods.setValue('location', newValue.address);
+                  }
+                }}
+                renderOption={(props, option) => (
+                  <li {...props} key={option.id}>
+                    {option.publicationTitle}
+                  </li>
+                )}
+                // Convert the ID back to the full object for display purposes
+                value={
+                  properties.find((person) => person.publicationTitle === methods.watch('name')) ||
+                  null
+                }
+              />
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button type="button" onClick={() => setOpen(false)}>
             Cancelar
           </Button>
-          <Button type="submit" disabled={isSubmitting} variant="contained">
-            {isSubmitting ? 'Creando...' : 'Crear'}
-          </Button>
+          {tabValue === 'form' && (
+            <Button type="submit" disabled={isSubmitting} variant="contained">
+              {isSubmitting ? 'Creando...' : 'Crear'}
+            </Button>
+          )}
+          {tabValue === 'select' && (
+            <Button type="button" variant="contained" onClick={() => setTabValue('form')}>
+              Continuar
+            </Button>
+          )}
         </DialogActions>
       </Form>
     </Dialog>

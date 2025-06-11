@@ -20,7 +20,6 @@ import { paths } from 'src/routes/paths';
 
 import { fIsAfter, fIsBetween } from 'src/utils/format-time';
 
-import { ORDER_STATUS_OPTIONS } from 'src/_mock';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
@@ -41,16 +40,24 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { getStatus } from '../../../utils/get-status';
 import { CashFlowTableRow } from '../cashflow-table-row';
 import { useGetCashFlows } from '../../../actions/cashflow';
 import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 import { CashFlowTableFiltersResult } from '../cashflow-table-filters-result';
 
+import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
 
 // ----------------------------------------------------------------------
 
-const STATUS_OPTIONS = [{ value: 'all', label: 'All' }, ...ORDER_STATUS_OPTIONS];
+const STATUS_OPTIONS = [
+  { value: 'all', label: 'Todos' },
+  { value: 'regular', label: 'Regular' },
+  { value: 'change', label: 'Cambio' },
+  { value: 'return', label: 'Devolucion' },
+  { value: 'refund', label: 'Reintegro' },
+];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID', width: 88 },
@@ -204,15 +211,10 @@ export function CashFlowListView() {
                       ((tab.value === 'all' || tab.value === currentFilters.status) && 'filled') ||
                       'soft'
                     }
-                    color={
-                      (tab.value === 'completed' && 'success') ||
-                      (tab.value === 'pending' && 'warning') ||
-                      (tab.value === 'cancelled' && 'error') ||
-                      'default'
-                    }
+                    color={getStatus(tab.value as GetStatusType)?.variant || 'default'}
                   >
-                    {['completed', 'pending', 'cancelled', 'refunded'].includes(tab.value)
-                      ? tableData.filter((cf) => 'sample' === tab.value).length
+                    {['change', 'regular', 'refund', 'return'].includes(tab.value)
+                      ? tableData.filter((cf) => cf.type === tab.value).length
                       : tableData.length}
                   </Label>
                 }
@@ -347,9 +349,9 @@ function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterP
   //   );
   // }
 
-  // if (status !== 'all') {
-  //   inputData = inputData.filter((order) => order.status === status);
-  // }
+  if (status !== 'all') {
+    inputData = inputData.filter((order) => order.type === status);
+  }
 
   if (!dateError) {
     if (startDate && endDate) {

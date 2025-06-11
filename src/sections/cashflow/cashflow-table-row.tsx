@@ -26,9 +26,11 @@ import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
 import { CustomPopover } from 'src/components/custom-popover';
 
+import { getStatus } from '../../utils/get-status';
 import { formatNumericId } from '../../utils/format-string';
 
 import type { ICashFlowItem } from '../../types/cashflow';
+import type { GetStatusType } from '../../utils/get-status';
 
 // ----------------------------------------------------------------------
 
@@ -111,14 +113,9 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
       <TableCell>
         <Label
           variant="soft"
-          color={
-            // (row.status === 'completed' && 'success') ||
-            // (row.status === 'pending' && 'warning') ||
-            // (row.status === 'cancelled' && 'error') ||
-            'default'
-          }
+          color={getStatus(row.type as GetStatusType)?.variant || 'default'}
         >
-          row.status
+          {getStatus(row.type as GetStatusType).name}
         </Label>
       </TableCell>
 
@@ -161,6 +158,7 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
                 })}
               >
                 <ListItemText
+
                   primary={item.service + ' ' + (item.serviceType ?? '')}
                   secondary={item.reason}
                   slotProps={{
@@ -180,12 +178,15 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
                     </Typography>
                     <Typography variant="body2">{item.transactionTypeData.name}</Typography>
                   </Stack>
-                  <Stack>
-                    <Typography variant="caption" fontWeight="bold">
-                      Entidad
-                    </Typography>
-                    <Typography variant="body2">{item.entityData.name}</Typography>
-                  </Stack>
+                  {
+                    item.entityData && item.entityData.name &&
+                    <Stack>
+                      <Typography variant="caption" fontWeight="bold">
+                        Entidad
+                      </Typography>
+                      <Typography variant="body2">{item.entityData.name}</Typography>
+                    </Stack>
+                  }
                   <Stack>
                     <Typography variant="caption" fontWeight="bold">
                       Forma de pago

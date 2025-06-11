@@ -30,6 +30,7 @@ import relativeTime from 'dayjs/plugin/relativeTime';
  */
 
 dayjs.extend(duration);
+dayjs.extend(utc);
 dayjs.extend(relativeTime);
 
 // ----------------------------------------------------------------------
@@ -86,8 +87,6 @@ export function fDate(date: DatePickerFormat, template?: string): string {
 }
 
 export function fDateUTC(date: DatePickerFormat, template?: string): string {
-  dayjs.extend(utc);
-
   if (!isValidDate(date)) {
     return 'Invalid date';
   }

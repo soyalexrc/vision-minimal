@@ -1,6 +1,6 @@
 import type { LabelColor } from '../components/label';
 
-export type GetStatusType = 'active' | 'featured' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
+export type GetStatusType = 'active' | 'refund' | 'return' | 'regular' | 'change' | 'featured' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
 
 export type GetStatusReturnType = {
   color: string;
@@ -16,6 +16,13 @@ export const getStatus = (status: GetStatusType): GetStatusReturnType => {
         color: '#229A16',
         backgroundColor: '#E4F8DD',
         name: "Aprobado",
+        variant: "success"
+      };
+    case 'regular':
+      return {
+        color: '#229A16',
+        backgroundColor: '#E4F8DD',
+        name: "Regular",
         variant: "success"
       };
     case 'yes':
@@ -101,6 +108,27 @@ export const getStatus = (status: GetStatusType): GetStatusReturnType => {
         backgroundColor: '#F4FCFE',
         name: "Pagado",
         variant: "success"
+      };
+    case 'change':
+      return {
+        color: '#206373',
+        backgroundColor: '#F4FCFE',
+        name: "Cambio",
+        variant: "info"
+      };
+    case 'return':
+      return {
+        color: '#B76E00',
+        backgroundColor: '#FFF1D6',
+        name: "Devolución",
+        variant: "warning"
+      };
+    case 'refund':
+      return {
+        color: '#229A16',
+        backgroundColor: '#E4F8DD',
+        name: "Reintegro",
+        variant: "secondary"
       };
     case 'rejected':
       return {
