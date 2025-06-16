@@ -2,6 +2,7 @@ import type { AxiosResponse } from 'axios';
 import type { UseFormRegister } from 'react-hook-form';
 
 import { z } from 'zod';
+import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
 
@@ -26,7 +27,6 @@ import { parseCurrency } from '../../../utils/format-number';
 import { createClient, updateClient, useGetClient, useGetClients } from '../../../actions/client';
 
 import type { IClientItem } from '../../../types/client';
-import { useEffect } from 'react';
 
 export const CONTACT_FROM_OPTIONS = [
   { value: 'Mercado Libre', label: 'Mercado Libre' },
