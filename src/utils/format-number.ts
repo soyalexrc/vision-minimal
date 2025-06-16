@@ -1,4 +1,4 @@
- 
+
 import { formatNumberLocale } from 'src/locales';
 
 // ----------------------------------------------------------------------
@@ -109,5 +109,5 @@ export function fData(inputValue: InputNumberValue) {
 
 export const parseCurrency = (value: string): number => {
   if (!value) return 0;
-  return Number(value.replace(/[^0-9.-]+/g, ''));
+  return Number(value?.replace(/[^0-9.-]+/g, ''));
 };

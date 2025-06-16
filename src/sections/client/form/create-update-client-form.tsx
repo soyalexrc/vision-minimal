@@ -26,6 +26,7 @@ import { parseCurrency } from '../../../utils/format-number';
 import { createClient, updateClient, useGetClient, useGetClients } from '../../../actions/client';
 
 import type { IClientItem } from '../../../types/client';
+import { useEffect } from 'react';
 
 export const CONTACT_FROM_OPTIONS = [
   { value: 'Mercado Libre', label: 'Mercado Libre' },
@@ -187,7 +188,6 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     mode: 'all',
     resolver: zodResolver(ClientFormSchema),
     defaultValues,
-    values: currentClient ? { ...currentClient } : defaultValues,
   });
 
   const {
@@ -229,10 +229,11 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
   const { categories } = useGetCategories();
 
   const onSubmit = handleSubmit(async (values) => {
+    console.log('values', values);
     const data = {
       ...values,
-      budgetfrom: parseCurrency(values.budgetfrom),
-      budgetto: parseCurrency(values.budgetto),
+      budgetfrom: typeof values.budgetfrom === 'string' ? parseCurrency(values.budgetfrom) : values.budgetfrom,
+      budgetto: typeof values.budgetto === 'string' ? parseCurrency(values.budgetto) : values.budgetto,
       amountOfYounger:
         typeof values.amountOfYounger === 'string'
           ? Number(values.amountOfYounger)
@@ -257,6 +258,10 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
       }
 
       if (response.status === 200 || response.status === 201) {
+          refresh();
+        if (currentClient?.id) {
+          refreshCurrent();
+        }
         return response.data?.message;
       } else {
         throw new Error(response.data?.message);
@@ -272,13 +277,19 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     try {
       await promise;
       reset();
-      refresh();
-      refreshCurrent();
       router.push('/dashboard/clients');
     } catch (error) {
       console.error(error);
     }
   });
+
+  useEffect(() => {
+    if (currentClient) {
+      reset(currentClient);
+    } else {
+      reset(defaultValues);
+    }
+  }, [currentClient, reset]);
 
   return (
     <Form methods={methods} onSubmit={onSubmit}>
