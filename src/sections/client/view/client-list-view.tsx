@@ -327,7 +327,7 @@ export function ClientListView() {
                   disableColumnMenu: true,
                   headerAlign: 'center',
                   getActions: (params) => [
-                    ...(user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id
+                    ...(user.role !== 'ASESOR_INMOBILIARIO' || params.row.createdby?.id == user.id || params.row.assignedto?.id == user.id
                       ? [
                           <GridActionsLinkItem
                             showInMenu
@@ -338,7 +338,7 @@ export function ClientListView() {
                         ]
                       : []),
                     ...(params.row.status !== 'deleted' &&
-                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id)
+                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.createdby?.id == user.id || params.row.assignedto?.id == user.id)
                       ? [
                           <GridActionsLinkItem
                             showInMenu
@@ -356,7 +356,7 @@ export function ClientListView() {
                           />,
                     ...(params.row.status !== 'deleted' &&
                     params.row.status !== 'concreted' &&
-                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id)
+                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.createdby?.id == user.id || params.row.assignedto?.id == user.id)
                       ? [
                           <GridActionsCellItem
                             showInMenu
@@ -383,7 +383,7 @@ export function ClientListView() {
                       : []),
 
                     ...(params.row.status === 'deleted' &&
-                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.adviserId == user.id)
+                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.createdby?.id === user.id || params.row.assignedto?.id === user.id)
                       ? [
                           <GridActionsCellItem
                             showInMenu
