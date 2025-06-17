@@ -151,8 +151,8 @@ export async function createUpdateProperty(payload: PropertyFormSchemaType, type
     console.log('newImagesUploaded', newImagesUploaded);
   }
 
-  const documentsUploaded = payload.documents.filter((doc: any) => typeof doc === 'string' && doc.startsWith('http'));
-  const documentsToUpload = payload.documents.filter((doc: any) => typeof doc === 'object' && doc instanceof File);
+  const documentsUploaded = payload.documents && payload.documents.length > 0 ? payload.documents.filter((doc: any) => typeof doc === 'string' && doc.startsWith('http')) : [];
+  const documentsToUpload = payload.documents && payload.documents.length > 0 ? payload.documents.filter((doc: any) => typeof doc === 'object' && doc instanceof File) : [];
 
 
   if (documentsToUpload.length > 0) {
@@ -161,6 +161,8 @@ export async function createUpdateProperty(payload: PropertyFormSchemaType, type
 
     console.log('newDocumentsUploaded', newDocumentsUploaded);
   }
+
+  payload.documents = payload.documents || [];
 
   payload.adjacencies = payload.adjacencies.filter((item: AdjacencyFormField) => item?.value === 'true');
   payload.attributes = payload.attributes.filter((item: AttributeFormField) => item?.value === 'true');
