@@ -222,20 +222,20 @@ export function CashFlowListView() {
             ))}
           </Tabs>
 
-          <CashFlowTableToolbar
+          {/* <CashFlowTableToolbar
             filters={filters}
             onResetPage={table.onResetPage}
             dateError={dateError}
-          />
+          /> */}
 
-          {canReset && (
+          {/* {canReset && (
             <CashFlowTableFiltersResult
               filters={filters}
               totalResults={dataFiltered.length}
               onResetPage={table.onResetPage}
               sx={{ p: 2.5, pt: 0 }}
             />
-          )}
+          )} */}
 
           <Box sx={{ position: 'relative' }}>
             <TableSelectedAction

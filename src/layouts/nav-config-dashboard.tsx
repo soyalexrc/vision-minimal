@@ -122,19 +122,19 @@ export const navData: NavSectionProps['data'] = [
         title: 'Admimistración interna',
         path: paths.dashboard.admin.internal,
         icon: ICONS.job,
-        allowedRoles: ['ADMINISTRADOR', 'TI'],
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'ADMINISTRADOR_DE_EMPRESA'],
       },
       {
         title: 'Gestión de archivos',
         path: paths.dashboard.admin.fileManager,
         icon: ICONS.folder,
-        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS'],
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ADMINISTRADOR_DE_EMPRESA'],
       },
       {
         title: 'Flujo de caja',
         path: paths.dashboard.admin.cashFlow,
         icon: ICONS.invoice,
-        allowedRoles: ['ADMINISTRADOR', 'TI'],
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'ADMINISTRADOR_DE_EMPRESA'],
       },
       {
         title: 'Calculo de comision',
