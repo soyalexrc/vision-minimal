@@ -56,7 +56,6 @@ const STATUS_OPTIONS = [
   { value: 'regular', label: 'Regular' },
   { value: 'change', label: 'Cambio' },
   { value: 'return', label: 'Devolucion' },
-  { value: 'refund', label: 'Reintegro' },
 ];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
@@ -213,7 +212,7 @@ export function CashFlowListView() {
                     }
                     color={getStatus(tab.value as GetStatusType)?.variant || 'default'}
                   >
-                    {['change', 'regular', 'refund', 'return'].includes(tab.value)
+                    {['change', 'regular', 'return'].includes(tab.value)
                       ? tableData.filter((cf) => cf.type === tab.value).length
                       : tableData.length}
                   </Label>

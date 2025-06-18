@@ -263,7 +263,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
   function showEntity(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType === 1 || transactionType === 3;
+    return transactionType === 1 || transactionType === 3 || transactionType === 6;
   }
 
   function showAmount(i: number) {
@@ -294,12 +294,17 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
   function showTaxPayerOptions(i: number) {
     const service = watch(`payments.${i}.service`);
-    return service === 'Inmobiliario';
+    return service === 'Contable';
   }
 
   function showCanonGuaranteeContract(i: number) {
     const service = watch(`payments.${i}.service`);
     return service === 'Administración de contratos';
+  }
+
+  function showServices(i: number) {
+    const transactionType = watch(`payments.${i}.transactionType`);
+    return transactionType !== 6;
   }
 
   function showSubService(i: number) {
@@ -429,13 +434,12 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
               <MenuItem value="regular">Regular</MenuItem>
               <MenuItem value="change">Cambio</MenuItem>
               <MenuItem value="return">Devolución</MenuItem>
-              <MenuItem value="refund">Reintegro</MenuItem>
             </Field.Select>
           </Box>
         </Section>
 
         {/* --- Sección: Información de servicio --- */}
-        <Section title="Pagos">
+        <Section title="Transacciones">
           {payments.map((_, index) => (
             <Box
               key={index + 1}
@@ -448,7 +452,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                 sx={{ mb: 2 }}
               >
                 <Typography variant="subtitle1" fontWeight="bold">
-                  Pago #{index + 1}
+                  Transaccion #{index + 1}
                 </Typography>
                 {payments.length > 1 && (
                   <IconButton
@@ -478,7 +482,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                   disabled={!isEdit}
                   size="small"
                   name={`payments.${index}.transactionType`}
-                  label="Tipo de Transacción"
+                  label="Categoria"
                 >
                   {transactionTypes.map((transactionType) => (
                     <MenuItem key={transactionType.id} value={transactionType.id}>
@@ -560,47 +564,53 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                   />
                 )}
 
-                <Field.Select
-                  disabled={!isEdit}
-                  size="small"
-                  name={`payments.${index}.service`}
-                  label="Servicio"
-                >
-                  {services.map((service) => (
-                    <MenuItem key={service.id} value={service.title}>
-                      {service.title}
-                    </MenuItem>
-                  ))}
-                </Field.Select>
+                {
+                  showServices(index) &&
+                  <Field.Select
+                    disabled={!isEdit}
+                    size="small"
+                    name={`payments.${index}.service`}
+                    label="Servicio"
+                  >
+                    {services.map((service) => (
+                      <MenuItem key={service.id} value={service.title}>
+                        {service.title}
+                      </MenuItem>
+                    ))}
+                  </Field.Select>
+                }
 
-                <Field.Select
-                  disabled={!isEdit}
-                  size="small"
-                  name={`payments.${index}.serviceType`}
-                  label="Tipo de servicio"
-                >
-                  <MenuItem value="">Ninguno</MenuItem>
-                  {showSubService(index).map((subService) => (
-                    <MenuItem key={subService.id} value={subService.service}>
-                      {subService.service}
-                    </MenuItem>
-                  ))}
-                </Field.Select>
+                {
+                  showServices(index) &&
+                  <Field.Select
+                    disabled={!isEdit}
+                    size="small"
+                    name={`payments.${index}.serviceType`}
+                    label="Tipo de servicio"
+                  >
+                    <MenuItem value="">Ninguno</MenuItem>
+                    {showSubService(index).map((subService) => (
+                      <MenuItem key={subService.id} value={subService.service}>
+                        {subService.service}
+                      </MenuItem>
+                    ))}
+                  </Field.Select>
+                }
 
-                {/*{*/}
-                {/*  showTaxPayerOptions(index) && (*/}
-                <Field.Select
-                  disabled={!isEdit}
-                  size="small"
-                  name={`payments.${index}.taxPayer`}
-                  label="Contribuyente"
-                >
-                  <MenuItem value="Ordinario Natural">Ordinario Natural</MenuItem>
-                  <MenuItem value="Ordinario Juridico">Ordinario Juridico</MenuItem>
-                  <MenuItem value="Especial">Especial</MenuItem>
-                </Field.Select>
-                {/*)*/}
-                {/*}*/}
+                {
+                  showTaxPayerOptions(index) && (
+                  <Field.Select
+                    disabled={!isEdit}
+                    size="small"
+                    name={`payments.${index}.taxPayer`}
+                    label="Contribuyente"
+                  >
+                    <MenuItem value="Ordinario Natural">Ordinario Natural</MenuItem>
+                    <MenuItem value="Ordinario Juridico">Ordinario Juridico</MenuItem>
+                    <MenuItem value="Especial">Especial</MenuItem>
+                  </Field.Select>
+                  )
+                }
 
                 {showCanonGuaranteeContract(index) && (
                   <Box sx={{ mt: 2 }}>
