@@ -43,8 +43,6 @@ import {
 import { getStatus } from '../../../utils/get-status';
 import { CashFlowTableRow } from '../cashflow-table-row';
 import { useGetCashFlows } from '../../../actions/cashflow';
-import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
-import { CashFlowTableFiltersResult } from '../cashflow-table-filters-result';
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
