@@ -8,8 +8,8 @@ import LinearProgress from '@mui/material/LinearProgress';
 
 import { RouterLink } from 'src/routes/components';
 
-import { fCurrency } from 'src/utils/format-number';
 import { fTime, fDate } from 'src/utils/format-time';
+import { fNumber, fCurrency } from 'src/utils/format-number';
 
 import { Label } from 'src/components/label';
 
@@ -20,7 +20,12 @@ type ParamsProps = {
 };
 
 export function RenderCellPrice({ params, value }: ParamsProps & { value?: number | string }) {
-  return fCurrency(value);
+  try {
+    return fCurrency(value, { currencySign: 'standard', currencyDisplay: 'symbol' });
+  } catch (error) {
+    console.error('Error formatting price:', error);
+    return '$ ' + fNumber(value); // Return the original value if formatting fails
+  }
 }
 
 export function RenderCellPublish({ params }: ParamsProps) {

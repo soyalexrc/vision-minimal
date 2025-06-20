@@ -2,7 +2,7 @@ import type { TextFieldProps } from '@mui/material/TextField';
 import type { DatePickerProps } from '@mui/x-date-pickers/DatePicker';
 import type { MobileDateTimePickerProps } from '@mui/x-date-pickers/MobileDateTimePicker';
 
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
