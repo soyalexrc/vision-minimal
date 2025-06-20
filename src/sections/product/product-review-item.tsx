@@ -36,7 +36,7 @@ export function ProductReviewItem({ review }: Props) {
 
       <ListItemText
         primary={review.name}
-        secondary={fDate(review.postedAt)}
+        secondary={fDate(review.postedAt!)}
         slotProps={{
           primary: { noWrap: true },
           secondary: {

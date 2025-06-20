@@ -1,4 +1,3 @@
-import { today } from 'src/utils/format-time';
 
 import { CONFIG } from 'src/global-config';
 
@@ -341,6 +340,6 @@ export const _coursesReminder = Array.from({ length: 4 }, (_, index) => ({
   id: _mock.id(index),
   title: _mock.courseNames(index),
   totalLesson: 12,
-  reminderAt: today(),
+  reminderAt: new Date(),
   currentLesson: index + 7,
 }));

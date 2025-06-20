@@ -1,4 +1,3 @@
-import { fSub, fAdd } from 'src/utils/format-time';
 
 import { _mock } from './_mock';
 import { _tags } from './assets';
@@ -60,7 +59,7 @@ export const _invoices = Array.from({ length: 20 }, (_, index) => {
     invoiceFrom: _addressBooks[index],
     invoiceTo: _addressBooks[index + 1],
     sent: _mock.number.nativeS(index),
-    createDate: fSub({ days: index }),
-    dueDate: fAdd({ days: index + 15, hours: index }),
+    createDate: new Date(),
+    dueDate: new Date()
   };
 });

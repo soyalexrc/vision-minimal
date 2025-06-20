@@ -1,5 +1,3 @@
-import type { Dayjs } from 'dayjs';
-
 // ----------------------------------------------------------------------
 
 export type IPaymentCard = {
@@ -21,7 +19,7 @@ export type IAddressItem = {
 
 export type IDateValue = string | number | null;
 
-export type IDatePickerControl = Dayjs | null;
+export type IDatePickerControl = Date | null;
 
 export type ISocialLink = {
   twitter: string;

@@ -59,7 +59,8 @@ const STATUS_OPTIONS = [
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID', width: 88 },
   { id: 'person.name', label: 'Persona', width: 320 },
-  { id: 'date', label: 'Fecha', width: 140 },
+  { id: 'createdAt', label: 'Fecha de registro', width: 140 },
+  { id: 'updatedAt', label: 'Ultima F. de actualizacion', width: 140 },
   { id: 'paymentsQty', label: 'C. Pagos', width: 120, align: 'center' },
   { id: 'totalAmount', label: 'Total', width: 140 },
   { id: 'status', label: 'Status', width: 110 },
@@ -69,7 +70,7 @@ const TABLE_HEAD: TableHeadCellProps[] = [
 // ----------------------------------------------------------------------
 
 export function CashFlowListView() {
-  const table = useTable({ defaultDense: true, defaultOrderBy: 'orderNumber', defaultRowsPerPage: 25 });
+  const table = useTable({ defaultDense: true, defaultOrderBy: 'updatedAt', defaultOrder: 'desc', defaultRowsPerPage: 25 });
   const { cashflow, cashflowLoading, cashflowError, cashflowEmpty } = useGetCashFlows()
   const confirmDialog = useBoolean();
 
@@ -87,7 +88,7 @@ export function CashFlowListView() {
   });
   const { state: currentFilters, setState: updateFilters } = filters;
 
-  const dateError = fIsAfter(currentFilters.startDate, currentFilters.endDate);
+  const dateError = fIsAfter(currentFilters.startDate!, currentFilters.endDate!);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -350,11 +351,11 @@ function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterP
     inputData = inputData.filter((order) => order.type === status);
   }
 
-  if (!dateError) {
-    if (startDate && endDate) {
-      inputData = inputData.filter((order) => fIsBetween(order.createdAt, startDate, endDate));
-    }
-  }
+  // if (!dateError) {
+  //   if (startDate && endDate) {
+  //     inputData = inputData.filter((order) => fIsBetween(order.createdAt, startDate, endDate));
+  //   }
+  // }
 
   return inputData;
 }

@@ -1,7 +1,7 @@
 import type { ZodTypeAny } from 'zod';
 
-import dayjs from 'dayjs';
 import { z as zod } from 'zod';
+import { format, isValid, parseISO } from 'date-fns';
 
 // ----------------------------------------------------------------------
 
@@ -34,10 +34,6 @@ export const schemaHelper = {
       .date()
       .nullable()
       .transform((dateString, ctx) => {
-        const date = dayjs(dateString).format();
-
-        const stringToDate = zod.string().pipe(zod.coerce.date());
-
         if (!dateString) {
           ctx.addIssue({
             code: zod.ZodIssueCode.custom,
@@ -46,14 +42,17 @@ export const schemaHelper = {
           return null;
         }
 
-        if (!stringToDate.safeParse(date).success) {
+        const date = typeof dateString === 'string' ? parseISO(dateString) : new Date(dateString);
+
+        if (!isValid(date)) {
           ctx.addIssue({
             code: zod.ZodIssueCode.invalid_date,
             message: props?.message?.invalid_type ?? 'Invalid Date!!',
           });
+          return null;
         }
 
-        return date;
+        return format(date, "yyyy-MM-dd'T'HH:mm:ss");
       })
       .pipe(zod.union([zod.number(), zod.string(), zod.date(), zod.null()])),
   /**

@@ -1,4 +1,3 @@
-import { fSub } from 'src/utils/format-time';
 
 import { CONFIG } from 'src/global-config';
 
@@ -37,7 +36,7 @@ import {
 
 export const _mock = {
   id: (index: number) => _id[index],
-  time: (index: number) => fSub({ days: index, hours: index }),
+  time: (index: number) => new Date(),
   boolean: (index: number) => _booleans[index],
   role: (index: number) => _roles[index],
   // Text

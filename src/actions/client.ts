@@ -51,10 +51,14 @@ export function useGetClients() {
 
 // ----------------------------------------------------------------------
 
-export function useGetClient(id: number | string) {
-  const url = endpoints.client.edit + '/' + id;
+export function useGetClient(id?: number | string) {
+  const url = id ? `${endpoints.client.edit}/${id}` : null;
 
-  const { data, isLoading, error, isValidating } = useSWR<ClientData>(url, fetcher, swrOptions);
+  const { data, isLoading, error, isValidating } = useSWR<ClientData>(
+    url,
+    url ? fetcher : null,
+    swrOptions
+  );
 
   const memoizedValue = useMemo(
     () => ({
@@ -63,14 +67,13 @@ export function useGetClient(id: number | string) {
       clientError: error,
       clientValidating: isValidating,
       clientEmpty: !isLoading && !isValidating && !data?.data,
-      refresh: () => mutate(url)
+      refresh: () => url && mutate(url)
     }),
-    [data?.data, error, isLoading, isValidating]
+    [data?.data, error, isLoading, isValidating, url]
   );
 
   return memoizedValue;
 }
-
 
 // ----------------------------------------------------------------------
 

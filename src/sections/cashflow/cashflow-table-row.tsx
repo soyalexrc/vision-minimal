@@ -19,7 +19,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { RouterLink } from 'src/routes/components';
 
 import { fCurrency } from 'src/utils/format-number';
-import { fDate, fTime } from 'src/utils/format-time';
+import { fDate, fDateTimeUTC, fDateTimeVE, fDateTimeVE2, fDateUTC, fTime, fTimestampUTC } from 'src/utils/format-time';
 
 import { Label } from 'src/components/label';
 import { Iconify } from 'src/components/iconify';
@@ -69,7 +69,7 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
 
       <TableCell>
         <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={row.persondata?.name}>{row.persondata!.name.toUpperCase().substring(0, 2)}</Avatar>
+          <Avatar alt={row.persondata?.name}>{row.persondata?.name.toUpperCase().substring(0, 2)}</Avatar>
 
           <Stack sx={{ typography: 'body2', flex: '1 1 auto', alignItems: 'flex-start' }}>
             <Box component="span">{row.persondata?.name.toUpperCase()}</Box>
@@ -86,8 +86,24 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
 
       <TableCell>
         <ListItemText
-          primary={fDate(row.date)}
-          secondary={fTime(row.date)}
+          primary={fDateTimeVE2(row.createdAt!).date}
+          secondary={fDateTimeVE2(row.createdAt!).time}
+          slotProps={{
+            primary: {
+              noWrap: true,
+              sx: { typography: 'body2' },
+            },
+            secondary: {
+              sx: { mt: 0.5, typography: 'caption' },
+            },
+          }}
+        />
+      </TableCell>
+
+      <TableCell>
+        <ListItemText
+          primary={fDateTimeVE2(row.updatedAt!).date}
+          secondary={fDateTimeVE2(row.updatedAt!).time}
           slotProps={{
             primary: {
               noWrap: true,

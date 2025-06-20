@@ -137,6 +137,7 @@ export type ICashFlowItem = {
   month: string;
   totalQuantity: number;
   createdAt: IDateValue;
+  updatedAt: IDateValue;
   createdBy: {
     id: number;
     name: string;

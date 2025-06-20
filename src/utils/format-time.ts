@@ -1,300 +1,251 @@
-import type { Dayjs, OpUnitType } from 'dayjs';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
+import {
+  parse,
+  format,
+  isEqual,
+  getTime,
+  isBefore,
+  formatISO,
+  isSameDay,
+  isSameYear,
+  isSameMonth,
+  formatDistanceToNow,
+  isAfter as dateIsAfter,
+  isValid,
+} from 'date-fns';
 
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import duration from 'dayjs/plugin/duration';
-import relativeTime from 'dayjs/plugin/relativeTime';
-
-// ----------------------------------------------------------------------
-
-/**
- * @Docs
- * https://day.js.org/docs/en/display/format
- */
-
-/**
- * Default timezones
- * https://day.js.org/docs/en/timezone/set-default-timezone#docsNav
- *
- */
-
-/**
- * UTC
- * https://day.js.org/docs/en/plugin/utc
- * @install
- * import utc from 'dayjs/plugin/utc';
- * dayjs.extend(utc);
- * @usage
- * dayjs().utc().format()
- *
- */
-
-dayjs.extend(duration);
-dayjs.extend(utc);
-dayjs.extend(relativeTime);
+export type DatePickerFormat =  Date | string | number | null | undefined;
 
 // ----------------------------------------------------------------------
 
-export type DatePickerFormat = Dayjs | Date | string | number | null | undefined;
-
-export const formatPatterns = {
-  dateTime: 'DD MMM YYYY h:mm a', // 17 Apr 2022 12:00 am
-  date: 'DD MMM YYYY', // 17 Apr 2022
-  time: 'h:mm a', // 12:00 am
-  split: {
-    dateTime: 'DD/MM/YYYY h:mm a', // 17/04/2022 12:00 am
-    date: 'DD/MM/YYYY', // 17/04/2022
-  },
-  paramCase: {
-    dateTime: 'DD-MM-YYYY h:mm a', // 17-04-2022 12:00 am
-    date: 'DD-MM-YYYY', // 17-04-2022
-  },
-};
-
-const isValidDate = (date: DatePickerFormat) =>
-  date !== null && date !== undefined && dayjs(date).isValid();
-
-// ----------------------------------------------------------------------
-
-export function today(template?: string): string {
-  return dayjs(new Date()).startOf('day').format(template);
+export function fToDate(date: any, newFormat: string = 'yyyy-MM-dd') {
+  return parse(date, newFormat, new Date())
 }
 
-// ----------------------------------------------------------------------
-
-/**
- * @output 17 Apr 2022 12:00 am
- */
-export function fDateTime(date: DatePickerFormat, template?: string): string {
-  if (!isValidDate(date)) {
-    return 'Invalid date';
-  }
-
-  return dayjs(date).format(template ?? formatPatterns.dateTime);
+// Función para convertir timestamp de PostgreSQL (asumiendo UTC)
+export function parsePostgresTimestamp(timestamp: string): Date {
+  // PostgreSQL timestamp sin zona horaria - asumimos UTC
+  return new Date(timestamp + 'Z'); // Agregar 'Z' para indicar UTC
 }
 
-// ----------------------------------------------------------------------
-
 /**
- * @output 17 Apr 2022
- */
-export function fDate(date: DatePickerFormat, template?: string): string {
-  if (!isValidDate(date)) {
-    return 'Invalid date';
-  }
-
-  return dayjs(date).format(template ?? formatPatterns.date);
-}
-
-export function fDateUTC(date: DatePickerFormat, template?: string): string {
-  if (!isValidDate(date)) {
-    return 'Invalid date';
-  }
-
-  return dayjs(date).format(template ?? formatPatterns.date);
-}
-
-// ----------------------------------------------------------------------
-
-/**
- * @output 12:00 am
- */
-export function fTime(date: DatePickerFormat, template?: string): string {
-  if (!isValidDate(date)) {
-    return 'Invalid date';
-  }
-
-  return dayjs(date).format(template ?? formatPatterns.time);
-}
-
-// ----------------------------------------------------------------------
-
-/**
- * @output 1713250100
- */
-export function fTimestamp(date: DatePickerFormat): number | 'Invalid date' {
-  if (!isValidDate(date)) {
-    return 'Invalid date';
-  }
-
-  return dayjs(date).valueOf();
-}
-
-// ----------------------------------------------------------------------
-
-/**
- * @output a few seconds, 2 years
- */
-export function fToNow(date: DatePickerFormat): string {
-  if (!isValidDate(date)) {
-    return 'Invalid date';
-  }
-
-  return dayjs(date).toNow(true);
-}
-
-// ----------------------------------------------------------------------
-
-/**
- * @output boolean
+ * Checks if a date is between two dates (inclusive)
+ * Uses date-fns functions for more reliable date comparison
  */
 export function fIsBetween(
-  inputDate: DatePickerFormat,
-  startDate: DatePickerFormat,
-  endDate: DatePickerFormat
+  date: string | number | Date,
+  startDate: string | number | Date,
+  endDate: string | number | Date
 ): boolean {
-  if (!isValidDate(inputDate) || !isValidDate(startDate) || !isValidDate(endDate)) {
-    return false;
-  }
+  // Convert all inputs to Date objects
+  const checkDate = new Date(date);
+  const start = new Date(startDate);
+  const end = new Date(endDate);
 
-  const formattedInputDate = fTimestamp(inputDate);
-  const formattedStartDate = fTimestamp(startDate);
-  const formattedEndDate = fTimestamp(endDate);
-
-  if (
-    formattedInputDate === 'Invalid date' ||
-    formattedStartDate === 'Invalid date' ||
-    formattedEndDate === 'Invalid date'
-  ) {
-    return false;
-  }
-
-  return formattedInputDate >= formattedStartDate && formattedInputDate <= formattedEndDate;
+  // Check if date is equal to or after start AND equal to or before end
+  return (isEqual(checkDate, start) || dateIsAfter(checkDate, start)) &&
+    (isEqual(checkDate, end) || isBefore(checkDate, end));
 }
 
-// ----------------------------------------------------------------------
-
 /**
- * @output boolean
+ * Checks if first date is after second date
+ * Uses date-fns isAfter for more reliable comparison
  */
-export function fIsAfter(startDate: DatePickerFormat, endDate: DatePickerFormat): boolean {
-  if (!isValidDate(startDate) || !isValidDate(endDate)) {
-    return false;
-  }
-
-  return dayjs(startDate).isAfter(endDate);
-}
-
-// ----------------------------------------------------------------------
-
-/**
- * @output boolean
- */
-export function fIsSame(
-  startDate: DatePickerFormat,
-  endDate: DatePickerFormat,
-  unitToCompare?: OpUnitType
+export function fIsAfter(
+  date: string | number | Date,
+  dateToCompare: string | number | Date
 ): boolean {
-  if (!isValidDate(startDate) || !isValidDate(endDate)) {
-    return false;
-  }
+  if (!date || !dateToCompare) return false;
 
-  return dayjs(startDate).isSame(endDate, unitToCompare ?? 'year');
+  return dateIsAfter(new Date(date), new Date(dateToCompare));
 }
 
-/**
- * @output
- * Same day: 26 Apr 2024
- * Same month: 25 - 26 Apr 2024
- * Same month: 25 - 26 Apr 2024
- * Same year: 25 Apr - 26 May 2024
- */
+export function fDate(date: string | number | Date, newFormat?: string): string {
+  const fm = newFormat || 'dd-MM-yyyy';
+
+  return date ? format(new Date(date), fm) : '';
+}
+
+export function fDateUTC(date: string | number | Date, newFormat?: string): string {
+  const fm = newFormat || 'dd-MM-yyyy';
+
+  return date ? format(new Date(new Date(date).toUTCString().substring(0, 16)), fm) : '';
+}
+
+export function dateUTC(date: string | number | Date): Date | string | number {
+  return date ? new Date(new Date(date).toUTCString().substring(0, 16)) : date;
+}
+
+export function dateTimeUTC(date: string | number | Date): Date | string | number {
+  return date ? new Date(new Date(date).toUTCString().substring(0, 26)) : date;
+}
+
+export function fTime(date: string | number | Date, newFormat?: string): string {
+  const fm = newFormat || 'p';
+
+  return date ? format(new Date(date), fm) : '';
+}
+
+export function fDateTime(date: string | number | Date, newFormat?: string): string {
+  const fm = newFormat || 'dd-MM-yyyy p';
+
+  return date ? format(new Date(date), fm) : '';
+}
+
+export function fDateTimeVE(date: string | number | Date, newFormat?: string): string {
+  const fm = newFormat || 'dd-MM-yyyy p';
+  if (!date) return '';
+
+  const parsedDate = typeof date === 'string' && !date.includes('T')
+    ? parsePostgresTimestamp(date)
+    : new Date(date);
+
+  // Convertir a zona horaria de Venezuela (UTC-4)
+  const veDate = new Date(parsedDate.getTime() - (4 * 60 * 60 * 1000));
+  return format(veDate, fm);
+}
+
+// export function fDateTimeVE2(date: string | number | Date, newFormat?: string): string {
+//   const fm = newFormat || 'dd-MM-yyyy HH:mm a';
+//   if (!date) return '';
+//
+//   const parsedDate = typeof date === 'string' && !date.includes('T')
+//     ? parsePostgresTimestamp(date)
+//     : new Date(date);
+//
+//   // Convertir UTC a zona horaria de Venezuela
+//   const veTime = toZonedTime(parsedDate, 'America/Caracas');
+//   return format(veTime, fm);
+// }
+
 export function fDateRangeShortLabel(
   startDate: DatePickerFormat,
   endDate: DatePickerFormat,
   initial?: boolean
 ): string {
-  if (!isValidDate(startDate) || !isValidDate(endDate) || fIsAfter(startDate, endDate)) {
+  if (!isValid(startDate) || !isValid(endDate) || fIsAfter(startDate!, endDate!)) {
     return 'Invalid date';
   }
-
-  let label = `${fDate(startDate)} - ${fDate(endDate)}`;
+  let label = `${fDate(startDate!)} - ${fDate(endDate!)}`;
 
   if (initial) {
     return label;
   }
 
-  const isSameYear = fIsSame(startDate, endDate, 'year');
-  const isSameMonth = fIsSame(startDate, endDate, 'month');
-  const isSameDay = fIsSame(startDate, endDate, 'day');
+  const sameYear = fIsSame(startDate, endDate, 'year');
+  const sameMonth = fIsSame(startDate, endDate, 'month');
+  const sameDay = fIsSame(startDate, endDate, 'day');
 
-  if (isSameYear && !isSameMonth) {
-    label = `${fDate(startDate, 'DD MMM')} - ${fDate(endDate)}`;
-  } else if (isSameYear && isSameMonth && !isSameDay) {
-    label = `${fDate(startDate, 'DD')} - ${fDate(endDate)}`;
-  } else if (isSameYear && isSameMonth && isSameDay) {
-    label = `${fDate(endDate)}`;
+  if (sameYear && !sameMonth) {
+    label = `${fDate(startDate!, 'DD MMM')} - ${fDate(endDate!)}`;
+  } else if (sameYear && sameMonth && !sameDay) {
+    label = `${fDate(startDate!, 'DD')} - ${fDate(endDate!)}`;
+  } else if (sameYear && sameMonth && sameDay) {
+    label = `${fDate(endDate!)}`;
   }
 
   return label;
 }
 
-// ----------------------------------------------------------------------
 
-/**
- * @output 2024-05-28T05:55:31+00:00
- */
-export type DurationProps = {
-  years?: number;
-  months?: number;
-  days?: number;
-  hours?: number;
-  minutes?: number;
-  seconds?: number;
-  milliseconds?: number;
-};
+  export function fDateTimeVE2(date: string | number | Date, dateFormat?: string, timeFormat?: string): {
+    date: string;
+    time: string
+  } {
+    const defaultDateFormat = dateFormat || 'dd-MM-yyyy';
+    const defaultTimeFormat = timeFormat || 'HH:mm a';
 
-export function fAdd({
-  years = 0,
-  months = 0,
-  days = 0,
-  hours = 0,
-  minutes = 0,
-  seconds = 0,
-  milliseconds = 0,
-}: DurationProps) {
-  const result = dayjs()
-    .add(
-      dayjs.duration({
-        years,
-        months,
-        days,
-        hours,
-        minutes,
-        seconds,
-        milliseconds,
+    if (!date) return { date: '', time: '' };
+
+    const parsedDate = typeof date === 'string' && !date.includes('T')
+      ? parsePostgresTimestamp(date)
+      : new Date(date);
+
+    // Convertir UTC a zona horaria de Venezuela
+    const veTime = toZonedTime(parsedDate, 'America/Caracas');
+
+    return {
+      date: format(veTime, defaultDateFormat),
+      time: format(veTime, defaultTimeFormat)
+    };
+  }
+
+  export function fDateTimeUTC(date: string | number | Date): string {
+    return date ? `${new Date(date).toLocaleDateString('es-VE', { timeZone: 'UTC' })} ${new Date(date).toLocaleTimeString('es-VE', { timeZone: 'UTC' })}` : '';
+  }
+
+  export function fTimestamp(date: string | number | Date): number | string {
+    return date ? getTime(new Date(date)) : '';
+  }
+
+  export function fTimestampUTC(date: string | number | Date): number | string {
+    return date ? getTime(new Date(`${fDateUTC(date, 'yyyy-MM-dd')}T00:00:00`)) : '';
+  }
+
+  export function fToNow(date: string | number | Date): string {
+    return date
+      ? formatDistanceToNow(new Date(date), {
+        addSuffix: true,
       })
-    )
-    .format();
+      : '';
+  }
 
-  return result;
-}
+  export function isBetween(inputDate: string | number | Date, startDate: Date, endDate: Date): boolean {
+    const date = new Date(inputDate);
 
-/**
- * @output 2024-05-28T05:55:31+00:00
- */
-export function fSub({
-  years = 0,
-  months = 0,
-  days = 0,
-  hours = 0,
-  minutes = 0,
-  seconds = 0,
-  milliseconds = 0,
-}: DurationProps) {
-  const result = dayjs()
-    .subtract(
-      dayjs.duration({
-        years,
-        months,
-        days,
-        hours,
-        minutes,
-        seconds,
-        milliseconds,
-      })
-    )
-    .format();
+    const results =
+      new Date(date.toUTCString().substring(0, 16)) >= new Date(startDate.toDateString()) &&
+      new Date(date.toUTCString().substring(0, 16)) <= new Date(endDate.toDateString());
 
-  return result;
-}
+    return results;
+  }
+
+  export function isAfter(startDate: string | number | Date, endDate: string | number | Date): boolean {
+    const results =
+      startDate && endDate ? new Date(startDate).getTime() > new Date(endDate).getTime() : false;
+
+    return results;
+  }
+
+  export function fIsSame(
+    date1: string | number | Date | null | undefined,
+    date2: string | number | Date | null | undefined,
+    unit: 'year' | 'month' | 'day'
+  ): boolean {
+    if (!date1 || !date2) return false;
+
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+
+    switch (unit) {
+      case 'year':
+        return isSameYear(d1, d2);
+      case 'month':
+        return isSameMonth(d1, d2);
+      case 'day':
+        return isSameDay(d1, d2);
+      default:
+        return false;
+    }
+  }
+
+  export function getNumberofDay(stringDay: string): number | null {
+    switch (stringDay) {
+      case 'Domingo':
+        return 0;
+      case 'Lunes':
+        return 1;
+      case 'Martes':
+        return 2;
+      case 'Miércoles':
+        return 3;
+      case 'Jueves':
+        return 4;
+      case 'Viernes':
+        return 5;
+      case 'Sábado':
+        return 6;
+      default:
+        return null;
+    }
+  }

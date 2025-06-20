@@ -59,6 +59,8 @@
     "@types/turndown": "^5.0.5",
     "autosuggest-highlight": "^3.3.4",
     "axios": "^1.8.4",
+    "date-fns": "^3.6.0",
+    "date-fns-tz": "^3.0.1",
     "dayjs": "^1.11.13",
     "embla-carousel": "^8.6.0",
     "embla-carousel-auto-scroll": "^8.6.0",

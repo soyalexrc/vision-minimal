@@ -1,7 +1,6 @@
 import type { AxiosResponse } from 'axios';
 
 import { z } from 'zod';
-import dayjs from 'dayjs';
 import { toast } from 'sonner';
 import { useState, useCallback } from 'react';
 import { varAlpha } from 'minimal-shared/utils';
@@ -64,8 +63,8 @@ const emptyPayment = {
   amount: 0,
   canon: false,
   contract: false,
-  currency: null,
-  entity: null,
+  currency: 0,
+  entity: 0,
   guarantee: false,
   incomeByThird: 0,
   observation: '',
@@ -75,8 +74,8 @@ const emptyPayment = {
   serviceType: '',
   taxPayer: '',
   totalDue: 0,
-  transactionType: null,
-  wayToPay: null,
+  transactionType: 0,
+  wayToPay: 0,
 };
 
 export type CashFlowSchemaType = z.infer<typeof CashFlowSchema>;
@@ -100,7 +99,7 @@ export const CashFlowSchema = z.object({
   owner: z.number().nullable().optional(),
   user: z.number().optional(),
   client: z.number().nullable().optional(),
-  date: z.any(),
+  date: z.any().optional(),
   month: z.string().optional(),
   type: z.string().optional(),
   location: z.string().optional(),
@@ -114,7 +113,7 @@ export const CashFlowSchema = z.object({
       contract: z.boolean().optional(),
       guarantee: z.boolean().optional(),
       serviceType: z.string().optional(),
-      reason: z.string(),
+      reason: z.string().optional(),
       service: z.string(),
       taxPayer: z.string().optional(),
       amount: z.any().optional(),
@@ -139,17 +138,17 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
   const { user } = useAuthContext();
   const defaultValues: CashFlowSchemaType = {
     id: undefined,
-    property: null,
-    person: null,
-    owner: null,
-    client: null,
+    property: 0,
+    person: 0,
+    owner: 0,
+    client: 0,
     user: user.id,
     date: new Date(),
     month: '',
     location: '',
     attachments: [],
     type: 'regular',
-    temporalTransactionId: null,
+    temporalTransactionId: 0,
     isTemporalTransaction: false,
     payments: [
       {
@@ -170,7 +169,6 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
   const [openPropertyDialog, setOpenPropertyDialog] = useState(false);
-  const [newPersonName, setNewPersonName] = useState('');
 
   const shortUser = {
     id: user?.id,
@@ -205,9 +203,27 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
   });
 
   const onSubmit = handleSubmit(async (values) => {
+    if (values.person === null) {
+      toast.error('Debe seleccionar una persona');
+      return;
+    }
+
+    if (values.location === null) {
+      toast.error('Debe seleccionar una ubicación');
+      return;
+    }
+
+    if (values.payments.some(payment =>
+        payment.wayToPay === null ||
+        payment.transactionType === null ||
+        payment.currency === null
+    )) {
+      toast.error('Todos los pagos deben tener forma de pago, categoría y moneda');
+      return;
+    }
     const data = {
       ...values,
-      date: dayjs(values.date).format('YYYY-MM-DD'),
+      date: new Date(),
       payments: values.payments.map((payment) => ({
         ...payment,
         amount: parseCurrency(payment.amount),
@@ -348,13 +364,13 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
               },
             }}
           >
-            <Field.DatePicker
-              disableFuture
-              disabled={!isEdit}
-              size="small"
-              name="date"
-              label="Fecha"
-            />
+            {/*<Field.DatePicker*/}
+            {/*  disableFuture*/}
+            {/*  disabled={!isEdit}*/}
+            {/*  size="small"*/}
+            {/*  name="date"*/}
+            {/*  label="Fecha"*/}
+            {/*/>*/}
 
             <Stack direction="row" alignItems="center" gap={1}>
               <Field.Autocomplete

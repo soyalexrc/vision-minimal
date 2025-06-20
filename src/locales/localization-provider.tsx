@@ -1,17 +1,12 @@
 'use client';
 
-import 'dayjs/locale/en';
-import 'dayjs/locale/vi';
-import 'dayjs/locale/fr';
-import 'dayjs/locale/zh-cn';
-import 'dayjs/locale/ar-sa';
+import { es } from 'date-fns/locale';
+import { setDefaultOptions } from 'date-fns';
 
-import dayjs from 'dayjs';
-
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFnsV3';
 import { LocalizationProvider as Provider } from '@mui/x-date-pickers/LocalizationProvider';
 
-import { useTranslate } from './use-locales';
+import { useLocales } from './use-locales';
 
 // ----------------------------------------------------------------------
 
@@ -20,12 +15,13 @@ type Props = {
 };
 
 export function LocalizationProvider({ children }: Props) {
-  const { currentLang } = useTranslate();
+  const { currentLang } = useLocales();
 
-  dayjs.locale(currentLang.adapterLocale);
+  setDefaultOptions({ locale: es })
+  // dayjs.locale(currentLang.adapterLocale);
 
   return (
-    <Provider dateAdapter={AdapterDayjs} adapterLocale={currentLang.adapterLocale}>
+    <Provider dateAdapter={AdapterDateFns} adapterLocale={currentLang.adapterLocale as any}>
       {children}
     </Provider>
   );

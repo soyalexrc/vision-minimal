@@ -3,7 +3,7 @@
 import type { UseCountdownDateReturn } from 'minimal-shared/hooks';
 
 import React from 'react';
-import dayjs from 'dayjs';
+import { add } from 'date-fns';
 import { varAlpha } from 'minimal-shared/utils';
 import { useCountdownDate } from 'minimal-shared/hooks';
 
@@ -34,10 +34,10 @@ type Props = {
 // ----------------------------------------------------------------------
 
 export function ComingSoonView({ countdown, showEmailInput, showSocials }: Props) {
-  const currentDate = dayjs()
-  const futureDate = currentDate.add(10, 'days');
+  const currentDate = new Date();
+  const futureDate = add(currentDate, { days: 10 });
 
-  const defaultCountdown = useCountdownDate(futureDate.toDate());
+  const defaultCountdown = useCountdownDate(futureDate);
 
   const countdownValue = defaultCountdown;
 

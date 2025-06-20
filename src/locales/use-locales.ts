@@ -1,6 +1,6 @@
 'use client';
 
-import dayjs from 'dayjs';
+// import dayjs from 'dayjs';
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -9,9 +9,27 @@ import { useRouter } from 'src/routes/hooks';
 import { toast } from 'src/components/snackbar';
 
 import { allLangs } from './all-langs';
+import { localStorageGetItem } from '../utils/storage';
 import { fallbackLng, changeLangMessages as messages } from './locales-config';
 
 import type { LanguageValue } from './locales-config';
+
+
+// ----------------------------------------------------------------------
+
+export function useLocales() {
+  const langStorage = localStorageGetItem('i18nextLng');
+  const defaultLang = allLangs[0]; // Spanish
+
+
+  const currentLang = allLangs.find((lang) => lang.value === langStorage) || defaultLang;
+
+  return {
+    allLangs,
+    currentLang,
+  };
+}
+
 
 // ----------------------------------------------------------------------
 
@@ -37,9 +55,9 @@ export function useTranslate(ns?: string) {
           error: currentMessages.error,
         });
 
-        if (currentLang) {
-          dayjs.locale(currentLang.adapterLocale);
-        }
+        // if (currentLang) {
+        //   dayjs.locale(currentLang.adapterLocale);
+        // }
 
         router.refresh();
       } catch (error) {

@@ -74,7 +74,7 @@ export function NotificationItem({ notification }: NotificationItemProps) {
       primary={readerContent(notification.title)}
       secondary={
         <>
-          {fToNow(notification.createdAt)}
+          {fToNow(notification.createdAt!)}
           <Box
             component="span"
             sx={{ width: 2, height: 2, borderRadius: '50%', bgcolor: 'currentColor' }}
