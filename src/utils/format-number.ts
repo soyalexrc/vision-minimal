@@ -1,5 +1,4 @@
-import { formatNumberLocale } from 'src/locales';
-
+import { formatNumberLocale, useLocales as getLocales } from 'src/locales';
 // ----------------------------------------------------------------------
 
 /*
@@ -38,8 +37,67 @@ export function fNumber(inputValue: InputNumberValue, options?: Options) {
 
 // ----------------------------------------------------------------------
 
+function getLocaleCode() {
+  const {
+    currentLang: {
+      numberFormat: { code, currency },
+    },
+  } = getLocales();
+
+  return {
+    code: code ?? 'en-US',
+    currency: currency ?? 'USD',
+  };
+}
+
+// ----------------------------------------------------------------------
+
+
 export function fCurrency(inputValue: InputNumberValue, options?: Options) {
-  console.log('fCurrency', inputValue, options);
+  const { code, currency } = getLocaleCode();
+
+  if (inputValue == 0) return "$0";
+  if (!inputValue) return '';
+
+  const number = Number(inputValue);
+
+  const fm = new Intl.NumberFormat(code, {
+    style: 'currency',
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    ...options,
+  }).format(number);
+
+  return fm;
+}
+
+
+// export function fCurrency(inputValue: InputNumberValue, options?: Options) {
+//  try {
+//    console.log('fCurrency', inputValue, options);
+//    const locale = formatNumberLocale() || DEFAULT_LOCALE;
+//    console.log('locale', locale);
+//
+//    const number = processInput(inputValue);
+//    if (number === null) return '';
+//
+//    return new Intl.NumberFormat(locale.code, {
+//      style: 'currency',
+//      currency: locale.currency,
+//      minimumFractionDigits: 0,
+//      maximumFractionDigits: 2,
+//      ...options,
+//    }).format(number);
+//  } catch (error) {
+//     console.error('Error formatting currency:', error);
+//     return '';
+//  }
+// }
+
+// ----------------------------------------------------------------------
+
+export function fPercent(inputValue: InputNumberValue, options?: Options) {
   const locale = formatNumberLocale() || DEFAULT_LOCALE;
 
   const number = processInput(inputValue);
@@ -52,24 +110,6 @@ export function fCurrency(inputValue: InputNumberValue, options?: Options) {
     maximumFractionDigits: 2,
     ...options,
   }).format(number);
-}
-
-// ----------------------------------------------------------------------
-
-export function fPercent(inputValue: InputNumberValue, options?: Options) {
-  const locale = formatNumberLocale() || DEFAULT_LOCALE;
-
-  const number = processInput(inputValue);
-  if (number === null) return '';
-
-  const fm = new Intl.NumberFormat(locale.code, {
-    style: 'percent',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 1,
-    ...options,
-  }).format(number / 100);
-
-  return fm;
 }
 
 // ----------------------------------------------------------------------

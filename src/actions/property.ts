@@ -146,7 +146,7 @@ export async function createUpdateProperty(payload: PropertyFormSchemaType, type
   const imagesToUpload = payload.images.filter((image: any) => typeof image === 'object' && image instanceof File);
 
   if (imagesToUpload.length > 0) {
-    const newImagesUploaded  = await UploadService.uploadMultiple(imagesToUpload);
+    const newImagesUploaded  = await UploadService.uploadMultiple(imagesToUpload, 'imagenes-inmuebles');
     payload.images = [...imagesUploaded, ...newImagesUploaded.urls];
     console.log('newImagesUploaded', newImagesUploaded);
   }
@@ -156,7 +156,7 @@ export async function createUpdateProperty(payload: PropertyFormSchemaType, type
 
 
   if (documentsToUpload.length > 0) {
-    const newDocumentsUploaded =  await UploadService.uploadMultiple(documentsToUpload);
+    const newDocumentsUploaded =  await UploadService.uploadMultiple(documentsToUpload, 'documentos-inmuebles');
     payload.documents = [...documentsUploaded, ...newDocumentsUploaded.urls];
 
     console.log('newDocumentsUploaded', newDocumentsUploaded);

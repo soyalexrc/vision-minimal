@@ -80,6 +80,12 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
                 {row.propertydata.name}
               </Box>
             }
+            {
+              !row.propertydata &&
+              <Box component="span" sx={{ color: 'text.disabled' }}>
+                {row.location}
+              </Box>
+            }
           </Stack>
         </Box>
       </TableCell>
@@ -126,14 +132,22 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
         ))}
       </TableCell>
 
-      <TableCell>
-        <Label
-          variant="soft"
-          color={getStatus(row.type as GetStatusType)?.variant || 'default'}
-        >
-          {getStatus(row.type as GetStatusType).name}
-        </Label>
-      </TableCell>
+      {/*<TableCell>*/}
+      {/*  {row.total_amount.map((item) => (*/}
+      {/*    <Typography variant="body2" key={item.currency}>*/}
+      {/*      {fCurrency(item.total_amount, { currency: item.currency_code })}*/}
+      {/*    </Typography>*/}
+      {/*  ))}*/}
+      {/*</TableCell>*/}
+
+      {/*<TableCell>*/}
+      {/*  <Label*/}
+      {/*    variant="soft"*/}
+      {/*    color={getStatus(row.type as GetStatusType)?.variant || 'default'}*/}
+      {/*  >*/}
+      {/*    {getStatus(row.type as GetStatusType).name}*/}
+      {/*  </Label>*/}
+      {/*</TableCell>*/}
 
       <TableCell align="right" sx={{ px: 1, whiteSpace: 'nowrap' }}>
         <IconButton
@@ -153,7 +167,7 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
 
   const renderSecondaryRow = () => (
     <TableRow>
-      <TableCell sx={{ p: 0, border: 'none' }} colSpan={8}>
+      <TableCell sx={{ p: 0, border: 'none' }} colSpan={10}>
         <Collapse
           in={collapseRow.value}
           timeout="auto"
@@ -174,7 +188,6 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
                 })}
               >
                 <ListItemText
-
                   primary={item.service + ' ' + (item.serviceType ?? '')}
                   secondary={item.reason}
                   slotProps={{

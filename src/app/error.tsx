@@ -34,6 +34,7 @@ export default function Error({
 
   const notifyDiscord = async () => {
     try {
+      if (process.env.NODE_ENV === 'development') return;
       const response = await axios.post('/external/notify-discord', {
         contents: [
           {"name": "user", "value": JSON.stringify(user)},
