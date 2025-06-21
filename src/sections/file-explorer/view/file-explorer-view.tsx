@@ -27,11 +27,11 @@ import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
 import { List , Toolbar, ListItem, CardContent, ListItemSecondaryAction } from '@mui/material';
 
+import axios from '../../../lib/axios';
 import { paths } from '../../../routes/paths';
 import { Iconify } from '../../../components/iconify';
 import { DashboardContent } from '../../../layouts/dashboard';
 import { CustomBreadcrumbs } from '../../../components/custom-breadcrumbs';
-import axios from '../../../lib/axios';
 
 export function FileExplorerView() {
   const theme = useTheme();
@@ -132,10 +132,155 @@ export function FileExplorerView() {
       setError('Failed to create folder');
     }
   };
+  const handleFolderUpload = async (files) => {
+    const formData = new FormData();
+    formData.append('baseFolder', currentPath);
+
+    Array.from(files).forEach(file => {
+      // Get the relative path from the file's webkitRelativePath
+      const relativePath = file.webkitRelativePath || file.name;
+
+      // Append both the file and its relative path
+      formData.append('files', file);
+      formData.append('paths', relativePath);
+    });
+
+    try {
+      const response = await axios.post(`/r2/upload/folder`, formData);
+      if (response.status !== 200 && response.status !== 201) throw new Error('Failed to upload folder');
+
+      const result = await response.data;
+      console.log(`Uploaded ${result.totalFiles} files in ${result.foldersCreated} folders`);
+
+      fetchItems(currentPath);
+      setShowUpload(false);
+    } catch (error) {
+      console.error('Error uploading folder:', error);
+      setError('Failed to upload folder');
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const itemsDropped =  Array.from(e.dataTransfer.items);
+    const files = [];
+
+    // Check if any items are directories
+    const hasDirectories = itemsDropped.some(item =>
+      item.webkitGetAsEntry && item.webkitGetAsEntry()?.isDirectory
+    );
+
+    if (hasDirectories) {
+      // Handle folder drop
+      const promises = itemsDropped.map(item => {
+        const entry = item.webkitGetAsEntry();
+        if (entry) {
+          return processEntry(entry, '');
+        }
+        return Promise.resolve([]);
+      });
+
+      Promise.all(promises).then(results => {
+        const allFileObjects = results.flat();
+        if (allFileObjects.length > 0) {
+          // Convert file objects back to files for upload
+          const filesForUpload = allFileObjects.map(fileObj => {
+            const file = fileObj.file;
+            // Store the relative path as a property on the file for later access
+            Object.defineProperty(file, 'customRelativePath', {
+              value: fileObj.relativePath,
+              writable: false,
+              enumerable: false
+            });
+            return file;
+          });
+          handleFolderUploadFromDrop(filesForUpload);
+        }
+      });
+    } else {
+      // Handle regular file drop
+      const fileList = Array.from(e.dataTransfer.files);
+      if (fileList.length > 0) {
+        handleFileUpload(fileList);
+      }
+    }
+  };
+
+  const handleFolderUploadFromDrop = async (files) => {
+    const formData = new FormData();
+    formData.append('baseFolder', currentPath);
+
+    files.forEach(file => {
+      // Get the relative path from our custom property or fallback to webkitRelativePath
+      const relativePath = file.customRelativePath || file.webkitRelativePath || file.name;
+
+      // Append the file with the relative path as filename
+      formData.append('files', file, relativePath);
+      formData.append('paths', relativePath);
+    });
+
+    try {
+      const response = await axios.post(`/r2/upload/folder`, formData);
+      if (response.status !== 200 && response.status !== 201) throw new Error('Failed to upload folder');
+
+      const result = await response.data;
+      console.log(`Uploaded ${result.totalFiles} files in ${result.foldersCreated} folders`);
+
+      fetchItems(currentPath);
+      setShowUpload(false);
+    } catch (error) {
+      console.error('Error uploading folder:', error);
+      setError('Failed to upload folder');
+    }
+  };
+
+
+  const processEntry = (entry, path) => new Promise((resolve) => {
+      if (entry.isFile) {
+        entry.file((file) => {
+          // Create a new object with path information instead of modifying the file
+          const fileWithPath = {
+            file,
+            relativePath: path + file.name
+          };
+          resolve([fileWithPath]);
+        });
+      } else if (entry.isDirectory) {
+        const dirReader = entry.createReader();
+        dirReader.readEntries((entries) => {
+          const promises = entries.map(childEntry =>
+            processEntry(childEntry, path + entry.name + '/')
+          );
+          Promise.all(promises).then(results => {
+            resolve(results.flat());
+          });
+        });
+      } else {
+        resolve([]);
+      }
+    });
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragEnter = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
 
   const handleFileUpload = async (files: any) => {
     const formData = new FormData();
     formData.append('folder', currentPath);
+    formData.append('shouldGenerateKey','false');
 
     Array.from(files).forEach((file: any) => {
       // const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, '');
@@ -149,8 +294,7 @@ export function FileExplorerView() {
     });
 
     try {
-
-      const response = await axios.post(`r2/upload/multiple`, formData);
+      const response = await axios.post(`/r2/upload/multiple`, formData);
       if (response.status !== 200 && response.status !== 201) throw new Error('Failed to upload files');
       fetchItems(currentPath);
       setShowUpload(false);
@@ -534,28 +678,147 @@ export function FileExplorerView() {
 
         {/* Upload Dialog */}
         <Dialog open={showUpload} onClose={() => setShowUpload(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Upload Files</DialogTitle>
+          <DialogTitle>Sube archivos o carpetas</DialogTitle>
           <DialogContent>
-            <input
-              type="file"
-              multiple
-              onChange={(e) => handleFileUpload(e.target.files)}
-              style={{ width: '100%', padding: '20px 0' }}
-            />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, py: 2 }}>
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Subir archivos
+                </Typography>
+                <Box
+                  sx={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    width: '100%'
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    fullWidth
+                    startIcon={<Iconify icon="mdi:file-upload" />}
+                    sx={{
+                      py: 2,
+                      borderStyle: 'dashed',
+                      borderWidth: 2,
+                      '&:hover': {
+                        borderStyle: 'dashed',
+                        borderWidth: 2,
+                        bgcolor: 'action.hover'
+                      }
+                    }}
+                  >
+                    Seleccionar archivos
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => handleFileUpload(e.target.files)}
+                      style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </Button>
+                </Box>
+              </Box>
+
+              <Divider />
+
+              <Box>
+                <Typography variant="subtitle1" gutterBottom>
+                  Subir carpeta
+                </Typography>
+                <Box
+                  sx={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    width: '100%'
+                  }}
+                >
+                  <Button
+                    variant="outlined"
+                    component="label"
+                    fullWidth
+                    startIcon={<Iconify icon="mdi:folder-upload" />}
+                    sx={{
+                      py: 2,
+                      borderStyle: 'dashed',
+                      borderWidth: 2,
+                      '&:hover': {
+                        borderStyle: 'dashed',
+                        borderWidth: 2,
+                        bgcolor: 'action.hover'
+                      }
+                    }}
+                  >
+                    Seleccionar carpeta
+                    <input
+                      type="file"
+                      webkitdirectory=""
+                      directory=""
+                      multiple
+                      onChange={(e) => handleFolderUpload(e.target.files)}
+                      style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        opacity: 0,
+                        cursor: 'pointer'
+                      }}
+                    />
+                  </Button>
+                </Box>
+                <Typography variant="caption" color="text.secondary">
+                  Selecciona una carpeta para subir todos sus archivos y subcarpetas.
+                </Typography>
+              </Box>
+
+              <Box>
+                <Paper
+                  sx={{
+                    border: '2px dashed',
+                    borderColor: 'primary.main',
+                    borderRadius: 2,
+                    p: 4,
+                    textAlign: 'center',
+                    bgcolor: 'action.hover',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      bgcolor: 'action.selected'
+                    }
+                  }}
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragEnter={handleDragEnter}
+                  onDragLeave={handleDragLeave}
+                >
+                  <Iconify icon="mdi:cloud-upload" style={{ fontSize: 48, marginBottom: 16 }} />
+                  <Typography variant="body1" gutterBottom>
+                    Arrastra y suelta archivos aqui.
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Soporta archivos y carpetas. Puedes subir múltiples archivos o una carpeta completa.
+                  </Typography>
+                </Paper>
+              </Box>
+            </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setShowUpload(false)}>Cancel</Button>
+            <Button onClick={() => setShowUpload(false)}>Cancelar</Button>
           </DialogActions>
         </Dialog>
 
         {/* Create Folder Dialog */}
         <Dialog open={createFolderDialog} onClose={() => setCreateFolderDialog(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Create New Folder</DialogTitle>
+          <DialogTitle>Crear nueva carpeta</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
               margin="dense"
-              label="Folder Name"
+              label="Nombre de carpeta"
               fullWidth
               variant="outlined"
               value={newFolderName}
@@ -568,13 +831,13 @@ export function FileExplorerView() {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setCreateFolderDialog(false)}>Cancel</Button>
+            <Button onClick={() => setCreateFolderDialog(false)}>Cancelar</Button>
             <Button
               onClick={() => createFolder(newFolderName.trim())}
               variant="contained"
               disabled={!newFolderName.trim()}
             >
-              Create
+              Crear
             </Button>
           </DialogActions>
         </Dialog>
