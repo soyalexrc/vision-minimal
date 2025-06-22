@@ -1,6 +1,5 @@
-import type { IOrderTableFilters } from 'src/types/order';
-import type { IDatePickerControl } from 'src/types/common';
 import type { UseSetStateReturn } from 'minimal-shared/hooks';
+import type { ICashFlowTableFilters } from 'src/types/cashflow';
 
 import { useCallback } from 'react';
 import { usePopover } from 'minimal-shared/hooks';
@@ -11,8 +10,6 @@ import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import IconButton from '@mui/material/IconButton';
 import InputAdornment from '@mui/material/InputAdornment';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import { formHelperTextClasses } from '@mui/material/FormHelperText';
 
 import { Iconify } from 'src/components/iconify';
 import { CustomPopover } from 'src/components/custom-popover';
@@ -22,7 +19,7 @@ import { CustomPopover } from 'src/components/custom-popover';
 type Props = {
   dateError: boolean;
   onResetPage: () => void;
-  filters: UseSetStateReturn<IOrderTableFilters>;
+  filters: UseSetStateReturn<ICashFlowTableFilters>;
 };
 
 export function CashFlowTableToolbar({ filters, onResetPage, dateError }: Props) {
@@ -38,21 +35,21 @@ export function CashFlowTableToolbar({ filters, onResetPage, dateError }: Props)
     [onResetPage, updateFilters]
   );
 
-  const handleFilterStartDate = useCallback(
-    (newValue: IDatePickerControl) => {
-      onResetPage();
-      updateFilters({ startDate: newValue });
-    },
-    [onResetPage, updateFilters]
-  );
+  // const handleFilterStartDate = useCallback(
+  //   (newValue: IDatePickerControl) => {
+  //     onResetPage();
+  //     updateFilters({ startDate: newValue });
+  //   },
+  //   [onResetPage, updateFilters]
+  // );
 
-  const handleFilterEndDate = useCallback(
-    (newValue: IDatePickerControl) => {
-      onResetPage();
-      updateFilters({ endDate: newValue });
-    },
-    [onResetPage, updateFilters]
-  );
+  // const handleFilterEndDate = useCallback(
+  //   (newValue: IDatePickerControl) => {
+  //     onResetPage();
+  //     updateFilters({ endDate: newValue });
+  //   },
+  //   [onResetPage, updateFilters]
+  // );
 
   const renderMenuActions = () => (
     <CustomPopover
@@ -92,7 +89,7 @@ export function CashFlowTableToolbar({ filters, onResetPage, dateError }: Props)
           alignItems: { xs: 'flex-end', md: 'center' },
         }}
       >
-        <DatePicker
+        {/* <DatePicker
           label="Start date"
           value={currentFilters.startDate}
           onChange={handleFilterStartDate}
@@ -118,7 +115,7 @@ export function CashFlowTableToolbar({ filters, onResetPage, dateError }: Props)
               bottom: { md: -40 },
             },
           }}
-        />
+        /> */}
 
         <Box
           sx={{
@@ -133,7 +130,7 @@ export function CashFlowTableToolbar({ filters, onResetPage, dateError }: Props)
             fullWidth
             value={currentFilters.name}
             onChange={handleFilterName}
-            placeholder="Search customer or order number..."
+            placeholder="Buscar..."
             slotProps={{
               input: {
                 startAdornment: (

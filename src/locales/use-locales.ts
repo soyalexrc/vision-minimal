@@ -21,7 +21,6 @@ export function useLocales() {
   const langStorage = localStorageGetItem('i18nextLng');
   const defaultLang = allLangs[0]; // Spanish
 
-
   const currentLang = allLangs.find((lang) => lang.value === langStorage) || defaultLang;
 
   return {

@@ -72,6 +72,7 @@ export const paths = {
       root: `${ROOTS.DASHBOARD}/cashFlow`,
       list: `${ROOTS.DASHBOARD}/cashFlow`,
       create: `${ROOTS.DASHBOARD}/cashFlow/new`,
+      cashflowClose: `${ROOTS.DASHBOARD}/cashFlow/closeCashFlow`,
     },
     properties: {
       root: `${ROOTS.DASHBOARD}/properties`,

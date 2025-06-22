@@ -8,13 +8,7 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 
-// Define format patterns since they're missing from the import
-const formatPatterns = {
-  split: {
-    date: 'dd/MM/yyyy',
-    dateTime: 'dd/MM/yyyy HH:mm'
-  }
-};
+import { formatPatterns } from '../../utils/format-time';
 
 // ----------------------------------------------------------------------
 
@@ -35,7 +29,6 @@ export function RHFDatePicker({ name, slotProps, size = 'medium', ...other }: RH
           {...field}
           value={field.value ? new Date(field.value) : null}
           onChange={(newValue) => field.onChange(newValue ? format(newValue, 'yyyy-MM-dd') : null)}
-          format={formatPatterns.split.date}
           slotProps={{
             ...slotProps,
             textField: {

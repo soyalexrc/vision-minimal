@@ -25,7 +25,7 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
-import { List , Toolbar, ListItem, CardContent, ListItemSecondaryAction } from '@mui/material';
+import { List, Toolbar, ListItem, CardContent, ListItemSecondaryAction } from '@mui/material';
 
 import axios from '../../../lib/axios';
 import { paths } from '../../../routes/paths';
@@ -33,35 +33,87 @@ import { Iconify } from '../../../components/iconify';
 import { DashboardContent } from '../../../layouts/dashboard';
 import { CustomBreadcrumbs } from '../../../components/custom-breadcrumbs';
 
+interface DirectoryInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  webkitdirectory?: any;
+  directory?: any;
+}
+
+// Type definitions
+interface FileItem {
+  name: string;
+  path: string;
+  type: 'file' | 'folder';
+  size: number;
+  lastModified: string;
+}
+
+interface ContextMenuState {
+  mouseX: number;
+  mouseY: number;
+  item: FileItem;
+}
+
+interface FileWithRelativePath extends File {
+  webkitRelativePath: string;
+  customRelativePath: string;
+}
+
+interface FileObject {
+  file: File;
+  relativePath: string;
+}
+
+interface UploadResponse {
+  success: boolean;
+  message: string;
+  totalFiles?: number;
+  foldersCreated?: number;
+}
+
+interface WebKitDirectoryEntry {
+  isFile: boolean;
+  isDirectory: boolean;
+  name: string;
+  createReader?: () => WebKitDirectoryReader;
+  file?: (callback: (file: File) => void) => void;
+}
+
+interface WebKitDirectoryReader {
+  readEntries: (callback: (entries: WebKitDirectoryEntry[]) => void) => void;
+}
+
+// interface DataTransferItemWithEntry extends DataTransferItem {
+//   webkitGetAsEntry?: () => WebKitDirectoryEntry | null;
+// }
+
+type ViewMode = 'list' | 'grid';
+
 export function FileExplorerView() {
   const theme = useTheme();
-  const [currentPath, setCurrentPath] = useState('');
-  const [items, setItems] = useState<any>([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedItems, setSelectedItems] = useState(new Set());
-  const [viewMode, setViewMode] = useState('list'); // 'list' or 'grid'
-  const [showUpload, setShowUpload] = useState(false);
-  const [contextMenu, setContextMenu] = useState<any>(null);
-  const [editingItem, setEditingItem] = useState(null);
-  const [newName, setNewName] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [error, setError] = useState('');
-  const [createFolderDialog, setCreateFolderDialog] = useState(false);
-  const [newFolderName, setNewFolderName] = useState('');
+  const [currentPath, setCurrentPath] = useState<string>('');
+  const [items, setItems] = useState<FileItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [showUpload, setShowUpload] = useState<boolean>(false);
+  const [contextMenu, setContextMenu] = useState<ContextMenuState | null>(null);
+  const [editingItem, setEditingItem] = useState<string | null>(null);
+  const [newName, setNewName] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [error, setError] = useState<string>('');
+  const [createFolderDialog, setCreateFolderDialog] = useState<boolean>(false);
+  const [newFolderName, setNewFolderName] = useState<string>('');
 
-  // Mock API calls - replace with your actual Hono backend endpoints
-  const apiBase = '/api/r2'; // Your Hono worker endpoint
-
-  const fetchItems = async (path = '') => {
+  const fetchItems = async (path: string = ''): Promise<void> => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get('/r2/list?path=' + encodeURIComponent(path));
-      if (response.status !== 200 ) throw new Error('Failed to fetch items');
-      const data = await response.data;
+      const response = await axios.get(`/r2/list?path=${encodeURIComponent(path)}`);
+      if (response.status !== 200) throw new Error('Failed to fetch items');
+      const data = response.data;
       setItems(data.data || []);
-    } catch (error: any) {
-      console.error('Error fetching items:', error);
+    } catch (err: any) {
+      console.error('Error fetching items:', err);
       setError('Failed to load files and folders');
       setItems([]);
     } finally {
@@ -69,14 +121,14 @@ export function FileExplorerView() {
     }
   };
 
-  const downloadItem = async (item: any) => {
+  const downloadItem = async (item: FileItem): Promise<void> => {
     try {
-      const response = await axios.get('/r2/download?path=' + encodeURIComponent(item.path), {
+      const response = await axios.get(`/r2/download?path=${encodeURIComponent(item.path)}`, {
         responseType: 'blob'
       });
 
       if (response.status !== 200) throw new Error('Failed to download file');
-      const blob = await response.data;
+      const blob = response.data;
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -85,24 +137,24 @@ export function FileExplorerView() {
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-    } catch (error: any) {
-      console.error('Error downloading file:', error);
+    } catch (err: any) {
+      console.error('Error downloading file:', err);
       setError('Failed to download file');
     }
   };
 
-  const deleteItem = async (item: any) => {
+  const deleteItem = async (item: FileItem): Promise<void> => {
     try {
-      const response = await axios.delete(`/r2/delete?path=${encodeURIComponent(item.path) }`);
+      const response = await axios.delete(`/r2/delete?path=${encodeURIComponent(item.path)}`);
       if (response.status !== 200) throw new Error('Failed to delete item');
       fetchItems(currentPath);
-    } catch (error) {
-      console.error('Error deleting item:', error);
+    } catch (err: any) {
+      console.error('Error deleting item:', err);
       setError('Failed to delete item');
     }
   };
 
-  const renameItem = async (item: any, nName: string) => {
+  const renameItem = async (item: FileItem, nName: string): Promise<void> => {
     try {
       const response = await axios.put('/r2/rename', {
         oldPath: item.path,
@@ -111,13 +163,13 @@ export function FileExplorerView() {
       if (response.status !== 200) throw new Error('Failed to rename item');
       fetchItems(currentPath);
       setEditingItem(null);
-    } catch (error) {
-      console.error('Error renaming item:', error);
+    } catch (err: any) {
+      console.error('Error renaming item:', err);
       setError('Failed to rename item');
     }
   };
 
-  const createFolder = async (folderName: string) => {
+  const createFolder = async (folderName: string): Promise<void> => {
     try {
       const response = await axios.post('/r2/create-folder', {
         path: currentPath,
@@ -127,54 +179,51 @@ export function FileExplorerView() {
       fetchItems(currentPath);
       setCreateFolderDialog(false);
       setNewFolderName('');
-    } catch (error) {
-      console.error('Error creating folder:', error);
+    } catch (err: any) {
+      console.error('Error creating folder:', err);
       setError('Failed to create folder');
     }
   };
-  const handleFolderUpload = async (files) => {
+
+  const handleFolderUpload = async (files: FileList | null): Promise<void> => {
+    if (!files) return;
+
     const formData = new FormData();
     formData.append('baseFolder', currentPath);
 
-    Array.from(files).forEach(file => {
-      // Get the relative path from the file's webkitRelativePath
+    Array.from(files).forEach((file: any) => {
       const relativePath = file.webkitRelativePath || file.name;
-
-      // Append both the file and its relative path
       formData.append('files', file);
       formData.append('paths', relativePath);
     });
 
     try {
-      const response = await axios.post(`/r2/upload/folder`, formData);
+      const response = await axios.post<UploadResponse>('/r2/upload/folder', formData);
       if (response.status !== 200 && response.status !== 201) throw new Error('Failed to upload folder');
 
-      const result = await response.data;
+      const result = response.data;
       console.log(`Uploaded ${result.totalFiles} files in ${result.foldersCreated} folders`);
 
       fetchItems(currentPath);
       setShowUpload(false);
-    } catch (error) {
-      console.error('Error uploading folder:', error);
+    } catch (err: any) {
+      console.error('Error uploading folder:', err);
       setError('Failed to upload folder');
     }
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     e.stopPropagation();
 
-    const itemsDropped =  Array.from(e.dataTransfer.items);
-    const files = [];
+    const itemsDropped = Array.from(e.dataTransfer.items) as any[];
 
-    // Check if any items are directories
     const hasDirectories = itemsDropped.some(item =>
       item.webkitGetAsEntry && item.webkitGetAsEntry()?.isDirectory
     );
 
     if (hasDirectories) {
-      // Handle folder drop
-      const promises = itemsDropped.map(item => {
+      const promises = itemsDropped.map((item: any) => {
         const entry = item.webkitGetAsEntry();
         if (entry) {
           return processEntry(entry, '');
@@ -185,10 +234,8 @@ export function FileExplorerView() {
       Promise.all(promises).then(results => {
         const allFileObjects = results.flat();
         if (allFileObjects.length > 0) {
-          // Convert file objects back to files for upload
           const filesForUpload = allFileObjects.map(fileObj => {
-            const file = fileObj.file;
-            // Store the relative path as a property on the file for later access
+            const file = fileObj.file as FileWithRelativePath;
             Object.defineProperty(file, 'customRelativePath', {
               value: fileObj.relativePath,
               writable: false,
@@ -200,7 +247,6 @@ export function FileExplorerView() {
         }
       });
     } else {
-      // Handle regular file drop
       const fileList = Array.from(e.dataTransfer.files);
       if (fileList.length > 0) {
         handleFileUpload(fileList);
@@ -208,48 +254,44 @@ export function FileExplorerView() {
     }
   };
 
-  const handleFolderUploadFromDrop = async (files) => {
+  const handleFolderUploadFromDrop = async (files: FileWithRelativePath[]): Promise<void> => {
     const formData = new FormData();
     formData.append('baseFolder', currentPath);
 
     files.forEach(file => {
-      // Get the relative path from our custom property or fallback to webkitRelativePath
       const relativePath = file.customRelativePath || file.webkitRelativePath || file.name;
-
-      // Append the file with the relative path as filename
       formData.append('files', file, relativePath);
       formData.append('paths', relativePath);
     });
 
     try {
-      const response = await axios.post(`/r2/upload/folder`, formData);
+      const response = await axios.post<UploadResponse>('/r2/upload/folder', formData);
       if (response.status !== 200 && response.status !== 201) throw new Error('Failed to upload folder');
 
-      const result = await response.data;
+      const result = response.data;
       console.log(`Uploaded ${result.totalFiles} files in ${result.foldersCreated} folders`);
 
       fetchItems(currentPath);
       setShowUpload(false);
-    } catch (error) {
-      console.error('Error uploading folder:', error);
+    } catch (err: any) {
+      console.error('Error uploading folder:', err);
       setError('Failed to upload folder');
     }
   };
 
-
-  const processEntry = (entry, path) => new Promise((resolve) => {
-      if (entry.isFile) {
-        entry.file((file) => {
-          // Create a new object with path information instead of modifying the file
-          const fileWithPath = {
+  const processEntry = (entry: WebKitDirectoryEntry, path: string): Promise<FileObject[]> =>
+    new Promise((resolve) => {
+      if (entry.isFile && entry.file) {
+        entry.file((file: File) => {
+          const fileWithPath: FileObject = {
             file,
             relativePath: path + file.name
           };
           resolve([fileWithPath]);
         });
-      } else if (entry.isDirectory) {
+      } else if (entry.isDirectory && entry.createReader) {
         const dirReader = entry.createReader();
-        dirReader.readEntries((entries) => {
+        dirReader.readEntries((entries: WebKitDirectoryEntry[]) => {
           const promises = entries.map(childEntry =>
             processEntry(childEntry, path + entry.name + '/')
           );
@@ -262,61 +304,54 @@ export function FileExplorerView() {
       }
     });
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleDragEnter = (e) => {
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleDragLeave = (e) => {
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
     e.stopPropagation();
   };
 
-  const handleFileUpload = async (files: any) => {
+  const handleFileUpload = async (files: FileList | File[]): Promise<void> => {
     const formData = new FormData();
     formData.append('folder', currentPath);
-    formData.append('shouldGenerateKey','false');
+    formData.append('shouldGenerateKey', 'false');
 
-    Array.from(files).forEach((file: any) => {
-      // const nameWithoutExtension = file.name.replace(/\.[^/.]+$/, '');
-
-      // const modifiedFile = new File([file], nameWithoutExtension, {
-      //   type: file.type,
-      //   lastModified: file.lastModified
-      // });
-
+    Array.from(files).forEach((file: File) => {
       formData.append('files', file);
     });
 
     try {
-      const response = await axios.post(`/r2/upload/multiple`, formData);
+      const response = await axios.post<UploadResponse>('/r2/upload/multiple', formData);
       if (response.status !== 200 && response.status !== 201) throw new Error('Failed to upload files');
       fetchItems(currentPath);
       setShowUpload(false);
-    } catch (error: any) {
-      console.error('Error uploading files:', error);
+    } catch (err: any) {
+      console.error('Error uploading files:', err);
       setError('Failed to upload files');
     }
   };
 
-  const navigateToFolder = (folderPath: any) => {
+  const navigateToFolder = (folderPath: string): void => {
     setCurrentPath(folderPath);
     setSelectedItems(new Set());
   };
 
-  const goBack = () => {
+  const goBack = (): void => {
     const pathParts = currentPath.split('/').filter(Boolean);
     pathParts.pop();
     const parentPath = pathParts.join('/');
     setCurrentPath(parentPath);
   };
 
-  const handleContextMenu = (e, item) => {
+  const handleContextMenu = (e: React.MouseEvent, item: FileItem): void => {
     e.preventDefault();
     setContextMenu({
       mouseX: e.clientX - 2,
@@ -325,11 +360,11 @@ export function FileExplorerView() {
     });
   };
 
-  const handleContextMenuClose = () => {
+  const handleContextMenuClose = (): void => {
     setContextMenu(null);
   };
 
-  const filteredItems = items.filter((item: any) =>
+  const filteredItems = items.filter((item: FileItem) =>
     item.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -337,7 +372,7 @@ export function FileExplorerView() {
     fetchItems(currentPath);
   }, [currentPath]);
 
-  const formatFileSize = (bytes: any) => {
+  const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
@@ -345,17 +380,18 @@ export function FileExplorerView() {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const formatDate = (dateString: any) => new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const formatDate = (dateString: string): string =>
+    new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
 
-  const getFileIcon = (fileName: string) => {
+  const getFileIcon = (fileName: string): string => {
     const extension = fileName.split('.').pop()?.toLowerCase();
-    const iconMap = {
+    const iconMap: Record<string, string> = {
       pdf: 'mdi:file-pdf',
       doc: 'mdi:file-word',
       docx: 'mdi:file-word',
@@ -375,14 +411,13 @@ export function FileExplorerView() {
       zip: 'mdi:zip-box',
       rar: 'mdi:zip-box',
     };
-    return iconMap[extension] || 'mdi:file';
+    return iconMap[extension || ''] || 'mdi:file';
   };
-
 
   const renderGridView = () => (
     <Grid container spacing={2}>
-      {filteredItems.map((item: any) => (
-        <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }}  key={item.path}>
+      {filteredItems.map((item: FileItem) => (
+        <Grid size={{ xs: 6, sm: 4, md: 3, lg: 2 }} key={item.path}>
           <Card
             sx={{
               cursor: 'pointer',
@@ -414,8 +449,7 @@ export function FileExplorerView() {
                   <TextField
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    // onBlur={() => renameItem(item, newName)}
-                    onKeyPress={(e) => {
+                    onKeyDown={(e) => {
                       if (e.key === 'Enter') renameItem(item, newName);
                       if (e.key === 'Escape') setEditingItem(null);
                     }}
@@ -444,24 +478,25 @@ export function FileExplorerView() {
   const renderListView = () => (
     <Paper>
       <List>
-        {filteredItems.map((item, index) => (
+        {filteredItems.map((item: FileItem, index: number) => (
           <Fragment key={item.path}>
             <ListItem
               sx={{
+                border: 'none',
                 cursor: 'pointer',
                 bgcolor: selectedItems.has(item.path) ? 'action.selected' : 'background.paper',
                 '&:hover': {
                   bgcolor: 'action.hover'
                 }
               }}
-              button
+              component="button"
               onClick={() => {
                 if (item.type === 'folder') {
                   navigateToFolder(item.path);
                 }
               }}
               onContextMenu={(e) => handleContextMenu(e, item)}
-              selected={selectedItems.has(item.path)}
+              aria-selected={selectedItems.has(item.path)}
             >
               <ListItemIcon>
                 <Iconify
@@ -477,15 +512,14 @@ export function FileExplorerView() {
                   editingItem === item.path ? (
                     <TextField
                       value={newName}
-                      onChange={(e) => setNewName(e.target.value)}
-                      // onBlur={() => renameItem(item, newName)}
-                      onKeyPress={(e) => {
+                      onChange={(e: any) => setNewName(e.target.value)}
+                      onKeyDown={(e: any) => {
                         if (e.key === 'Enter') renameItem(item, newName);
                         if (e.key === 'Escape') setEditingItem(null);
                       }}
                       size="small"
                       autoFocus
-                      onClick={(e) => e.stopPropagation()}
+                      onClick={(e: any) => e.stopPropagation()}
                     />
                   ) : (
                     item.name
@@ -583,7 +617,7 @@ export function FileExplorerView() {
 
               <Button
                 variant="contained"
-                color="success"
+                color="primary"
                 startIcon={<Iconify icon="mdi:folder-plus" />}
                 onClick={() => setCreateFolderDialog(true)}
               >
@@ -595,8 +629,6 @@ export function FileExplorerView() {
 
         {/* Content */}
         <Box sx={{ p: 3, flexGrow: 1, overflow: 'auto' }}>
-          {/*{renderBreadcrumbs()}*/}
-
           <TextField
             fullWidth
             placeholder="Busca archivos y carpetas..."
@@ -644,7 +676,9 @@ export function FileExplorerView() {
           {contextMenu?.item?.type === 'file' && (
             <MenuItem
               onClick={() => {
-                downloadItem(contextMenu.item);
+                if (contextMenu?.item) {
+                  downloadItem(contextMenu.item);
+                }
                 handleContextMenuClose();
               }}
             >
@@ -654,17 +688,19 @@ export function FileExplorerView() {
           )}
           <MenuItem
             onClick={() => {
-              setEditingItem(contextMenu.item.path);
-              setNewName(contextMenu.item.name);
+              if (contextMenu?.item) {
+                setEditingItem(contextMenu.item.path);
+                setNewName(contextMenu.item.name);
+              }
               handleContextMenuClose();
             }}
           >
             <Iconify icon="mdi:pencil" style={{ marginRight: 8 }} />
-            Rename
+            Cambiar nombre
           </MenuItem>
           <MenuItem
             onClick={() => {
-              if (window.confirm(`Are you sure you want to delete "${contextMenu.item.name}"?`)) {
+              if (contextMenu?.item && window.confirm(`Are you sure you want to delete "${contextMenu.item.name}"?`)) {
                 deleteItem(contextMenu.item);
               }
               handleContextMenuClose();
@@ -672,7 +708,7 @@ export function FileExplorerView() {
             sx={{ color: 'error.main' }}
           >
             <Iconify icon="mdi:delete" style={{ marginRight: 8 }} />
-            Delete
+            Eliminar
           </MenuItem>
         </Menu>
 
@@ -712,7 +748,7 @@ export function FileExplorerView() {
                     <input
                       type="file"
                       multiple
-                      onChange={(e) => handleFileUpload(e.target.files)}
+                      onChange={(e) => handleFileUpload(e.target.files as any)}
                       style={{
                         position: 'absolute',
                         width: '100%',
@@ -758,7 +794,6 @@ export function FileExplorerView() {
                     <input
                       type="file"
                       webkitdirectory=""
-                      directory=""
                       multiple
                       onChange={(e) => handleFolderUpload(e.target.files)}
                       style={{
@@ -768,10 +803,11 @@ export function FileExplorerView() {
                         opacity: 0,
                         cursor: 'pointer'
                       }}
+                      {...({} as DirectoryInputProps)}
                     />
                   </Button>
                 </Box>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" color="textSecondary">
                   Selecciona una carpeta para subir todos sus archivos y subcarpetas.
                 </Typography>
               </Box>
@@ -823,7 +859,7 @@ export function FileExplorerView() {
               variant="outlined"
               value={newFolderName}
               onChange={(e) => setNewFolderName(e.target.value)}
-              onKeyPress={(e) => {
+              onKeyDown={(e) => {
                 if (e.key === 'Enter' && newFolderName.trim()) {
                   createFolder(newFolderName.trim());
                 }

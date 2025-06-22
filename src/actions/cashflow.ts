@@ -1,13 +1,15 @@
 import type { AxiosResponse } from 'axios';
 import type { SWRConfiguration } from 'swr';
 import type { IProductItem } from 'src/types/product';
+import type { DateFilters } from 'src/sections/cashflow/view/cashflow-list-view';
 import type {
   CashFlowSchemaType,
   ExternalPersonSchemaType, ExternalPropertySchemaType,
 } from 'src/sections/cashflow/form/create-update-cashflow-form';
 
-import { useMemo } from 'react';
+import { format } from 'date-fns';
 import useSWR, { mutate } from 'swr';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import { UploadService } from 'src/utils/files/upload';
 
@@ -33,30 +35,160 @@ const swrOptions: SWRConfiguration = {
 
 // ----------------------------------------------------------------------
 
-type CashFlowData = {
+export type CashFlowData = {
   data: ICashFlowItem[];
 }
 
-export function useGetCashFlows() {
-  const url = endpoints.cashflow.list;
-
-  const { data, isLoading, error, isValidating } = useSWR<CashFlowData>(url, fetcher, swrOptions);
-
-  const memoizedValue = useMemo(
-    () => ({
-      cashflow: data?.data || [],
-      cashflowLoading: isLoading,
-      cashflowError: error,
-      cashflowValidating: isValidating,
-      cashflowEmpty: !isLoading && !isValidating && !data?.data?.length,
-      refetch: () => mutate(url),
-    }),
-    [data?.data, error, isLoading, isValidating]
-  );
-
-  return memoizedValue;
+interface CashFlowParams extends DateFilters {
+  [key: string]: any;
 }
 
+interface CashFlowState {
+  data: any[];
+  loading: boolean;
+  error: any;
+  empty: boolean;
+}
+
+// Simple fetch hook without SWR
+export function useGetCashFlows(params?: CashFlowParams) {
+  const [state, setState] = useState<CashFlowState>({
+    data: [],
+    loading: false,
+    error: null,
+    empty: false,
+  });
+
+  // Build URL with params
+  const buildUrl = useCallback((filters?: CashFlowParams) => {
+    if (!filters) return endpoints.cashflow.list;
+
+    const searchParams = new URLSearchParams();
+
+    if (filters.startDate) {
+      searchParams.append('dateFrom', format(filters.startDate, 'yyyy-MM-dd'));
+    }
+
+    if (filters.endDate) {
+      searchParams.append('dateTo', format(filters.endDate, 'yyyy-MM-dd'));
+    }
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key !== 'startDate' && key !== 'endDate' && value != null && value !== '') {
+        searchParams.append(key, String(value));
+      }
+    });
+
+    const queryString = searchParams.toString();
+    return `${endpoints.cashflow.list}${queryString ? `?${queryString}` : ''}`;
+  }, []);
+
+  // Fetch function
+  const fetchData = useCallback(async (filters?: CashFlowParams) => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const url = buildUrl(filters);
+      const response = await fetcher(url);
+
+      setState({
+        data: response?.data || [],
+        loading: false,
+        error: null,
+        empty: !response?.data?.length,
+      });
+
+      return response;
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error,
+      }));
+      throw error;
+    }
+  }, [buildUrl]);
+
+  // Auto-fetch when params change
+  useEffect(() => {
+    fetchData(params);
+  }, [params, fetchData]);
+
+  // Manual refetch functions
+  const refetch = useCallback(() => fetchData(params), [params, fetchData]);
+
+  const refetchWithParams = useCallback((newParams: CashFlowParams) => fetchData(newParams), [fetchData]);
+
+  return {
+    cashflow: state.data,
+    cashflowLoading: state.loading,
+    cashflowError: state.error,
+    cashflowEmpty: state.empty,
+    cashflowValidating: false, // Not needed without SWR
+    refetch,
+    refetchWithParams,
+  };
+}
+
+// Simple totals hook
+export function useGetCashFlowTotals(params?: DateFilters) {
+  const [state, setState] = useState({
+    data: null,
+    loading: false,
+    error: null,
+  });
+
+  const fetchTotals = useCallback(async (filters?: DateFilters) => {
+    if (!filters?.startDate || !filters?.endDate) {
+      setState({ data: null, loading: false, error: null });
+      return;
+    }
+
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const searchParams = new URLSearchParams();
+      searchParams.append('dateFrom', format(filters.startDate, 'yyyy-MM-dd'));
+      searchParams.append('dateTo', format(filters.endDate, 'yyyy-MM-dd'));
+
+      const url = `${endpoints.cashflow.totals}?${searchParams.toString()}`;
+      const response = await fetcher(url);
+
+      setState({
+        data: response,
+        loading: false,
+        error: null,
+      });
+
+      // eslint-disable-next-line consistent-return
+      return response;
+    } catch (error) {
+      setState((prev: any) => ({
+        ...prev,
+        loading: false,
+        error,
+      }));
+      throw error;
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTotals(params);
+  }, [params, fetchTotals]);
+
+  const refetchTotals = useCallback(() => fetchTotals(params), [params, fetchTotals]);
+  const refetchWithParams = useCallback((newParams: CashFlowParams) => fetchTotals(newParams), [fetchTotals]);
+
+
+  return {
+    totalsData: state.data,
+    totalsLoading: state.loading,
+    totalsError: state.error,
+    totalsValidating: false,
+    refetchTotals,
+    refetchWithParams
+  };
+}
 
 // ----------------------------------------------------------------------
 

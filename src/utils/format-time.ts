@@ -15,6 +15,39 @@ import {
 
 export type DatePickerFormat =  Date | string | number | null | undefined;
 
+export const formatPatterns = {
+  dateTime: 'DD MMM YYYY h:mm a', // 17 Apr 2022 12:00 am
+  date: 'yyyy-MM-dd', // 17 Apr 2022
+  time: 'h:mm a', // 12:00 am
+  split: {
+    dateTime: 'DD/MM/YYYY h:mm a', // 17/04/2022 12:00 am
+    date: 'DD/MM/YYYY', // 17/04/2022
+  },
+  paramCase: {
+    dateTime: 'DD-MM-YYYY h:mm a', // 17-04-2022 12:00 am
+    date: 'DD-MM-YYYY', // 17-04-2022
+  },
+};
+
+// Format patterns for date-fns
+export const formatPatterns2 = {
+  date: 'dd/MM/yyyy',
+  dateTime: 'dd/MM/yyyy HH:mm',
+  time: 'HH:mm',
+  
+  // For more specific formats
+  day: 'dd',
+  month: 'MMM',
+  monthYear: 'MMM yyyy',
+  fullDate: 'EEEE, dd MMMM yyyy',
+  fullDateTime: 'EEEE, dd MMMM yyyy HH:mm',
+  
+  // Additional formats
+  shortDate: 'dd MMM',
+  longDate: 'dd MMMM yyyy',
+  iso: "yyyy-MM-dd'T'HH:mm:ss.SSSxxx",
+};
+
 // ----------------------------------------------------------------------
 
 export function fToDate(date: any, newFormat: string = 'yyyy-MM-dd') {

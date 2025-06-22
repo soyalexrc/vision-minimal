@@ -3,6 +3,7 @@
 import type { TableHeadCellProps } from 'src/components/table';
 
 import { varAlpha } from 'minimal-shared/utils';
+import { endOfMonth, startOfMonth } from 'date-fns';
 import { useState, useEffect, useCallback } from 'react';
 import { useBoolean, useSetState } from 'minimal-shared/hooks';
 
@@ -10,15 +11,15 @@ import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
+import { Stack } from '@mui/material';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import TableBody from '@mui/material/TableBody';
 import IconButton from '@mui/material/IconButton';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { paths } from 'src/routes/paths';
-
-import { fIsAfter } from 'src/utils/format-time';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -27,6 +28,7 @@ import { toast } from 'src/components/snackbar';
 import { Iconify } from 'src/components/iconify';
 import { Scrollbar } from 'src/components/scrollbar';
 import { ConfirmDialog } from 'src/components/custom-dialog';
+import { LoadingScreen } from 'src/components/loading-screen';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 import {
   useTable,
@@ -41,11 +43,13 @@ import {
 } from 'src/components/table';
 
 import { getStatus } from '../../../utils/get-status';
+import CashFlowDashboard from '../cashflow-dashboard';
 import { CashFlowTableRow } from '../cashflow-table-row';
-import { useGetCashFlows } from '../../../actions/cashflow';
+import { useGetCashFlows, useGetCashFlowTotals } from '../../../actions/cashflow';
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
+// import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 
 // ----------------------------------------------------------------------
 
@@ -66,42 +70,59 @@ const TABLE_HEAD: TableHeadCellProps[] = [
   { id: '', width: 88 },
 ];
 
+// Interface for date filters
+export interface DateFilters {
+  startDate: Date | string | number;
+  endDate: Date | string | number;
+}
+
+const defaultFilters = {
+  startDate: startOfMonth(new Date()),
+  endDate: endOfMonth(new Date()),
+}
+
 // ----------------------------------------------------------------------
 
 export function CashFlowListView() {
-  const table = useTable({ defaultDense: true, defaultOrderBy: 'updatedAt', defaultOrder: 'desc', defaultRowsPerPage: 25 });
-  const { cashflow, cashflowLoading, cashflowError, cashflowEmpty } = useGetCashFlows()
+  const table = useTable({
+    defaultDense: true,
+    defaultOrderBy: 'updatedAt',
+    defaultOrder: 'desc',
+    defaultRowsPerPage: 10,
+  });
+  const [dateFilters, setDateFilters] = useState<DateFilters>({
+    startDate: startOfMonth(new Date()),
+    endDate: endOfMonth(new Date()),
+  });
+  const { cashflow, cashflowLoading, cashflowError, refetchWithParams } = useGetCashFlows(defaultFilters);
+  const { totalsData, totalsLoading, totalsError, refetchWithParams: refetchTotals } = useGetCashFlowTotals(defaultFilters);
   const confirmDialog = useBoolean();
-
   const [tableData, setTableData] = useState<ICashFlowItem[]>([]);
 
   useEffect(() => {
     setTableData(cashflow || []);
   }, [cashflow]);
 
+
   const filters = useSetState<ICashFlowTableFilters>({
     name: '',
     status: 'all',
-    startDate: null,
-    endDate: null,
   });
   const { state: currentFilters, setState: updateFilters } = filters;
 
-  const dateError = fIsAfter(currentFilters.startDate!, currentFilters.endDate!);
+  // const dateError = fIsAfter(currentFilters.startDate.value!, currentFilters.endDate.value!);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(table.order, table.orderBy),
     filters: currentFilters,
-    dateError,
   });
 
   const dataInPage = rowInPage(dataFiltered, table.page, table.rowsPerPage);
 
-  const canReset =
-    !!currentFilters.name ||
-    currentFilters.status !== 'all' ||
-    (!!currentFilters.startDate && !!currentFilters.endDate);
+  const canReset = !!currentFilters.name || currentFilters.status !== 'all';
+  // currentFilters.status !== 'all' ||
+  // (!!currentFilters.startDate && !!currentFilters.endDate);
 
   const notFound = (!dataFiltered.length && canReset) || !dataFiltered.length;
 
@@ -115,8 +136,23 @@ export function CashFlowListView() {
 
       table.onUpdatePageDeleteRow(dataInPage.length);
     },
-    [dataInPage.length, table, tableData]
+    [dataInPage.length, table, tableData],
   );
+
+  // Fixed onSubmit function
+  const onSubmit = async () => {
+    const {startDate, endDate} = dateFilters;
+    if (!startDate || !endDate) {
+      toast.error('Por favor, seleccione las fechas de inicio y fin.');
+      return;
+    }
+    if (startDate > endDate) {
+      toast.error('La fecha de inicio no puede ser posterior a la fecha de fin.');
+      return;
+    }
+    refetchTotals(dateFilters);
+    refetchWithParams(dateFilters)
+  };
 
   const handleDeleteRows = useCallback(() => {
     const deleteRows = tableData.filter((row) => !table.selected.includes(row.id.toString()));
@@ -133,7 +169,7 @@ export function CashFlowListView() {
       table.onResetPage();
       updateFilters({ status: newValue });
     },
-    [updateFilters, table]
+    [updateFilters, table],
   );
 
   const renderConfirmDialog = () => (
@@ -173,18 +209,94 @@ export function CashFlowListView() {
             { name: 'Listado' },
           ]}
           action={
-            <Button
-              component="a"
-              href={paths.dashboard.cashFlow.create}
-              variant="contained"
-              startIcon={<Iconify icon="solar:plus-bold" />}
-            >
-              Nueva transacción
-            </Button>
+            <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
+              <Button
+                component="a"
+                href={paths.dashboard.cashFlow.cashflowClose}
+                variant="contained"
+                color="info"
+                startIcon={<Iconify icon="solar:plus-bold" />}
+              >
+                Ver cierres de caja
+              </Button>
+              <Button
+                component="a"
+                href={paths.dashboard.cashFlow.create}
+                variant="contained"
+                startIcon={<Iconify icon="solar:plus-bold" />}
+              >
+                Nueva transacción
+              </Button>
+            </Stack>
           }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
+        <Stack direction="row" gap={2}>
+          <DatePicker
+            value={dateFilters.startDate as Date}
+            onChange={(date) => {
+              if (date) {
+                setDateFilters((prev) => ({
+                  ...prev,
+                  startDate: date,
+                }));
+              }
+            }}
+            label="Desde"
+            sx={{ width: 200 }}
+          />
+          <DatePicker
+            label="Hasta"
+            value={dateFilters.endDate as Date}
+            onChange={(date) => {
+              if (date) {
+                setDateFilters((prev) => ({
+                  ...prev,
+                  endDate: date,
+                }));
+              }
+            }}
 
+            sx={{ width: 200 }}
+          />
+          <Button onClick={onSubmit} variant="contained" color="primary">
+            <Iconify icon="solar:search-bold" />
+              Buscar
+          </Button>
+        </Stack>
+        {
+          totalsLoading && (
+            <Box
+              sx={{
+                height: 400,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <LoadingScreen />
+            </Box>
+          )
+        }
+
+        {
+          totalsError && (
+            <Box
+              sx={{
+                p: 2,
+                textAlign: 'center',
+                color: 'error.main',
+              }}
+            >
+              Error al cargar los totales. Por favor, intente nuevamente.
+            </Box>
+          )
+        }
+
+        {
+          !totalsLoading && !totalsError && totalsData &&
+          <CashFlowDashboard data={totalsData as any} />
+        }
         <Card>
           <Tabs
             value={currentFilters.status}
@@ -242,7 +354,7 @@ export function CashFlowListView() {
               onSelectAllRows={(checked) =>
                 table.onSelectAllRows(
                   checked,
-                  dataFiltered.map((row) => row.id.toString())
+                  dataFiltered.map((row) => row.id.toString()),
                 )
               }
               action={
@@ -254,49 +366,82 @@ export function CashFlowListView() {
               }
             />
 
-            <Scrollbar sx={{ minHeight: 444 }}>
-              <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
-                <TableHeadCustom
-                  order={table.order}
-                  orderBy={table.orderBy}
-                  headCells={TABLE_HEAD}
-                  rowCount={dataFiltered.length}
-                  numSelected={table.selected.length}
-                  onSort={table.onSort}
-                  onSelectAllRows={(checked) =>
-                    table.onSelectAllRows(
-                      checked,
-                      dataFiltered.map((row) => row.id.toString())
-                    )
-                  }
-                />
+            {
+              cashflowLoading && (
+                <Box
+                  sx={{
+                    height: 400,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                  }}
+                >
+                  <LoadingScreen />
+                </Box>
+              )
+            }
 
-                <TableBody>
-                  {dataFiltered
-                    .slice(
-                      table.page * table.rowsPerPage,
-                      table.page * table.rowsPerPage + table.rowsPerPage
-                    )
-                    .map((row) => (
-                      <CashFlowTableRow
-                        key={row.id}
-                        row={row}
-                        selected={table.selected.includes(row.id.toString())}
-                        onSelectRow={() => table.onSelectRow(row.id.toString())}
-                        onDeleteRow={() => handleDeleteRow(row.id)}
-                        detailsHref={paths.dashboard.properties.details(row.id)}
-                      />
-                    ))}
+            {
+              cashflowError && (
+                <Box
+                  sx={{
+                    p: 2,
+                    textAlign: 'center',
+                    color: 'error.main',
+                  }}
+                >
+                  Error al cargar los registros. Por favor, intente nuevamente.
+                </Box>
+              )
+            }
 
-                  <TableEmptyRows
-                    height={table.dense ? 56 : 56 + 20}
-                    emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+            {
+              !cashflowLoading && !cashflowError && cashflow &&
+              <Scrollbar sx={{ minHeight: 444 }}>
+                <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
+                  <TableHeadCustom
+                    order={table.order}
+                    orderBy={table.orderBy}
+                    headCells={TABLE_HEAD}
+                    rowCount={dataFiltered.length}
+                    numSelected={table.selected.length}
+                    onSort={table.onSort}
+                    onSelectAllRows={(checked) =>
+                      table.onSelectAllRows(
+                        checked,
+                        dataFiltered.map((row) => row.id.toString()),
+                      )
+                    }
                   />
 
-                  <TableNoData notFound={notFound} />
-                </TableBody>
-              </Table>
-            </Scrollbar>
+                  <TableBody>
+                    {dataFiltered
+                      .slice(
+                        table.page * table.rowsPerPage,
+                        table.page * table.rowsPerPage + table.rowsPerPage,
+                      )
+                      .map((row) => (
+                        <CashFlowTableRow
+                          key={row.id}
+                          row={row}
+                          selected={table.selected.includes(row.id.toString())}
+                          onSelectRow={() => table.onSelectRow(row.id.toString())}
+                          onDeleteRow={() => handleDeleteRow(row.id)}
+                          detailsHref={paths.dashboard.properties.details(row.id)}
+                        />
+                      ))}
+
+                    <TableEmptyRows
+                      height={table.dense ? 56 : 56 + 20}
+                      emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}
+                    />
+
+                    <TableNoData notFound={notFound} />
+                  </TableBody>
+                </Table>
+              </Scrollbar>
+            }
+
           </Box>
 
           <TablePaginationCustom
@@ -311,22 +456,24 @@ export function CashFlowListView() {
         </Card>
       </DashboardContent>
 
-      {renderConfirmDialog()}
+    {
+      renderConfirmDialog()
+    }
     </>
-  );
+  )
+    ;
 }
 
 // ----------------------------------------------------------------------
 
 type ApplyFilterProps = {
-  dateError: boolean;
   inputData: ICashFlowItem[];
   filters: ICashFlowTableFilters;
   comparator: (a: any, b: any) => number;
 };
 
-function applyFilter({ inputData, comparator, filters, dateError }: ApplyFilterProps) {
-  const { status, name, startDate, endDate } = filters;
+function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
+  const { status, name } = filters;
 
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 

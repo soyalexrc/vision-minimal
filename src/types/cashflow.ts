@@ -1,12 +1,10 @@
-import type { IDateValue, IDatePickerControl } from './common';
+import type { IDateValue } from './common';
 
 // ----------------------------------------------------------------------
 
 export type ICashFlowTableFilters = {
   name: string;
   status: string;
-  endDate: IDatePickerControl;
-  startDate: IDatePickerControl;
 };
 
 export type IOrderHistory = {
