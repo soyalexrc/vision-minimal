@@ -42,7 +42,6 @@ import {
 } from '../../../actions/cashflow';
 
 import type { ICashFlowItem, IPropertyCashFlow } from '../../../types/cashflow';
-import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 
 export const MONTHS = [
   'ENERO',
