@@ -397,7 +397,7 @@ export function CreateCashflowForm() {
                   cashflowPeople.find((person) => person.id === methods.watch('person')) || null
                 }
               />
-               <IconButton size="small">
+                <IconButton size="small" onClick={() => setOpenPersonDialog(true)}>
                 <Iconify icon="solar:cart-plus-bold" />
               </IconButton>
             </Stack>
