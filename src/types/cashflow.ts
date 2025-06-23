@@ -125,6 +125,58 @@ export type ICashFlowPersonData = {
   source: string;
 };
 
+export type ISimpleCashFlowPaymentData = {
+  id: number;
+  cashflow: number;
+  canon: boolean;
+  contract: boolean;
+  guarantee: boolean;
+  serviceType: string;
+  reason: string;
+  service: string;
+  taxPayer: string;
+  amount: number;
+  currency: number;
+  wayToPay: number;
+  transactionType: number;
+  totalDue: number;
+  incomeByThird: number;
+  entity: number;
+  pendingToCollect: number;
+  observation?: string;
+}
+
+export type ISimpleCashFlowData = {
+  id: number;
+  user: number;
+  owner: number;
+  location: string;
+  type: string;
+  person: number;
+  client: number;
+  property: number;
+  month: string;
+  attachments: string[];
+  totalQuantity: number;
+  createdAt: IDateValue;
+  updatedAt: IDateValue;
+  createdBy: {
+    id: number;
+    name: string;
+    email: string;
+    username: string
+  };
+  updatedby?: {
+    id: number;
+    name: string;
+    email: string;
+    username: string
+  };
+  date: IDateValue;
+  isTemporalTransaction: boolean;
+  temporalTransactionId?: number;
+}
+
 export type ICashFlowItem = {
   id: number;
   client?: number;

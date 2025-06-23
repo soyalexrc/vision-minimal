@@ -5,7 +5,7 @@ import type { DateFilters } from 'src/sections/cashflow/view/cashflow-list-view'
 import type {
   CashFlowSchemaType,
   ExternalPersonSchemaType, ExternalPropertySchemaType,
-} from 'src/sections/cashflow/form/create-update-cashflow-form';
+} from 'src/sections/cashflow/form/create-cashflow-form';
 
 import { format } from 'date-fns';
 import useSWR, { mutate } from 'swr';
@@ -16,13 +16,13 @@ import { UploadService } from 'src/utils/files/upload';
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
 import type { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
-import type {
+import {
   IEntity, ICurrency,
   IWayToPay,
   ICashFlowItem,
   IPersonCashFlow,
   ITransactionType,
-  IPropertyCashFlow,
+  IPropertyCashFlow, ISimpleCashFlowData, ISimpleCashFlowPaymentData,
 } from '../types/cashflow';
 
 // ----------------------------------------------------------------------
@@ -37,6 +37,11 @@ const swrOptions: SWRConfiguration = {
 
 export type CashFlowData = {
   data: ICashFlowItem[];
+}
+
+export type GetOneCashFlowData = {
+  cashflow: ISimpleCashFlowData;
+  payments: ISimpleCashFlowPaymentData[];
 }
 
 interface CashFlowParams extends DateFilters {
@@ -188,6 +193,32 @@ export function useGetCashFlowTotals(params?: DateFilters) {
     refetchTotals,
     refetchWithParams
   };
+}
+
+// ----------------------------------------------------------------------
+
+export function useGetCashFlow(id?: number | string) {
+  const url = id ? `${endpoints.cashflow.getOne}/${id}` : null;
+
+  const { data, isLoading, error, isValidating } = useSWR<GetOneCashFlowData>(
+    url,
+    url ? fetcher : null,
+    swrOptions
+  );
+
+  const memoizedValue = useMemo(
+    () => ({
+      cashflow: data || {},
+      cashflowLoading: isLoading,
+      cashflowError: error,
+      cashflowValidating: isValidating,
+      cashflowEmpty: !isLoading && !isValidating && !data,
+      refresh: () => url && mutate(url)
+    }),
+    [data, error, isLoading, isValidating, url]
+  );
+
+  return memoizedValue;
 }
 
 // ----------------------------------------------------------------------
@@ -435,7 +466,7 @@ export async function updateCashFlow(payload: CashFlowSchemaType, updatedby: any
       console.log('newAttachments', newAttachments);
     }
   const url = `${endpoints.cashflow.edit}`;
-  return axios.put(`${url}/${id}`, {...payload, updatedby});
+  return axios.patch(`${url}/${id}`, {...payload, updatedby});
 }
 
 export async function deleteAlly(id: number) {

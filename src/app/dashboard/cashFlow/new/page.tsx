@@ -5,7 +5,7 @@ import Container from '@mui/material/Container';
 
 import { paths } from '../../../../routes/paths';
 import { CustomBreadcrumbs } from '../../../../components/custom-breadcrumbs';
-import { CreateUpdateCashFlowForm } from '../../../../sections/cashflow/form/create-update-cashflow-form';
+import { CreateCashflowForm } from '../../../../sections/cashflow/form/create-cashflow-form';
 
 // ----------------------------------------------------------------------
 
@@ -25,7 +25,7 @@ export default function Page() {
           mb: { xs: 3, md: 5 },
         }}
       />
-      <CreateUpdateCashFlowForm isEdit />
+      <CreateCashflowForm />
     </Container>
   );
 }

@@ -1,11 +1,10 @@
 import type { AxiosResponse } from 'axios';
 
-import { z } from 'zod';
 import { toast } from 'sonner';
-import { useState, useCallback } from 'react';
 import { varAlpha } from 'minimal-shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -29,7 +28,10 @@ import { useParams, useRouter } from '../../../routes/hooks';
 import { useGetProperties } from '../../../actions/property';
 import { useGetServices, useGetSubServices } from '../../../actions/service';
 import {
-  createCashFlow,
+  CashFlowSchema,
+  ExternalPersonSchema, ExternalPropertySchema
+} from './create-cashflow-form';
+import {
   updateCashFlow,
   useGetCashFlowPeople,
   createExternalPerson,
@@ -38,25 +40,15 @@ import {
   useGetCashFlowWaysToPay,
   useGetCashFlowProperties,
   useGetCashFlowCurrencies,
-  useGetCashFlowTransactionTypes,
+  useGetCashFlowTransactionTypes
 } from '../../../actions/cashflow';
 
-import type { ICashFlowItem, IPropertyCashFlow } from '../../../types/cashflow';
+import type { IPropertyCashFlow } from '../../../types/cashflow';
+import type { GetOneCashFlowData} from '../../../actions/cashflow';
+import type { CashFlowSchemaType ,
+  ExternalPersonSchemaType,
+  ExternalPropertySchemaType} from './create-cashflow-form';
 
-export const MONTHS = [
-  'ENERO',
-  'FEBRERO',
-  'MARZO',
-  'ABRIL',
-  'MAYO',
-  'JUNIO',
-  'JULIO',
-  'AGOSTO',
-  'SEPTIEMBRE',
-  'OCTUBRE',
-  'NOVIEMBRE',
-  'DICIEMBRE',
-];
 
 const emptyPayment = {
   id: 0,
@@ -78,63 +70,11 @@ const emptyPayment = {
   wayToPay: 0,
 };
 
-export type CashFlowSchemaType = z.infer<typeof CashFlowSchema>;
-export type ExternalPersonSchemaType = z.infer<typeof ExternalPersonSchema>;
-export type ExternalPropertySchemaType = z.infer<typeof ExternalPropertySchema>;
-
-export const ExternalPersonSchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  source: z.string().optional(),
-});
-
-export const ExternalPropertySchema = z.object({
-  name: z.string().min(1, 'El nombre es requerido'),
-  location: z.string().optional(),
-});
-
-export const CashFlowSchema = z.object({
-  id: z.number().optional(),
-  property: z.number().nullable().optional(),
-  person: z.number().nullable().optional(),
-  owner: z.number().nullable().optional(),
-  user: z.number().optional(),
-  client: z.number().nullable().optional(),
-  date: z.any().optional(),
-  month: z.string().optional(),
-  type: z.string().optional(),
-  location: z.string().optional(),
-  attachments: z.any().optional(),
-  temporalTransactionId: z.any().optional(),
-  isTemporalTransaction: z.any().optional(),
-  payments: z.array(
-    z.object({
-      id: z.number().optional(),
-      canon: z.boolean().optional(),
-      contract: z.boolean().optional(),
-      guarantee: z.boolean().optional(),
-      serviceType: z.string().optional(),
-      reason: z.string().optional(),
-      service: z.string(),
-      taxPayer: z.string().optional(),
-      amount: z.any().optional(),
-      currency: z.number().nullable().optional(),
-      wayToPay: z.number().nullable().optional(),
-      entity: z.number().nullable().optional(),
-      transactionType: z.number().nullable().optional(),
-      totalDue: z.any().optional(),
-      incomeByThird: z.any().optional(),
-      pendingToCollect: z.any().optional(),
-      observation: z.string().optional(),
-    })
-  ),
-});
-
 type Props = {
-  currentCashFlow?: ICashFlowItem;
-  isEdit?: boolean;
+  currentCashFlow: GetOneCashFlowData;
 };
 
-export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Props) {
+export function UpdateCashFlowForm({ currentCashFlow }: Props) {
   const { user } = useAuthContext();
   const defaultValues: CashFlowSchemaType = {
     id: undefined,
@@ -170,19 +110,60 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
   const [openPersonDialog, setOpenPersonDialog] = useState(false);
   const [openPropertyDialog, setOpenPropertyDialog] = useState(false);
 
-  const shortUser = {
+  const shortUser = useMemo(() => ({
     id: user?.id,
     username: user?.username,
     name: user?.firstname + ' ' + user?.lastname,
     email: user?.email,
-  };
+  }), [user?.id, user?.username, user?.firstname, user?.lastname, user?.email]);
+
+  const formValues = useMemo(() => ({
+      id: currentCashFlow.cashflow.id!,
+      property: currentCashFlow.cashflow.property || 0,
+      person: currentCashFlow.cashflow.person || 0,
+      owner: currentCashFlow.cashflow.owner || 0,
+      user: currentCashFlow.cashflow.user || shortUser.id,
+      client: currentCashFlow.cashflow.client || 0,
+      date: currentCashFlow.cashflow.date ? new Date(currentCashFlow.cashflow.date) : new Date(),
+      month: currentCashFlow.cashflow.month || '',
+      location: currentCashFlow.cashflow.location || '',
+      attachments: currentCashFlow.cashflow.attachments || [],
+      type: currentCashFlow.cashflow.type || 'regular',
+      temporalTransactionId: currentCashFlow.cashflow.temporalTransactionId || 0,
+      isTemporalTransaction: currentCashFlow.cashflow.isTemporalTransaction || false,
+      payments: currentCashFlow.payments.map((payment) => ({
+        id: payment.id!,
+        canon: payment.canon || false,
+        contract: payment.contract || false,
+        guarantee: payment.guarantee || false,
+        serviceType: payment.serviceType || '',
+        reason: payment.reason || '',
+        service: payment.service || '',
+        taxPayer: payment.taxPayer || '',
+        amount: payment.amount || 0,
+        currency: payment.currency || 0,
+        wayToPay: payment.wayToPay || 0,
+        entity: payment.entity || 0,
+        transactionType: payment.transactionType || 0,
+        totalDue: payment.totalDue || 0,
+        incomeByThird: payment.incomeByThird || 0,
+        pendingToCollect: payment.pendingToCollect || 0,
+        observation: payment.observation || '',
+      })),
+
+    }), [currentCashFlow, shortUser])
 
   const methods = useForm<CashFlowSchemaType>({
     mode: 'all',
     resolver: zodResolver(CashFlowSchema),
     defaultValues,
-    // values: currentCashFlow ? { ...currentCashFlow } : defaultValues,
   });
+
+  useEffect(() => {
+    if (currentCashFlow) {
+      methods.reset(formValues);
+    }
+  }, [])
 
   const {
     reset,
@@ -209,8 +190,8 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     }
 
     if (values.property === null || values.property === 0) {
-          toast.error('Debe seleccionar un inmueble');
-          return;
+      toast.error('Debe seleccionar un inmueble');
+      return;
     }
 
     if (values.location === null || values.location?.trim() === '') {
@@ -218,39 +199,35 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
       return;
     }
 
-    if (values.payments.some(payment =>
-        payment.wayToPay === null ||
-        payment.transactionType === null ||
-        payment.currency === null
+    if (values.payments.some((payment: any) =>
+      payment.wayToPay === null ||
+      payment.transactionType === null ||
+      payment.currency === null
     )) {
       toast.error('Todos los pagos deben tener forma de pago, categoría y moneda');
       return;
     }
     const data = {
       ...values,
-      payments: values.payments.map((payment) => ({
+      payments: values.payments.map((payment: any) => ({
         ...payment,
-        amount: parseCurrency(payment.amount),
+        amount: parseCurrency(typeof payment.amount === 'string' ? payment.amount : String(payment.amount)),
         entity: payment.entity === 0 ? null : (payment.entity || null),
-        totalDue: parseCurrency(payment.totalDue),
-        pendingToCollect: parseCurrency(payment.pendingToCollect),
-        incomeByThird: parseCurrency(payment.incomeByThird),
+        totalDue: parseCurrency(typeof payment.totalDue === 'string' ? payment.totalDue : String(payment.totalDue)),
+        pendingToCollect: parseCurrency(typeof payment.pendingToCollect === 'string' ? payment.pendingToCollect : String(payment.pendingToCollect)),
+        incomeByThird: parseCurrency(typeof payment.incomeByThird === 'string' ? payment.incomeByThird : String(payment.incomeByThird)),
       })),
     };
 
     const promise = await (async () => {
-      let response: AxiosResponse<any>;
-      if (currentCashFlow?.id) {
-        const changes = getChangedFields(data, currentCashFlow);
+      const changes = getChangedFields(data, currentCashFlow);
 
-        if (Object.keys(changes).length === 0) {
-          console.log('No changes made.');
-          return 'No se detectaron cambios en el registro.';
-        }
-        response = await updateCashFlow(data, shortUser, currentCashFlow.id);
-      } else {
-        response = await createCashFlow(data, shortUser);
+      if (Object.keys(changes).length === 0) {
+        console.log('No changes made.');
+        return 'No se detectaron cambios en el registro.';
       }
+
+      const response: AxiosResponse<any> = await updateCashFlow(data, shortUser, currentCashFlow.cashflow.id);
 
       if (response.status === 200 || response.status === 201) {
         return response.data?.message;
@@ -268,8 +245,6 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     try {
       await promise;
       reset();
-      // refresh();
-      // refreshCurrent();
       router.push('/dashboard/cashFlow');
     } catch (error) {
       console.error(error);
@@ -289,7 +264,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
   function showAmount(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType === 1 || transactionType === 3 || transactionType === 4;
+    return transactionType === 1 || transactionType === 3 || transactionType === 4 || transactionType === 6;
   }
 
   function obtainPrefixByCurrency(i: number) {
@@ -352,6 +327,20 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     setValue('attachments', [], { shouldValidate: true });
   }, [setValue]);
 
+  const handleDateChange = useCallback((date: Date | null) => {
+    if (date) {
+      const adjustedDate = new Date(date);
+      adjustedDate.setHours(12, 0, 0, 0);
+      setValue('date', adjustedDate);
+    } else {
+      setValue('date', null);
+    }
+  }, [setValue]);
+
+  const handlePersonChange = useCallback((_: any, newValue: any) => {
+    setValue('person', newValue ? newValue.id : null);
+  }, [setValue]);
+
   return (
     <>
       <Form methods={methods} onSubmit={onSubmit}>
@@ -369,25 +358,15 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
               },
             }}
           >
-         {
-          user.role === 'ADMINISTRADOR' || user.role === 'TI' &&
-             <Field.DatePicker
-              name="date"
-               onChange={(date) => {
-                // Ensure timezone doesn't affect the date by setting time to noon
-                if (date) {
-                  const adjustedDate = new Date(date);
-                  adjustedDate.setHours(12, 0, 0, 0);
-                  setValue('date', adjustedDate);
-                } else {
-                  setValue('date', null);
-                }
-              }}
-              size="small"
-              disabled={!isEdit}
-              label="Fecha"
-            />
-         }
+            {
+              user.role === 'ADMINISTRADOR' || user.role === 'TI' &&
+              <Field.DatePicker
+                name="date"
+                // onChange={handleDateChange}
+                size="small"
+                label="Fecha"
+              />
+            }
 
             <Stack direction="row" alignItems="center" gap={1}>
               <Field.Autocomplete
@@ -398,9 +377,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                 options={cashflowPeople}
                 getOptionLabel={(option) => option.name || ''}
                 isOptionEqualToValue={(option, value) => option.id === value?.id}
-                onChange={(_, newValue) => {
-                  methods.setValue('person', newValue ? newValue.id : null);
-                }}
+                onChange={handlePersonChange}
                 renderOption={(props, option) => (
                   <li {...props} key={option.id}>
                     {option.name}
@@ -411,8 +388,8 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                   cashflowPeople.find((person) => person.id === methods.watch('person')) || null
                 }
               />
-              <IconButton onClick={() => setOpenPersonDialog(true)} disabled={!isEdit} size="small">
-                <Iconify icon="eva:plus-fill" />
+              <IconButton onClick={() => setOpenPersonDialog(true)}  size="small">
+                <Iconify icon="solar:cart-plus-bold" />
               </IconButton>
             </Stack>
             <Stack direction="row" alignItems="center" gap={1}>
@@ -442,14 +419,14 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
               />
               <IconButton
                 onClick={() => setOpenPropertyDialog(true)}
-                disabled={!isEdit}
+
                 size="small"
               >
-                <Iconify icon="eva:plus-fill" />
+                <Iconify icon="solar:user-plus-bold" />
               </IconButton>
             </Stack>
 
-            {/*<Field.Select disabled={!isEdit} size="small" name="month" label="Mes">*/}
+            {/*<Field.Select  size="small" name="month" label="Mes">*/}
             {/*  {MONTHS.map((month) => (*/}
             {/*    <MenuItem key={month} value={month}>*/}
             {/*      {month}*/}
@@ -457,9 +434,9 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             {/*  ))}*/}
             {/*</Field.Select>*/}
 
-            <Field.Text disabled={!isEdit} size="small" name="location" label="Ubicacion" />
+            <Field.Text  size="small" name="location" label="Ubicacion" />
             <Field.Select
-              disabled={!isEdit}
+
               size="small"
               name="type"
               label="Tipo de transacción"
@@ -492,7 +469,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                     onClick={() => removePayment(index)}
                     color="error"
                     size="small"
-                    disabled={!isEdit}
+
                   >
                     <Iconify icon="eva:trash-2-fill" />
                   </IconButton>
@@ -512,11 +489,12 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                 }}
               >
                 <Field.Select
-                  disabled={!isEdit}
+
                   size="small"
                   name={`payments.${index}.transactionType`}
                   label="Categoria"
                 >
+                  <MenuItem value={0}><em>Seleccionar</em></MenuItem>
                   {transactionTypes.map((transactionType) => (
                     <MenuItem key={transactionType.id} value={transactionType.id}>
                       {transactionType.name}
@@ -526,11 +504,12 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
                 {showWayToPay(index) && (
                   <Field.Select
-                    disabled={!isEdit}
+
                     size="small"
                     name={`payments.${index}.wayToPay`}
                     label="Forma de pago"
                   >
+                    <MenuItem value={0}><em>Seleccionar</em></MenuItem>
                     {waysToPay.map((wayToPay) => (
                       <MenuItem key={wayToPay.id} value={wayToPay.id}>
                         {wayToPay.name}
@@ -540,11 +519,12 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                 )}
 
                 <Field.Select
-                  disabled={!isEdit}
+
                   size="small"
                   name={`payments.${index}.currency`}
                   label="Moneda"
                 >
+                  <MenuItem value={0}><em>Seleccionar</em></MenuItem>
                   {currencies.map((currency) => (
                     <MenuItem key={currency.id} value={currency.id}>
                       {currency.name}
@@ -554,11 +534,12 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
                 {showEntity(index) && (
                   <Field.Select
-                    disabled={!isEdit}
+
                     size="small"
                     name={`payments.${index}.entity`}
                     label="Entidad"
                   >
+                    <MenuItem value={0}><em>Seleccionar</em></MenuItem>
                     {entities.map((entity) => (
                       <MenuItem key={entity.id} value={entity.id}>
                         {entity.name}
@@ -569,7 +550,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
                 {showAmount(index) && (
                   <Field.Currency
-                    disabled={!isEdit}
+
                     size="small"
                     prefix={obtainPrefixByCurrency(index) + ' '}
                     name={`payments.${index}.amount`}
@@ -579,7 +560,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
                 {showTotalDue(index) && (
                   <Field.Currency
-                    disabled={!isEdit}
+
                     size="small"
                     prefix={obtainPrefixByCurrency(index) + ' '}
                     name={`payments.${index}.totalDue`}
@@ -589,7 +570,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
                 {showPendingToCollect(index) && (
                   <Field.Currency
-                    disabled={!isEdit}
+
                     size="small"
                     prefix={obtainPrefixByCurrency(index) + ' '}
                     name={`payments.${index}.pendingToCollect`}
@@ -600,7 +581,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                 {
                   showServices(index) &&
                   <Field.Select
-                    disabled={!isEdit}
+
                     size="small"
                     name={`payments.${index}.service`}
                     label="Servicio"
@@ -616,7 +597,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                 {
                   showServices(index) &&
                   <Field.Select
-                    disabled={!isEdit}
+
                     size="small"
                     name={`payments.${index}.serviceType`}
                     label="Tipo de servicio"
@@ -632,33 +613,33 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
                 {
                   showTaxPayerOptions(index) && (
-                  <Field.Select
-                    disabled={!isEdit}
-                    size="small"
-                    name={`payments.${index}.taxPayer`}
-                    label="Contribuyente"
-                  >
-                    <MenuItem value="Ordinario Natural">Ordinario Natural</MenuItem>
-                    <MenuItem value="Ordinario Juridico">Ordinario Juridico</MenuItem>
-                    <MenuItem value="Especial">Especial</MenuItem>
-                  </Field.Select>
+                    <Field.Select
+
+                      size="small"
+                      name={`payments.${index}.taxPayer`}
+                      label="Contribuyente"
+                    >
+                      <MenuItem value="Ordinario Natural">Ordinario Natural</MenuItem>
+                      <MenuItem value="Ordinario Juridico">Ordinario Juridico</MenuItem>
+                      <MenuItem value="Especial">Especial</MenuItem>
+                    </Field.Select>
                   )
                 }
 
                 {showCanonGuaranteeContract(index) && (
                   <Box sx={{ mt: 2 }}>
                     <Field.Switch
-                      disabled={!isEdit}
+
                       name={`payments.${index}.canon`}
                       label="Canon"
                     />
                     <Field.Switch
-                      disabled={!isEdit}
+
                       name={`payments.${index}.contract`}
                       label="Contrato"
                     />
                     <Field.Switch
-                      disabled={!isEdit}
+
                       name={`payments.${index}.guarantee`}
                       label="Garantía"
                     />
@@ -666,7 +647,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                 )}
 
                 {/*<Field.Currency*/}
-                {/*  disabled={!isEdit}*/}
+                {/*  */}
                 {/*  size="small"*/}
                 {/*  name={`payments.${index}.incomeByThird`}*/}
                 {/*  label="Ingreso por Terceros"*/}
@@ -675,7 +656,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 
               <Box sx={{ mt: 2 }}>
                 <Field.Text
-                  disabled={!isEdit}
+
                   size="small"
                   name={`payments.${index}.reason`}
                   label="Concepto"
@@ -684,7 +665,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
                   fullWidth
                 />
                 {/*<Field.Text*/}
-                {/*  disabled={!isEdit}*/}
+                {/*  */}
                 {/*  size="small"*/}
                 {/*  name={`payments.${index}.observation`}*/}
                 {/*  label="Observaciones"*/}
@@ -732,7 +713,6 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             <Iconify icon="eva:arrow-ios-back-fill" />
             Volver
           </Button>
-          {isEdit && (
             <Button
               variant="contained"
               type="submit"
@@ -742,9 +722,8 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
               loading={isSubmitting}
               startIcon={isSubmitting ? <Iconify icon="eva:loading-spinner-fill" /> : null}
             >
-              {currentCashFlow ? 'Actualizar' : 'Crear'} Transaccion
+              Actualizar Transaccion
             </Button>
-          )}
         </Stack>
       </Form>
       <ExternalPersonDialogForm
@@ -773,10 +752,10 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
 }
 
 const ExternalPersonDialogForm = ({
-  open,
-  setOpen,
-  onSubmitFinished,
-}: {
+                                    open,
+                                    setOpen,
+                                    onSubmitFinished,
+                                  }: {
   open: boolean;
   setOpen: (value: boolean) => void;
   onSubmitFinished: (id: number) => void;
@@ -824,11 +803,11 @@ const ExternalPersonDialogForm = ({
 };
 
 const ExternalPropertyDialogForm = ({
-  open,
-  setOpen,
-  cashflowProperties,
-  onSubmitFinished,
-}: {
+                                      open,
+                                      setOpen,
+                                      cashflowProperties,
+                                      onSubmitFinished,
+                                    }: {
   open: boolean;
   cashflowProperties: IPropertyCashFlow[];
   setOpen: (value: boolean) => void;
@@ -889,14 +868,14 @@ const ExternalPropertyDialogForm = ({
           >
             <Tab iconPosition="end" value="form" label="Formulario" />
             <Tab iconPosition="end" value="select" label="Seleccionar de inventario"
-            icon={
-              <Label
-                variant={(tabValue === 'select' && 'filled') || 'soft'}
-                color="default"
-              >
-                {filteredProperties.length}
-              </Label>
-            }/>
+                 icon={
+                   <Label
+                     variant={(tabValue === 'select' && 'filled') || 'soft'}
+                     color="default"
+                   >
+                     {filteredProperties.length}
+                   </Label>
+                 }/>
           </Tabs>
 
           {tabValue === 'form' && (

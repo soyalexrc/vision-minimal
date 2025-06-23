@@ -427,7 +427,7 @@ export function CashFlowListView() {
                           selected={table.selected.includes(row.id.toString())}
                           onSelectRow={() => table.onSelectRow(row.id.toString())}
                           onDeleteRow={() => handleDeleteRow(row.id)}
-                          detailsHref={paths.dashboard.properties.details(row.id)}
+                          detailsHref={paths.dashboard.cashFlow.details(row.id)}
                         />
                       ))}
 
