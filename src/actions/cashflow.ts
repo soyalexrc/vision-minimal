@@ -16,7 +16,7 @@ import { UploadService } from 'src/utils/files/upload';
 import axios, { fetcher, endpoints } from 'src/lib/axios';
 
 import type { AllyQuickEditSchemaType } from '../sections/ally/ally-quick-edit-form';
-import {
+import type {
   IEntity, ICurrency,
   IWayToPay,
   ICashFlowItem,
