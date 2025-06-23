@@ -42,6 +42,7 @@ import {
 } from '../../../actions/cashflow';
 
 import type { ICashFlowItem, IPropertyCashFlow } from '../../../types/cashflow';
+import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
 
 export const MONTHS = [
   'ENERO',
@@ -203,12 +204,17 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
   });
 
   const onSubmit = handleSubmit(async (values) => {
-    if (values.person === null) {
+    if (values.person === null || values.person === 0) {
       toast.error('Debe seleccionar una persona');
       return;
     }
 
-    if (values.location === null) {
+    if (values.property === null || values.property === 0) {
+          toast.error('Debe seleccionar un inmueble');
+          return;
+    }
+
+    if (values.location === null || values.location?.trim() === '') {
       toast.error('Debe seleccionar una ubicación');
       return;
     }
@@ -223,10 +229,10 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
     }
     const data = {
       ...values,
-      date: new Date(),
       payments: values.payments.map((payment) => ({
         ...payment,
         amount: parseCurrency(payment.amount),
+        entity: payment.entity === 0 ? null : (payment.entity || null),
         totalDue: parseCurrency(payment.totalDue),
         pendingToCollect: parseCurrency(payment.pendingToCollect),
         incomeByThird: parseCurrency(payment.incomeByThird),
@@ -364,13 +370,25 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
               },
             }}
           >
-            {/*<Field.DatePicker*/}
-            {/*  disableFuture*/}
-            {/*  disabled={!isEdit}*/}
-            {/*  size="small"*/}
-            {/*  name="date"*/}
-            {/*  label="Fecha"*/}
-            {/*/>*/}
+         {
+          user.role === 'ADMINISTRADOR' || user.role === 'TI' &&
+             <Field.DatePicker
+              name="date"
+               onChange={(date) => {
+                // Ensure timezone doesn't affect the date by setting time to noon
+                if (date) {
+                  const adjustedDate = new Date(date);
+                  adjustedDate.setHours(12, 0, 0, 0);
+                  setValue('date', adjustedDate);
+                } else {
+                  setValue('date', null);
+                }
+              }}
+              size="small"
+              disabled={!isEdit}
+              label="Fecha"
+            />
+         }
 
             <Stack direction="row" alignItems="center" gap={1}>
               <Field.Autocomplete
@@ -401,7 +419,7 @@ export function CreateUpdateCashFlowForm({ currentCashFlow, isEdit = false }: Pr
             <Stack direction="row" alignItems="center" gap={1}>
               <Field.Autocomplete
                 name="property"
-                label="Inmueble (opcional)"
+                label="Inmueble"
                 size="small"
                 sx={{ flexGrow: 1 }}
                 options={cashflowProperties}

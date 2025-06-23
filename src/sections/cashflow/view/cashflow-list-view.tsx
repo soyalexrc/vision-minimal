@@ -63,7 +63,7 @@ const STATUS_OPTIONS = [
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID', width: 88 },
   { id: 'person.name', label: 'Persona', sx: { minWidth: 300 } },
-  { id: 'createdAt', label: 'Fecha de registro', width: 140 },
+  { id: 'date', label: 'Fecha de registro', width: 140 },
   { id: 'updatedAt', label: 'Ultima F. de actualizacion', width: 140 },
   { id: 'paymentsQty', label: 'C. Transac', align: 'center', sx: { minWidth: 110 } },
   { id: 'totalAmount', label: 'Total', width: 140 },

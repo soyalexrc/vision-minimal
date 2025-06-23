@@ -89,8 +89,7 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
 
       <TableCell>
         <ListItemText
-          primary={fDateTimeVE2(row.createdAt!).date}
-          secondary={fDateTimeVE2(row.createdAt!).time}
+          primary={fDateTimeVE2(row.date!).date}
           slotProps={{
             primary: {
               noWrap: true,
