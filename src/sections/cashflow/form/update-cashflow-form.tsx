@@ -34,14 +34,14 @@ import {
 } from './create-cashflow-form';
 import {
   updateCashFlow,
+  useGetCashFlow,
   useGetCashFlowPeople,
   createExternalPerson,
   useGetCashFlowEntities,
   createExternalProperty,
   useGetCashFlowWaysToPay,
   useGetCashFlowProperties,
-  useGetCashFlowCurrencies,
-  useGetCashFlowTransactionTypes, useGetCashFlow,
+  useGetCashFlowCurrencies, useGetCashFlowTransactionTypes,
 } from '../../../actions/cashflow';
 
 import type { IPropertyCashFlow } from '../../../types/cashflow';

@@ -18,19 +18,17 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { Dialog, DialogTitle, DialogActions, DialogContent } from '@mui/material';
 
-import { getChangedFields } from 'src/utils/form';
 import { parseCurrency } from 'src/utils/format-number';
 
 import { Label } from '../../../components/label';
+import { useRouter } from '../../../routes/hooks';
 import { useAuthContext } from '../../../auth/hooks';
 import { Iconify } from '../../../components/iconify';
 import { Form, Field } from '../../../components/hook-form';
-import { useParams, useRouter } from '../../../routes/hooks';
 import { useGetProperties } from '../../../actions/property';
 import { useGetServices, useGetSubServices } from '../../../actions/service';
 import {
   createCashFlow,
-  updateCashFlow,
   useGetCashFlowPeople,
   createExternalPerson,
   useGetCashFlowEntities,
@@ -42,7 +40,6 @@ import {
 } from '../../../actions/cashflow';
 
 import type { IPropertyCashFlow } from '../../../types/cashflow';
-import type { GetOneCashFlowData} from '../../../actions/cashflow';
 
 export const MONTHS = [
   'ENERO',
