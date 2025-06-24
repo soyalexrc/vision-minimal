@@ -17,9 +17,6 @@ export default function Page() {
   const { id } = useParams();
   const { cashflow, cashflowLoading, cashflowError } = useGetCashFlow(id as any)
 
-  console.log('cashflow', cashflow)
-
-
   return (
     // <Container maxWidth={settings.themeStretch ? false : 'xl'}>
     <Container maxWidth="xl">
@@ -41,7 +38,6 @@ export default function Page() {
       {
         cashflowError && <div>Error: {cashflowError}</div>
       }
-      <p>hello</p>
       {
         cashflow && !cashflowLoading && <UpdateCashFlowForm currentCashFlow={cashflow as any} />
       }

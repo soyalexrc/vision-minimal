@@ -104,7 +104,10 @@ export type IPropertyCashFlow = {
 export type ICashFlowTotalAmount = {
   currency: number;
   currency_code: string;
-  total_amount: number;
+  total_income: number;
+  total_outcome: number;
+  total_pending_to_collect: number;
+  total_due: number;
 };
 
 export type ICashFlowPropertyData = {

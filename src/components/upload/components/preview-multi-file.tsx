@@ -14,17 +14,31 @@ import type { MultiFilePreviewProps } from '../types';
 
 // ----------------------------------------------------------------------
 
+// Helper function to create preview URL
+const createPreviewUrl = (file: File | string): string => {
+  if (typeof file === 'string') {
+    return file; // Assume it's already a URL
+  }
+  return URL.createObjectURL(file);
+};
+
+// Helper function to handle image preview
+const handleImagePreview = (file: File | string) => {
+  const previewUrl = createPreviewUrl(file);
+  window.open(previewUrl, '_blank', 'width=800,height=600,scrollbars=yes,resizable=yes');
+};
+
 export function MultiFilePreview({
-  sx,
-  onRemove,
-  lastNode,
-  thumbnail,
-  slotProps,
-  firstNode,
-  files = [],
-  className,
-  ...other
-}: MultiFilePreviewProps) {
+                                   sx,
+                                   onRemove,
+                                   lastNode,
+                                   thumbnail,
+                                   slotProps,
+                                   firstNode,
+                                   files = [],
+                                   className,
+                                   ...other
+                                 }: MultiFilePreviewProps) {
   return (
     <ListRoot
       thumbnail={thumbnail}
@@ -45,11 +59,17 @@ export function MultiFilePreview({
                 imageView
                 file={file}
                 onRemove={() => onRemove?.(file)}
+                onClick={() => handleImagePreview(file)}
                 sx={[
                   (theme) => ({
                     width: 80,
                     height: 80,
                     border: `solid 1px ${varAlpha(theme.vars.palette.grey['500Channel'], 0.16)}`,
+                      cursor: 'pointer',
+                      transition: 'transform 0.2s ease-in-out',
+                      '&:hover': {
+                        transform: 'scale(1.05)',
+                      },
                   }),
                 ]}
                 slotProps={{ icon: { sx: { width: 36, height: 36 } } }}
@@ -61,7 +81,11 @@ export function MultiFilePreview({
 
         return (
           <ItemRow key={name}>
-            <FileThumbnail file={file} {...slotProps?.thumbnail} />
+            <FileThumbnailWrapper
+              onClick={() => handleImagePreview(file)}
+            >
+              <FileThumbnail file={file} {...slotProps?.thumbnail} />
+            </FileThumbnailWrapper>
 
             <ListItemText
               primary={name}
@@ -112,3 +136,13 @@ const ItemNode = styled('li', {
 })<Pick<MultiFilePreviewProps, 'thumbnail'>>(({ thumbnail }) => ({
   ...(thumbnail && { width: 'auto', display: 'inline-flex' }),
 }));
+
+const FileThumbnailWrapper = styled('div')({
+  display: 'flex',
+  alignItems: 'center',
+  cursor: 'pointer',
+  transition: 'opacity 0.2s ease-in-out',
+  '&:hover': {
+    opacity: 0.8,
+  },
+});

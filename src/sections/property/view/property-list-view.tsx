@@ -51,7 +51,7 @@ const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
   { value: 'active', label: 'Activo' },
   { value: 'inactive', label: 'Inactivo' },
-  { value: 'deleted', label: 'Eliminado' },
+  // { value: 'deleted', label: 'Eliminado' },
 ];
 
 // ----------------------------------------------------------------------

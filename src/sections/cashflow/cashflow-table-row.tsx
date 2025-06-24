@@ -19,7 +19,7 @@ import ListItemText from '@mui/material/ListItemText';
 import { RouterLink } from 'src/routes/components';
 
 import { fCurrency } from 'src/utils/format-number';
-import { fDateTimeVE2 } from 'src/utils/format-time';
+import { fDateTimeVE2, fromDateString } from 'src/utils/format-time';
 
 import { Iconify } from 'src/components/iconify';
 import { ConfirmDialog } from 'src/components/custom-dialog';
@@ -27,7 +27,7 @@ import { CustomPopover } from 'src/components/custom-popover';
 
 import { formatNumericId } from '../../utils/format-string';
 
-import type { ICashFlowItem } from '../../types/cashflow';
+import type { ICashFlowItem, ICashFlowPayment } from '../../types/cashflow';
 
 // ----------------------------------------------------------------------
 
@@ -42,6 +42,16 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
   const confirmDialog = useBoolean();
   const menuActions = usePopover();
   const collapseRow = useBoolean();
+
+  function getCorrectValueForAmountField(item: ICashFlowPayment) {
+    if (item.transactionType === 2) {
+      return item.pendingToCollect
+    }
+    if (item.transactionType === 5) {
+      return item.totalDue
+    }
+    return item.amount;
+  }
 
   const renderPrimaryRow = () => (
     <TableRow hover selected={selected}>
@@ -89,7 +99,7 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
 
       <TableCell>
         <ListItemText
-          primary={fDateTimeVE2(row.date!).date}
+          primary={fDateTimeVE2(fromDateString(row.date as string)).date}
           slotProps={{
             primary: {
               noWrap: true,
@@ -122,19 +132,29 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
 
       <TableCell>
         {row.total_amount.map((item) => (
-          <Typography variant="body2" key={item.currency}>
-            {fCurrency(item.total_amount, { currency: item.currency_code })}
-          </Typography>
+          <Stack key={item.currency}>
+            <Typography variant="body2" color="success.dark">
+              {fCurrency(item.total_income, { currency: item.currency_code })}
+            </Typography>
+            <Typography variant="body2" color="error.dark">
+              {fCurrency(item.total_outcome, { currency: item.currency_code })}
+            </Typography>
+          </Stack>
         ))}
       </TableCell>
 
-      {/*<TableCell>*/}
-      {/*  {row.total_amount.map((item) => (*/}
-      {/*    <Typography variant="body2" key={item.currency}>*/}
-      {/*      {fCurrency(item.total_amount, { currency: item.currency_code })}*/}
-      {/*    </Typography>*/}
-      {/*  ))}*/}
-      {/*</TableCell>*/}
+      <TableCell>
+        {row.total_amount.map((item) => (
+          <Stack key={item.currency}>
+            <Typography variant="body2" color="success.dark">
+              {fCurrency(item.total_pending_to_collect, { currency: item.currency_code })}
+            </Typography>
+            <Typography variant="body2" color="error.dark">
+              {fCurrency(item.total_due, { currency: item.currency_code })}
+            </Typography>
+          </Stack>
+        ))}
+      </TableCell>
 
       {/*<TableCell>*/}
       {/*  <Label*/}
@@ -186,6 +206,9 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
                 <ListItemText
                   primary={item.service + ' ' + (item.serviceType ?? '')}
                   secondary={item.reason}
+                  sx={{
+                    flex: 1,
+                  }}
                   slotProps={{
                     primary: {
                       sx: { typography: 'body2' },
@@ -225,7 +248,7 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
                     <Typography variant="caption" fontWeight="bold">
                       Monto
                     </Typography>
-                    <Typography variant="body2">{fCurrency(item.amount, { currency: item.currencyData.code })}</Typography>
+                    <Typography variant="body2">{fCurrency(getCorrectValueForAmountField(item), { currency: item.currencyData.code })}</Typography>
                   </Stack>
 
                 </Box>
@@ -253,13 +276,13 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
           sx={{ color: 'error.main' }}
         >
           <Iconify icon="solar:trash-bin-trash-bold" />
-          Delete
+          Eliminar
         </MenuItem>
 
         <li>
           <MenuItem component={RouterLink} href={detailsHref} onClick={() => menuActions.onClose()}>
             <Iconify icon="solar:eye-bold" />
-            View
+            Ver
           </MenuItem>
         </li>
       </MenuList>

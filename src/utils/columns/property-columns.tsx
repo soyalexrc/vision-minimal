@@ -33,6 +33,19 @@ export const propertyColumns: GridColDef[] = [
     ),
   },
   {
+    field: 'status',
+    headerName: 'Estatus',
+    flex: 1,
+    minWidth: 130,
+    renderCell: (params) => (
+      <RenderCellStatusAndFeatured
+        params={params}
+        featured={params.row.isFeatured}
+        value={params.row.status}
+      />
+    ),
+  },
+  {
     field: 'propertyType',
     headerName: 'Tipo de inmueble',
     flex: 1,
@@ -59,18 +72,5 @@ export const propertyColumns: GridColDef[] = [
     flex: 1,
     minWidth: 200,
     renderCell: (params) => <RenderCellPrice params={params} value={params.row.price} />,
-  },
-  {
-    field: 'status',
-    headerName: 'Estatus',
-    flex: 1,
-    minWidth: 130,
-    renderCell: (params) => (
-      <RenderCellStatusAndFeatured
-        params={params}
-        featured={params.row.isFeatured}
-        value={params.row.status}
-      />
-    ),
   },
 ];

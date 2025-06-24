@@ -466,7 +466,7 @@ export async function updateCashFlow(payload: CashFlowSchemaType, updatedby: any
       console.log('newAttachments', newAttachments);
     }
   const url = `${endpoints.cashflow.edit}`;
-  return axios.patch(`${url}/${id}`, {...payload, updatedby});
+  return axios.patch(`${url}/${id}`, {...payload, updatedby, payments: payload.payments.map((payment: any) => ({...payment, id: payment.id > 0 ? payment.id : undefined}))});
 }
 
 export async function deleteAlly(id: number) {

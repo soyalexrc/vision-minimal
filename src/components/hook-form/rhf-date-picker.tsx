@@ -28,7 +28,8 @@ export function RHFDatePicker({ name, slotProps, size = 'medium', ...other }: RH
         <DatePicker
           {...field}
           value={field.value ? new Date(field.value) : null}
-          onChange={(newValue) => field.onChange(newValue ? format(newValue, 'yyyy-MM-dd') : null)}
+          onChange={(newValue) => field.onChange(newValue ? new Date(newValue) : null)}
+          format={formatPatterns.date}
           slotProps={{
             ...slotProps,
             textField: {

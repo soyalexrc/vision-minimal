@@ -24,6 +24,7 @@ import { Label } from '../../../components/label';
 import { useAuthContext } from '../../../auth/hooks';
 import { Iconify } from '../../../components/iconify';
 import { Form, Field } from '../../../components/hook-form';
+import { fromDateString } from '../../../utils/format-time';
 import { useParams, useRouter } from '../../../routes/hooks';
 import { useGetProperties } from '../../../actions/property';
 import { useGetServices, useGetSubServices } from '../../../actions/service';
@@ -40,7 +41,7 @@ import {
   useGetCashFlowWaysToPay,
   useGetCashFlowProperties,
   useGetCashFlowCurrencies,
-  useGetCashFlowTransactionTypes
+  useGetCashFlowTransactionTypes, useGetCashFlow,
 } from '../../../actions/cashflow';
 
 import type { IPropertyCashFlow } from '../../../types/cashflow';
@@ -90,14 +91,11 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
     type: 'regular',
     temporalTransactionId: 0,
     isTemporalTransaction: false,
-    payments: [
-      {
-        ...emptyPayment,
-      },
-    ],
+    payments: [],
   };
   const router = useRouter();
   const { id } = useParams();
+  const {refresh} = useGetCashFlow(id as any)
   const { cashflowPeople, refetch: refetchPeople } = useGetCashFlowPeople();
   const { cashflowProperties, refetch: refetchProperties } = useGetCashFlowProperties();
   const { transactionTypes } = useGetCashFlowTransactionTypes();
@@ -124,33 +122,13 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
       owner: currentCashFlow.cashflow.owner || 0,
       user: currentCashFlow.cashflow.user || shortUser.id,
       client: currentCashFlow.cashflow.client || 0,
-      date: currentCashFlow.cashflow.date ? new Date(currentCashFlow.cashflow.date) : new Date(),
+      date: currentCashFlow.cashflow.date ? fromDateString(currentCashFlow.cashflow.date as string) : new Date(),
       month: currentCashFlow.cashflow.month || '',
       location: currentCashFlow.cashflow.location || '',
       attachments: currentCashFlow.cashflow.attachments || [],
       type: currentCashFlow.cashflow.type || 'regular',
       temporalTransactionId: currentCashFlow.cashflow.temporalTransactionId || 0,
       isTemporalTransaction: currentCashFlow.cashflow.isTemporalTransaction || false,
-      payments: currentCashFlow.payments.map((payment) => ({
-        id: payment.id!,
-        canon: payment.canon || false,
-        contract: payment.contract || false,
-        guarantee: payment.guarantee || false,
-        serviceType: payment.serviceType || '',
-        reason: payment.reason || '',
-        service: payment.service || '',
-        taxPayer: payment.taxPayer || '',
-        amount: payment.amount || 0,
-        currency: payment.currency || 0,
-        wayToPay: payment.wayToPay || 0,
-        entity: payment.entity || 0,
-        transactionType: payment.transactionType || 0,
-        totalDue: payment.totalDue || 0,
-        incomeByThird: payment.incomeByThird || 0,
-        pendingToCollect: payment.pendingToCollect || 0,
-        observation: payment.observation || '',
-      })),
-
     }), [currentCashFlow, shortUser])
 
   const methods = useForm<CashFlowSchemaType>({
@@ -158,12 +136,6 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
     resolver: zodResolver(CashFlowSchema),
     defaultValues,
   });
-
-  useEffect(() => {
-    if (currentCashFlow) {
-      methods.reset(formValues);
-    }
-  }, [])
 
   const {
     reset,
@@ -182,6 +154,37 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
     control,
     name: 'payments',
   });
+
+  console.log(formValues)
+
+  useEffect(() => {
+    if (currentCashFlow) {
+      methods.reset(formValues);
+      currentCashFlow.payments?.forEach((payment) => {
+          appendPayment({
+            id: payment.id!,
+            canon: payment.canon || false,
+            contract: payment.contract || false,
+            guarantee: payment.guarantee || false,
+            serviceType: payment.serviceType || '',
+            reason: payment.reason || '',
+            service: payment.service || '',
+            taxPayer: payment.taxPayer || '',
+            amount: payment.amount || 0,
+            currency: payment.currency || 0,
+            wayToPay: payment.wayToPay || 0,
+            entity: payment.entity || 0,
+            transactionType: payment.transactionType || 0,
+            totalDue: payment.totalDue || 0,
+            incomeByThird: payment.incomeByThird || 0,
+            pendingToCollect: payment.pendingToCollect || 0,
+            observation: payment.observation || '',
+          });
+        });
+    }
+  }, [])
+
+
 
   const onSubmit = handleSubmit(async (values) => {
     if (values.person === null || values.person === 0) {
@@ -245,6 +248,7 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
     try {
       await promise;
       reset();
+      refresh();
       router.push('/dashboard/cashFlow');
     } catch (error) {
       console.error(error);
@@ -280,12 +284,12 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
 
   function showTotalDue(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType === 1 || transactionType === 5 || transactionType === 4;
+    return transactionType === 5
   }
 
   function showPendingToCollect(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType === 1 || transactionType === 2 || transactionType === 4;
+    return transactionType === 2
   }
 
   function showTaxPayerOptions(i: number) {
@@ -574,7 +578,8 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
                     size="small"
                     prefix={obtainPrefixByCurrency(index) + ' '}
                     name={`payments.${index}.pendingToCollect`}
-                    label="Pendiente por Cobrar"
+                    label={showAmount(index) ? 'Pendiente por Cobrar' : 'Monto'}
+                    // label="Pendiente por Cobrar"
                   />
                 )}
 

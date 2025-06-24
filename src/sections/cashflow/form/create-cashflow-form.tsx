@@ -288,12 +288,12 @@ export function CreateCashflowForm() {
 
   function showTotalDue(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType === 1 || transactionType === 5 || transactionType === 4;
+    return transactionType === 5
   }
 
   function showPendingToCollect(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType === 1 || transactionType === 2 || transactionType === 4;
+    return transactionType === 2
   }
 
   function showTaxPayerOptions(i: number) {
@@ -572,7 +572,8 @@ export function CreateCashflowForm() {
                     size="small"
                     prefix={obtainPrefixByCurrency(index) + ' '}
                     name={`payments.${index}.pendingToCollect`}
-                    label="Pendiente por Cobrar"
+                    label={showAmount(index) ? 'Pendiente por Cobrar' : 'Monto'}
+                    // label="Pendiente por Cobrar"
                   />
                 )}
 

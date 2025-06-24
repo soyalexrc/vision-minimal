@@ -66,7 +66,8 @@ const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'date', label: 'Fecha de registro', width: 140 },
   { id: 'updatedAt', label: 'Ultima F. de actualizacion', width: 140 },
   { id: 'paymentsQty', label: 'C. Transac', align: 'center', sx: { minWidth: 110 } },
-  { id: 'totalAmount', label: 'Total', width: 140 },
+  { id: 'totalIncomeOutcome', label: 'Ingreso / Egreso', sx: { minWidth: 100 } },
+  { id: 'totalPendingToCollectAndDue', label: 'Por cobrar / Por Pagar', sx: { minWidth: 100 } },
   { id: '', width: 88 },
 ];
 
