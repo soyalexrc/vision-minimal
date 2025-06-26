@@ -8,6 +8,7 @@ import {
   RenderCellProperty,
   RenderCellStatusAndFeatured,
 } from '../../sections/property/property-table-row';
+import { fDateTimeVE2 } from '../format-time';
 
 export const propertyColumns: GridColDef[] = [
   {
@@ -16,6 +17,36 @@ export const propertyColumns: GridColDef[] = [
     filterable: true,
     renderCell: (params) => (
       <RenderCell params={params} value={params.row.code || formatCodeVINM(params.row.codeId)} />
+    ),
+  },
+  {
+    field: 'createdAt',
+    headerName: 'Fecha de registro',
+    flex: 1,
+    minWidth: 170,
+    renderCell: (params) => {
+      console.log('params.row.createdAt', params.row.createdAt);
+      const date = fDateTimeVE2(params.row.createdAt);
+      if (!date) {
+        return <RenderCell params={params} value="N/A" />;
+      }
+      const dateString = `${date.date} ${date.time}`;
+      return (
+        <RenderCell params={params} value={dateString} />
+      )
+    },
+  },
+  {
+    field: 'status',
+    headerName: 'Estatus',
+    flex: 1,
+    minWidth: 130,
+    renderCell: (params) => (
+      <RenderCellStatusAndFeatured
+        params={params}
+        featured={params.row.isFeatured}
+        value={params.row.status}
+      />
     ),
   },
   {
@@ -29,19 +60,6 @@ export const propertyColumns: GridColDef[] = [
       <RenderCellProperty
         params={params}
         href={paths.dashboard.properties.details(params.row.id)}
-      />
-    ),
-  },
-  {
-    field: 'status',
-    headerName: 'Estatus',
-    flex: 1,
-    minWidth: 130,
-    renderCell: (params) => (
-      <RenderCellStatusAndFeatured
-        params={params}
-        featured={params.row.isFeatured}
-        value={params.row.status}
       />
     ),
   },

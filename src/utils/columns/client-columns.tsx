@@ -1,5 +1,6 @@
 import type { GridColDef } from '@mui/x-data-grid';
 
+import { fDateTimeVE2 } from '../format-time';
 import {
   RenderCell,
   RenderCellPhone, RenderCellAmount,
@@ -10,7 +11,16 @@ import type { UserType } from '../../auth/types';
 
 export function getClientColumns(user: UserType): GridColDef[] {
   return [
-    { field: 'id', headerName: 'ID', filterable: true },
+    { field: 'id', headerName: 'ID', filterable: true, width: 80 },
+    {
+      field: 'status',
+      headerName: 'Estatus',
+      flex: 1,
+      minWidth: 100,
+      renderCell: (params) => (
+        <RenderCellStatus params={params} value={params.row.status} />
+      ),
+    },
     {
       field: 'name',
       headerName: 'Nombre',
@@ -22,7 +32,23 @@ export function getClientColumns(user: UserType): GridColDef[] {
           // <RenderCellRedirect redirectTo={url} params={params} value={params.row.name} />
           <ConditionalRenderCell user={user} params={params} value={params.row.name} />
         )
-
+    },
+    {
+      field: 'createdat',
+      headerName: 'Fecha de registro',
+      flex: 1,
+      minWidth: 170,
+      renderCell: (params) => {
+        console.log('params.row.createdat', params.row.createdat);
+        const date = fDateTimeVE2(params.row.createdat);
+        if (!date) {
+          return <RenderCell params={params} value="N/A" />;
+        }
+        const dateString = `${date.date} ${date.time}`;
+        return (
+          <RenderCell params={params} value={dateString} />
+        )
+      },
     },
     {
       field: 'phone',
@@ -114,15 +140,6 @@ export function getClientColumns(user: UserType): GridColDef[] {
       minWidth: 250,
       renderCell: (params) => (
         <ConditionalRenderCell user={user} params={params} value={params.row.requestracking} />
-      ),
-    },
-    {
-      field: 'status',
-      headerName: 'Estatus',
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => (
-        <RenderCellStatus params={params} value={params.row.status} />
       ),
     },
     {

@@ -190,7 +190,7 @@ export function fDateTimeVE2(
   time: string;
 } {
   const defaultDateFormat = dateFormat || 'dd-MM-yyyy';
-  const defaultTimeFormat = timeFormat || 'HH:mm a';
+  const defaultTimeFormat = timeFormat || 'h:mm a';
 
   if (!date) return { date: '', time: '' };
 

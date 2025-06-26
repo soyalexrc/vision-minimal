@@ -72,7 +72,7 @@ export function tokenExpired(exp: number) {
 export async function setSession(accessToken: string | null) {
   try {
     if (accessToken) {
-      sessionStorage.setItem(JWT_STORAGE_KEY, accessToken);
+      localStorage.setItem(JWT_STORAGE_KEY, accessToken);
 
       axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
       // TODO REVISAR TIEMPO DE VIDA DE SESION

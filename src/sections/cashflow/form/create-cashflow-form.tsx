@@ -440,6 +440,7 @@ export function CreateCashflowForm() {
               <MenuItem value="regular">Regular</MenuItem>
               <MenuItem value="change">Cambio</MenuItem>
               <MenuItem value="return">Devolución</MenuItem>
+              <MenuItem value="internal_admin">Administración Interna</MenuItem>
             </Field.Select>
           </Box>
         </Section>

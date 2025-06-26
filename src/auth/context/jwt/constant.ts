@@ -1,1 +1,1 @@
-export const JWT_STORAGE_KEY = 'jwt_access_token';
+export const JWT_STORAGE_KEY = 'vinm_jwt_access_token';
