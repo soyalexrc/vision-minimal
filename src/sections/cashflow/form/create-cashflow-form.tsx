@@ -352,6 +352,9 @@ export function CreateCashflowForm() {
       setValue('property', 16)
       setValue('location', 'NAGUANAGUA');
     }
+    if (watchedType === 'change') {
+      setValue('property', 16)
+    }
   }, [watchedType]);
 
   return (
@@ -412,7 +415,6 @@ export function CreateCashflowForm() {
                 name="property"
                 label="Inmueble"
                 size="small"
-                disabled={watchedType === 'internal_admin'}
                 sx={{ flexGrow: 1 }}
                 options={cashflowProperties}
                 getOptionLabel={(option) => option.name || ''}
@@ -434,7 +436,6 @@ export function CreateCashflowForm() {
                 }
               />
               <IconButton
-                disabled={watchedType === 'internal_admin'}
                 onClick={() => setOpenPropertyDialog(true)}
                 size="small"
               >
@@ -442,7 +443,7 @@ export function CreateCashflowForm() {
               </IconButton>
             </Stack>
 
-            <Field.Text size="small" disabled={watchedType === 'internal_admin'} name="location" label="Ubicacion" />
+            <Field.Text size="small"  name="location" label="Ubicacion" />
             <Field.Select
               size="small"
               name="type"

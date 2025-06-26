@@ -352,6 +352,9 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
       setValue('property', 16)
       setValue('location', 'NAGUANAGUA');
     }
+    if (watchedType === 'change') {
+      setValue('property', 16);
+    }
   }, [watchedType]);
 
   return (
@@ -409,7 +412,6 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
               <Field.Autocomplete
                 name="property"
                 label="Inmueble"
-                disabled={watchedType === 'internal_admin'}
                 size="small"
                 sx={{ flexGrow: 1 }}
                 options={cashflowProperties}
@@ -433,7 +435,6 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
               />
               <IconButton
                 onClick={() => setOpenPropertyDialog(true)}
-                disabled={watchedType === 'internal_admin'}
                 size="small"
               >
                 <Iconify icon="solar:user-plus-bold" />
@@ -448,7 +449,7 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
             {/*  ))}*/}
             {/*</Field.Select>*/}
 
-            <Field.Text  size="small" disabled={watchedType === 'internal_admin'} name="location" label="Ubicacion" />
+            <Field.Text  size="small" name="location" label="Ubicacion" />
             <Field.Select
 
               size="small"
