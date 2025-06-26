@@ -56,45 +56,25 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
   const renderPrimaryRow = () => (
     <TableRow hover selected={selected}>
       <TableCell padding="checkbox">
-        <Checkbox
-          checked={selected}
-          onClick={onSelectRow}
-          slotProps={{
-            input: {
-              id: `${row.id}-checkbox`,
-              'aria-label': `${row.id} checkbox`,
-            },
-          }}
-        />
+        {/*<Checkbox*/}
+        {/*  checked={selected}*/}
+        {/*  onClick={onSelectRow}*/}
+        {/*  slotProps={{*/}
+        {/*    input: {*/}
+        {/*      id: `${row.id}-checkbox`,*/}
+        {/*      'aria-label': `${row.id} checkbox`,*/}
+        {/*    },*/}
+        {/*  }}*/}
+        {/*/>*/}
+        <IconButton color={menuActions.open ? 'inherit' : 'default'} onClick={menuActions.onOpen}>
+          <Iconify icon="eva:more-vertical-fill" />
+        </IconButton>
       </TableCell>
 
       <TableCell>
         <Link component={RouterLink} href={detailsHref} color="inherit" underline="always">
           #{formatNumericId(row.id, 5)}
         </Link>
-      </TableCell>
-
-      <TableCell>
-        <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
-          <Avatar alt={row.persondata?.name}>{row.persondata?.name.toUpperCase().substring(0, 2)}</Avatar>
-
-          <Stack sx={{ typography: 'body2', flex: '1 1 auto', alignItems: 'flex-start' }}>
-            <Box component="span">{row.persondata?.name.toUpperCase()}</Box>
-
-            {
-              row.propertydata &&
-              <Box component="span" sx={{ color: 'text.disabled' }}>
-                {row.propertydata.name}
-              </Box>
-            }
-            {
-              !row.propertydata &&
-              <Box component="span" sx={{ color: 'text.disabled' }}>
-                {row.location}
-              </Box>
-            }
-          </Stack>
-        </Box>
       </TableCell>
 
       <TableCell>
@@ -127,6 +107,31 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
           }}
         />
       </TableCell>
+
+      <TableCell>
+        <Box sx={{ gap: 2, display: 'flex', alignItems: 'center' }}>
+          <Avatar alt={row.persondata?.name}>{row.persondata?.name.toUpperCase().substring(0, 2)}</Avatar>
+
+          <Stack sx={{ typography: 'body2', flex: '1 1 auto', alignItems: 'flex-start' }}>
+            <Box component="span">{row.persondata?.name.toUpperCase()}</Box>
+
+            {
+              row.propertydata &&
+              <Box component="span" sx={{ color: 'text.disabled' }}>
+                {row.propertydata.name}
+              </Box>
+            }
+            {
+              !row.propertydata &&
+              <Box component="span" sx={{ color: 'text.disabled' }}>
+                {row.location}
+              </Box>
+            }
+          </Stack>
+        </Box>
+      </TableCell>
+
+
 
       <TableCell align="center"> {row.payments.length} </TableCell>
 
@@ -172,10 +177,6 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
           sx={{ ...(collapseRow.value && { bgcolor: 'action.hover' }) }}
         >
           <Iconify icon="eva:arrow-ios-downward-fill" />
-        </IconButton>
-
-        <IconButton color={menuActions.open ? 'inherit' : 'default'} onClick={menuActions.onOpen}>
-          <Iconify icon="eva:more-vertical-fill" />
         </IconButton>
       </TableCell>
     </TableRow>
@@ -268,16 +269,16 @@ export function CashFlowTableRow({ row, selected, onSelectRow, onDeleteRow, deta
       slotProps={{ arrow: { placement: 'right-top' } }}
     >
       <MenuList>
-        <MenuItem
-          onClick={() => {
-            confirmDialog.onTrue();
-            menuActions.onClose();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="solar:trash-bin-trash-bold" />
-          Eliminar
-        </MenuItem>
+        {/*<MenuItem*/}
+        {/*  onClick={() => {*/}
+        {/*    confirmDialog.onTrue();*/}
+        {/*    menuActions.onClose();*/}
+        {/*  }}*/}
+        {/*  sx={{ color: 'error.main' }}*/}
+        {/*>*/}
+        {/*  <Iconify icon="solar:trash-bin-trash-bold" />*/}
+        {/*  Eliminar*/}
+        {/*</MenuItem>*/}
 
         <li>
           <MenuItem component={RouterLink} href={detailsHref} onClick={() => menuActions.onClose()}>

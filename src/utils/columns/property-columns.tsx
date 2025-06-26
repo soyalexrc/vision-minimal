@@ -1,6 +1,7 @@
 import type { GridColDef } from '@mui/x-data-grid';
 
 import { paths } from '../../routes/paths';
+import { fDateTimeVE2 } from '../format-time';
 import { formatCodeVINM } from '../format-string';
 import { RenderCellPrice } from '../../sections/product/product-table-row';
 import {
@@ -8,7 +9,6 @@ import {
   RenderCellProperty,
   RenderCellStatusAndFeatured,
 } from '../../sections/property/property-table-row';
-import { fDateTimeVE2 } from '../format-time';
 
 export const propertyColumns: GridColDef[] = [
   {

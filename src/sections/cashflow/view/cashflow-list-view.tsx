@@ -3,7 +3,7 @@
 import type { TableHeadCellProps } from 'src/components/table';
 
 import { varAlpha } from 'minimal-shared/utils';
-import { endOfMonth, startOfMonth } from 'date-fns';
+import { endOfDay, endOfMonth, startOfDay, startOfMonth } from 'date-fns';
 import { useState, useEffect, useCallback } from 'react';
 import { useBoolean, useSetState } from 'minimal-shared/hooks';
 
@@ -63,9 +63,9 @@ const STATUS_OPTIONS = [
 
 const TABLE_HEAD: TableHeadCellProps[] = [
   { id: 'id', label: 'ID', width: 88 },
-  { id: 'person.name', label: 'Persona', sx: { minWidth: 300 } },
-  { id: 'date', label: 'Fecha de registro', width: 140 },
+  { id: 'date', label: 'Fecha de registro', sx: { minWidth: 120 } },
   { id: 'updatedAt', label: 'Ultima F. de actualizacion', width: 140 },
+  { id: 'person.name', label: 'Persona', sx: { minWidth: 300 } },
   { id: 'paymentsQty', label: 'C. Transac', align: 'center', sx: { minWidth: 110 } },
   { id: 'totalIncomeOutcome', label: 'Ingreso / Egreso', sx: { minWidth: 100 } },
   { id: 'totalPendingToCollectAndDue', label: 'Por cobrar / Por Pagar', sx: { minWidth: 100 } },
@@ -79,8 +79,8 @@ export interface DateFilters {
 }
 
 const defaultFilters = {
-  startDate: startOfMonth(new Date()),
-  endDate: endOfMonth(new Date()),
+  startDate: startOfDay(new Date()),
+  endDate: endOfDay(new Date()),
 }
 
 // ----------------------------------------------------------------------
@@ -93,8 +93,8 @@ export function CashFlowListView() {
     defaultRowsPerPage: 10,
   });
   const [dateFilters, setDateFilters] = useState<DateFilters>({
-    startDate: startOfMonth(new Date()),
-    endDate: endOfMonth(new Date()),
+    startDate: startOfDay(new Date()),
+    endDate: endOfDay(new Date()),
   });
   const { cashflow, cashflowLoading, cashflowError, refetchWithParams } = useGetCashFlows(defaultFilters);
   const { totalsData, totalsLoading, totalsError, refetchWithParams: refetchTotals } = useGetCashFlowTotals(defaultFilters);

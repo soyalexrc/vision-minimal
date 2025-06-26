@@ -53,7 +53,7 @@ const STATUS_OPTIONS = [
     label: 'Concretado',
   },
   { value: 'inactive', label: 'Inactivo' },
-  { value: 'deleted', label: 'Eliminado' },
+  // { value: 'deleted', label: 'Eliminado' },
 ];
 
 // ----------------------------------------------------------------------

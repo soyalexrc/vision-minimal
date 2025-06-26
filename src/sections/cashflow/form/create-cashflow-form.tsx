@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { varAlpha } from 'minimal-shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState, useCallback } from 'react';
+import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
@@ -305,7 +305,7 @@ export function CreateCashflowForm() {
 
   function showServices(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType !== 6;
+    return transactionType !== 6 && watchedType !== 'internal_admin' && watchedType !== 'change';
   }
 
   function showSubService(i: number) {
@@ -318,6 +318,7 @@ export function CreateCashflowForm() {
   }
 
   const watchedAttachments = watch('attachments');
+  const watchedType = watch('type');
 
   const handleRemoveFile = useCallback(
     (inputFile: File | string) => {
@@ -346,8 +347,16 @@ export function CreateCashflowForm() {
     setValue('person', newValue ? newValue.id : null);
   }, [setValue]);
 
+  useEffect(() => {
+    if (watchedType === 'internal_admin') {
+      setValue('property', 16)
+      setValue('location', 'NAGUANAGUA');
+      setValue('person', 17);
+    }
+  }, [watchedType]);
+
   return (
-    <>
+    <>x
       <Form methods={methods} onSubmit={onSubmit}>
         {/* --- Sección: Información básica --- */}
         <Section title="Información básica">
@@ -378,6 +387,7 @@ export function CreateCashflowForm() {
               <Field.Autocomplete
                 sx={{ flexGrow: 1 }}
                 name="person"
+                disabled={watchedType === 'internal_admin'}
                 label="Persona"
                 size="small"
                 options={cashflowPeople}
@@ -394,7 +404,9 @@ export function CreateCashflowForm() {
                   cashflowPeople.find((person) => person.id === methods.watch('person')) || null
                 }
               />
-                <IconButton size="small" onClick={() => setOpenPersonDialog(true)}>
+                <IconButton
+                  disabled={watchedType === 'internal_admin'}
+                  size="small" onClick={() => setOpenPersonDialog(true)}>
                 <Iconify icon="solar:cart-plus-bold" />
               </IconButton>
             </Stack>
@@ -403,6 +415,7 @@ export function CreateCashflowForm() {
                 name="property"
                 label="Inmueble"
                 size="small"
+                disabled={watchedType === 'internal_admin'}
                 sx={{ flexGrow: 1 }}
                 options={cashflowProperties}
                 getOptionLabel={(option) => option.name || ''}
@@ -424,6 +437,7 @@ export function CreateCashflowForm() {
                 }
               />
               <IconButton
+                disabled={watchedType === 'internal_admin'}
                 onClick={() => setOpenPropertyDialog(true)}
                 size="small"
               >
@@ -431,7 +445,7 @@ export function CreateCashflowForm() {
               </IconButton>
             </Stack>
 
-            <Field.Text size="small" name="location" label="Ubicacion" />
+            <Field.Text size="small" disabled={watchedType === 'internal_admin'} name="location" label="Ubicacion" />
             <Field.Select
               size="small"
               name="type"
