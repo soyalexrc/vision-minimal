@@ -304,7 +304,7 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
 
   function showServices(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType !== 6;
+    return transactionType !== 6 && watchedType !== 'internal_admin' && watchedType !== 'change';
   }
 
   function showSubService(i: number) {
@@ -317,6 +317,7 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
   }
 
   const watchedAttachments = watch('attachments');
+  const watchedType = watch('type');
 
   const handleRemoveFile = useCallback(
     (inputFile: File | string) => {
@@ -344,6 +345,14 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
   const handlePersonChange = useCallback((_: any, newValue: any) => {
     setValue('person', newValue ? newValue.id : null);
   }, [setValue]);
+
+
+  useEffect(() => {
+    if (watchedType === 'internal_admin') {
+      setValue('property', 16)
+      setValue('location', 'NAGUANAGUA');
+    }
+  }, [watchedType]);
 
   return (
     <>
@@ -400,6 +409,7 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
               <Field.Autocomplete
                 name="property"
                 label="Inmueble"
+                disabled={watchedType === 'internal_admin'}
                 size="small"
                 sx={{ flexGrow: 1 }}
                 options={cashflowProperties}
@@ -423,7 +433,7 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
               />
               <IconButton
                 onClick={() => setOpenPropertyDialog(true)}
-
+                disabled={watchedType === 'internal_admin'}
                 size="small"
               >
                 <Iconify icon="solar:user-plus-bold" />
@@ -438,7 +448,7 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
             {/*  ))}*/}
             {/*</Field.Select>*/}
 
-            <Field.Text  size="small" name="location" label="Ubicacion" />
+            <Field.Text  size="small" disabled={watchedType === 'internal_admin'} name="location" label="Ubicacion" />
             <Field.Select
 
               size="small"

@@ -4,8 +4,8 @@ import { z } from 'zod';
 import { toast } from 'sonner';
 import { varAlpha } from 'minimal-shared/utils';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMemo, useState, useCallback, useEffect } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { useMemo, useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
 import Tab from '@mui/material/Tab';
@@ -351,7 +351,6 @@ export function CreateCashflowForm() {
     if (watchedType === 'internal_admin') {
       setValue('property', 16)
       setValue('location', 'NAGUANAGUA');
-      setValue('person', 17);
     }
   }, [watchedType]);
 
@@ -387,7 +386,6 @@ export function CreateCashflowForm() {
               <Field.Autocomplete
                 sx={{ flexGrow: 1 }}
                 name="person"
-                disabled={watchedType === 'internal_admin'}
                 label="Persona"
                 size="small"
                 options={cashflowPeople}
@@ -405,7 +403,6 @@ export function CreateCashflowForm() {
                 }
               />
                 <IconButton
-                  disabled={watchedType === 'internal_admin'}
                   size="small" onClick={() => setOpenPersonDialog(true)}>
                 <Iconify icon="solar:cart-plus-bold" />
               </IconButton>

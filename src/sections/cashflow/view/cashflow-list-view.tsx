@@ -3,7 +3,7 @@
 import type { TableHeadCellProps } from 'src/components/table';
 
 import { varAlpha } from 'minimal-shared/utils';
-import { endOfDay, endOfMonth, startOfDay, startOfMonth } from 'date-fns';
+import { endOfDay, startOfDay } from 'date-fns';
 import { useState, useEffect, useCallback } from 'react';
 import { useBoolean, useSetState } from 'minimal-shared/hooks';
 
