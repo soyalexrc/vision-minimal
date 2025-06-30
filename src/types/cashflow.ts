@@ -128,6 +128,14 @@ export type ICashFlowPersonData = {
   source: string;
 };
 
+export type ICloseCashFlowItem = {
+  id: number;
+  createdAt: IDateValue;
+  updatedAt: IDateValue;
+  date: IDateValue;
+  data: any
+}
+
 export type ISimpleCashFlowPaymentData = {
   id: number;
   cashflow: number;

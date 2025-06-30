@@ -64,6 +64,7 @@ export const endpoints = {
     waysToPay: '/ways-to-pay',
     currencies: '/currencies',
     entities: '/entities',
+    closeCashFlows: '/cashflow/cashflow-close',
   },
   subService: {
     list: '/service/subservice'

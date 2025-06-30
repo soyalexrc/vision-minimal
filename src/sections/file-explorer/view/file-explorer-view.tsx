@@ -563,7 +563,7 @@ export function FileExplorerView() {
           links={[
             { name: 'Inicio', href: paths.dashboard.root },
             { name: 'Administración' },
-            { name: 'Gestion de archivos', href: paths.dashboard.cashFlow.root },
+            { name: 'Gestion de archivos', href: paths.dashboard.fileExplorer.root },
             { name: 'Listado' },
           ]}
           sx={{ mb: { xs: 3, md: 5 } }}

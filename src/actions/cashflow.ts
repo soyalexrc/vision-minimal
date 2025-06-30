@@ -135,6 +135,88 @@ export function useGetCashFlows(params?: CashFlowParams) {
   };
 }
 
+export function useGetCloseCashFlows(params?: CashFlowParams) {
+  const [state, setState] = useState<CashFlowState>({
+    data: [],
+    loading: false,
+    error: null,
+    empty: false,
+  });
+
+  // Build URL with params
+  const buildUrl = useCallback((filters?: CashFlowParams) => {
+    if (!filters) return endpoints.cashflow.closeCashFlows;
+
+    const searchParams = new URLSearchParams();
+
+    if (filters.startDate) {
+      searchParams.append('dateFrom', format(filters.startDate, 'yyyy-MM-dd'));
+    }
+
+    if (filters.endDate) {
+      searchParams.append('dateTo', format(filters.endDate, 'yyyy-MM-dd'));
+    }
+
+    Object.entries(filters).forEach(([key, value]) => {
+      if (key !== 'startDate' && key !== 'endDate' && value != null && value !== '') {
+        searchParams.append(key, String(value));
+      }
+    });
+
+    const queryString = searchParams.toString();
+    return `${endpoints.cashflow.list}${queryString ? `?${queryString}` : ''}`;
+  }, []);
+
+  // Fetch function
+  const fetchData = useCallback(async (filters?: CashFlowParams) => {
+    setState(prev => ({ ...prev, loading: true, error: null }));
+
+    try {
+      const url = buildUrl(filters);
+      const response = await fetcher(url);
+
+      console.log('useGetCloseCashFlows response', response);
+
+      setState({
+        data: response || [],
+        loading: false,
+        error: null,
+        empty: !response?.length,
+      });
+
+      return response;
+    } catch (error) {
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error,
+      }));
+      throw error;
+    }
+  }, [buildUrl]);
+
+  // Auto-fetch when params change
+  useEffect(() => {
+    fetchData(params);
+  }, [params, fetchData]);
+
+  // Manual refetch functions
+  const refetch = useCallback(() => fetchData(params), [params, fetchData]);
+
+  const refetchWithParams = useCallback((newParams: CashFlowParams) => fetchData(newParams), [fetchData]);
+
+  return {
+    data: state.data,
+    loading: state.loading,
+    error: state.error,
+    empty: state.empty,
+    validating: false, // Not needed without SWR
+    refetch,
+    refetchWithParams,
+  };
+}
+
+
 // Simple totals hook
 export function useGetCashFlowTotals(params?: DateFilters) {
   const [state, setState] = useState({

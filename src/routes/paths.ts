@@ -75,6 +75,10 @@ export const paths = {
       create: `${ROOTS.DASHBOARD}/cashFlow/new`,
       cashflowClose: `${ROOTS.DASHBOARD}/cashFlow/closeCashFlow`,
     },
+    fileExplorer: {
+      root: `${ROOTS.DASHBOARD}/fileManager`,
+      list: `${ROOTS.DASHBOARD}/fileManager`,
+    },
     properties: {
       root: `${ROOTS.DASHBOARD}/properties`,
       list: `${ROOTS.DASHBOARD}/properties`,
@@ -88,6 +92,7 @@ export const paths = {
       cashFlow: `${ROOTS.DASHBOARD}/cashFlow`,
       commissions: `${ROOTS.DASHBOARD}/commissions`,
       fileManager: `${ROOTS.DASHBOARD}/fileManager`,
+      systemSupport: `${ROOTS.DASHBOARD}/system-support`,
     },
     owners: {
       root: `${ROOTS.DASHBOARD}/owners`,

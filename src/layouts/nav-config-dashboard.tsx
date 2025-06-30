@@ -142,6 +142,12 @@ export const navData: NavSectionProps['data'] = [
         path: paths.dashboard.admin.commissions,
         icon: ICONS.calculator,
       },
+      {
+        title: 'Soporte de sistema',
+        allowedRoles: ['ADMINISTRADOR', 'TI'],
+        path: paths.dashboard.admin.systemSupport,
+        icon: ICONS.calendar,
+      },
     ],
   },
 ];
