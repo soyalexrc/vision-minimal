@@ -451,15 +451,19 @@ export function UpdateCashFlowForm({ currentCashFlow }: Props) {
 
             <Field.Text  size="small" name="location" label="Ubicacion" />
             <Field.Select
-
               size="small"
               name="type"
+              disabled={watchedType === 'money_movement'}
               label="Tipo de transacción"
             >
               <MenuItem value="regular">Regular</MenuItem>
               <MenuItem value="change">Cambio</MenuItem>
               <MenuItem value="return">Devolución</MenuItem>
               <MenuItem value="internal_admin">Administración Interna</MenuItem>
+              {
+                watchedType === 'money_movement' &&
+                <MenuItem value="money_movement">Traslado de dinero</MenuItem>
+              }
             </Field.Select>
           </Box>
         </Section>
