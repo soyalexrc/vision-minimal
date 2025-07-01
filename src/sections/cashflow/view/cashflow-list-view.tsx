@@ -45,11 +45,11 @@ import {
 import { getStatus } from '../../../utils/get-status';
 import CashFlowDashboard from '../cashflow-dashboard';
 import { CashFlowTableRow } from '../cashflow-table-row';
+import { CashflowMoneyMovementDialog } from '../cashflow-money-movement-dialog';
 import { useGetCashFlows, useGetCashFlowTotals } from '../../../actions/cashflow';
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
-import { CashflowMoneyMovementDialog } from '../cashflow-money-movement-dialog';
 // import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 
 // ----------------------------------------------------------------------
