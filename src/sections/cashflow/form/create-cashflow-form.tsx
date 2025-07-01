@@ -375,7 +375,7 @@ export function CreateCashflowForm() {
             }}
           >
          {
-          user.role === 'ADMINISTRADOR' || user.role === 'TI' &&
+          (user.role === 'ADMINISTRADOR' || user.role === 'TI') &&
              <Field.DatePicker
               name="date"
                // onChange={handleDateChange}
