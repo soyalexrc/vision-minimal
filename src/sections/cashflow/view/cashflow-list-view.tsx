@@ -49,6 +49,7 @@ import { useGetCashFlows, useGetCashFlowTotals } from '../../../actions/cashflow
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
+import { CashflowMoneyMovementDialog } from '../cashflow-money-movement-dialog';
 // import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 
 // ----------------------------------------------------------------------
@@ -59,6 +60,7 @@ const STATUS_OPTIONS = [
   { value: 'change', label: 'Cambio' },
   { value: 'return', label: 'Devolucion' },
   { value: 'internal_admin', label: 'Administración Interna' },
+  { value: 'money_movement', label: 'Traslado de dinero' },
 ];
 
 const TABLE_HEAD: TableHeadCellProps[] = [
@@ -99,6 +101,7 @@ export function CashFlowListView() {
   const { cashflow, cashflowLoading, cashflowError, refetchWithParams } = useGetCashFlows(defaultFilters);
   const { totalsData, totalsLoading, totalsError, refetchWithParams: refetchTotals } = useGetCashFlowTotals(defaultFilters);
   const confirmDialog = useBoolean();
+  const moneyMovementDialog = useBoolean();
   const [tableData, setTableData] = useState<ICashFlowItem[]>([]);
 
   useEffect(() => {
@@ -174,6 +177,14 @@ export function CashFlowListView() {
     [updateFilters, table],
   );
 
+  const renderMoneyMovementDialog = () => (
+     <CashflowMoneyMovementDialog
+        open={moneyMovementDialog.value}
+        onClose={moneyMovementDialog.onFalse}
+        onSuccess={onSubmit}
+      />
+  )
+
   const renderConfirmDialog = () => (
     <ConfirmDialog
       open={confirmDialog.value}
@@ -213,13 +224,12 @@ export function CashFlowListView() {
           action={
             <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
               <Button
-                component="a"
-                href={paths.dashboard.cashFlow.cashflowClose}
                 variant="contained"
                 color="info"
+                onClick={moneyMovementDialog.onTrue}
                 startIcon={<Iconify icon="solar:plus-bold" />}
               >
-                Ver cierres de caja
+                Traslado de dinero
               </Button>
               <Button
                 component="a"
@@ -235,6 +245,11 @@ export function CashFlowListView() {
         />
         <Stack direction="row" gap={2}>
           <DatePicker
+            slotProps={{
+              textField: {
+                size: 'small',
+              }
+            }}
             value={dateFilters.startDate as Date}
             onChange={(date) => {
               if (date) {
@@ -249,6 +264,11 @@ export function CashFlowListView() {
           />
           <DatePicker
             label="Hasta"
+                slotProps={{
+              textField: {
+                size: 'small',
+              }
+            }}
             value={dateFilters.endDate as Date}
             onChange={(date) => {
               if (date) {
@@ -324,7 +344,7 @@ export function CashFlowListView() {
                     }
                     color={getStatus(tab.value as GetStatusType)?.variant || 'default'}
                   >
-                    {['change', 'regular', 'return', 'internal_admin'].includes(tab.value)
+                    {['change', 'regular', 'return', 'internal_admin', 'money_movement'].includes(tab.value)
                       ? tableData.filter((cf) => cf.type === tab.value).length
                       : tableData.length}
                   </Label>
@@ -458,9 +478,8 @@ export function CashFlowListView() {
         </Card>
       </DashboardContent>
 
-    {
-      renderConfirmDialog()
-    }
+    {renderConfirmDialog()}
+    {renderMoneyMovementDialog()}
     </>
   )
     ;

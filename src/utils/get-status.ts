@@ -1,6 +1,6 @@
 import type { LabelColor } from '../components/label';
 
-export type GetStatusType = 'active' | 'refund' | 'internal_admin' | 'return' | 'regular' | 'change' | 'featured' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
+export type GetStatusType = 'active' | 'refund' | 'internal_admin' | 'money_movement' | 'return' | 'regular' | 'change' | 'featured' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
 
 export type GetStatusReturnType = {
   color: string;
@@ -129,6 +129,13 @@ export const getStatus = (status: GetStatusType): GetStatusReturnType => {
         backgroundColor: '#E4F8DD',
         name: "Administración Interna",
         variant: "secondary"
+      };
+    case 'money_movement':
+      return {
+        color: '#7C3AED',
+        backgroundColor: '#F3E8FF',
+        name: "Traslado de dinero",
+        variant: "primary"
       };
     case 'rejected':
       return {
