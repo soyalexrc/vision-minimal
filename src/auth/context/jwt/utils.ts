@@ -85,7 +85,7 @@ export async function setSession(accessToken: string | null) {
       //   throw new Error('Invalid access token!');
       // }
     } else {
-      sessionStorage.removeItem(JWT_STORAGE_KEY);
+      localStorage.removeItem(JWT_STORAGE_KEY);
       delete axios.defaults.headers.common.Authorization;
     }
   } catch (error) {
