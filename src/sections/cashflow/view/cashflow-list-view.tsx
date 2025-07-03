@@ -50,6 +50,7 @@ import { useGetCashFlows, useGetCashFlowTotals } from '../../../actions/cashflow
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
+import { useAuthContext } from 'src/auth/hooks';
 // import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 
 // ----------------------------------------------------------------------
@@ -98,6 +99,7 @@ export function CashFlowListView() {
     startDate: startOfDay(new Date()),
     endDate: endOfDay(new Date()),
   });
+  const { user } = useAuthContext();
   const { cashflow, cashflowLoading, cashflowError, refetchWithParams } = useGetCashFlows(defaultFilters);
   const { totalsData, totalsLoading, totalsError, refetchWithParams: refetchTotals } = useGetCashFlowTotals(defaultFilters);
   const confirmDialog = useBoolean();
@@ -223,7 +225,9 @@ export function CashFlowListView() {
           ]}
           action={
             <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
-              <Button
+             {
+              (user.role === 'ADMINISTRADOR' || user.role === 'TI') &&
+               <Button
                 variant="contained"
                 color="info"
                 onClick={moneyMovementDialog.onTrue}
@@ -231,6 +235,7 @@ export function CashFlowListView() {
               >
                 Traslado de dinero
               </Button>
+             }
               <Button
                 component="a"
                 href={paths.dashboard.cashFlow.create}
