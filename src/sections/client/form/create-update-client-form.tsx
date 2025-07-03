@@ -216,6 +216,10 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
     name: 'essentialFeatures',
   });
 
+  const watchedIsInWaitingList = watch('isinwaitinglist');
+
+  console.log('watchedIsInWaitingList', watchedIsInWaitingList);
+
   const watchedContactFrom = watch('contactFrom');
   const watchedTypeOfPerson = watch('typeOfPerson');
   const watchedPersonHeadquarters = watch('personHeadquarters');
@@ -357,7 +361,7 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
           <div />
           <Field.Checkbox
             disabled={!isEdit}
-            name="isInWaitingList"
+            name="isinwaitinglist"
             label="Esta en lista de espera"
           />
         </Box>

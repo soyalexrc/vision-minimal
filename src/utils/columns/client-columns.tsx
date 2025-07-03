@@ -198,11 +198,11 @@ export function getClientColumns(user: UserType): GridColDef[] {
     },
     {
       field: 'allowpets',
-      headerName: 'Menores Mascotas',
+      headerName: 'Presencia de Mascotas',
       flex: 1,
       minWidth: 150,
       renderCell: (params) => (
-        <RenderCellStatus params={params} value={params.row.allowpets ? 'yes' : 'no'} />
+        <RenderCellStatus params={params} value={params.row.allowpets === 'Si' ? 'yes' : params.row.allowpets} />
       ),
     },
   ];
