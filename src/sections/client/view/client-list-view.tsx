@@ -48,6 +48,7 @@ const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
   { value: 'active', label: 'Activo' },
+  { value: 'reserved', label: 'Reservado' },
   {
     value: 'concreted',
     label: 'Concretado',
@@ -285,10 +286,11 @@ export function ClientListView() {
                       (tab.value === 'concreted' && 'info') ||
                       (tab.value === 'active' && 'success') ||
                       (tab.value === 'deleted' && 'error') ||
+                      (tab.value === 'reserved' && 'warning') ||
                       'default'
                     }
                   >
-                    {['active', 'concreted', 'inactive', 'rejected', 'deleted'].includes(tab.value)
+                    {['active', 'concreted', 'inactive', 'rejected', 'deleted', 'reserved'].includes(tab.value)
                       ? tableData.filter((property) => property.status === tab.value).length
                       : tableData.length}
                   </Label>
@@ -371,6 +373,13 @@ export function ClientListView() {
                             icon={<Iconify icon="lets-icons:check-fill" />}
                             label="Marcar como concretado"
                             sx={{ color: 'info.main' }}
+                          />,
+                           <GridActionsCellItem
+                            showInMenu
+                            onClick={() => handleChangeRowStatus(params.row.id, 'reserved')}
+                            icon={<Iconify icon="lets-icons:check-fill" />}
+                            label="Marcar como reservado"
+                            sx={{ color: 'purple' }}
                           />,
                           <GridActionsCellItem
                             showInMenu
