@@ -21,6 +21,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 import { paths } from 'src/routes/paths';
 
+import { isAdmin } from 'src/utils/roles.mapper';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
@@ -52,7 +54,6 @@ import { useGetCashFlows, useGetCashFlowTotals } from '../../../actions/cashflow
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
-import { isAdmin } from 'src/utils/roles.mapper';
 // import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 
 // ----------------------------------------------------------------------

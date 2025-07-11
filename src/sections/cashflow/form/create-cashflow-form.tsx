@@ -18,6 +18,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import { Dialog, DialogTitle, DialogActions, DialogContent } from '@mui/material';
 
+import { isAdmin } from 'src/utils/roles.mapper';
 import { parseCurrency } from 'src/utils/format-number';
 
 import { Label } from '../../../components/label';
@@ -40,7 +41,6 @@ import {
 } from '../../../actions/cashflow';
 
 import type { IPropertyCashFlow } from '../../../types/cashflow';
-import { isAdmin } from 'src/utils/roles.mapper';
 
 export const MONTHS = [
   'ENERO',
