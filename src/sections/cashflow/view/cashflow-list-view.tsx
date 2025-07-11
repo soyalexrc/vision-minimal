@@ -52,6 +52,7 @@ import { useGetCashFlows, useGetCashFlowTotals } from '../../../actions/cashflow
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
+import { isAdmin } from 'src/utils/roles.mapper';
 // import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 
 // ----------------------------------------------------------------------
@@ -227,7 +228,7 @@ export function CashFlowListView() {
           action={
             <Stack direction="row" spacing={1} sx={{ flexShrink: 0 }}>
              {
-              (user.role === 'ADMINISTRADOR' || user.role === 'TI') &&
+              isAdmin(user.role) &&
                <Button
                 variant="contained"
                 color="info"

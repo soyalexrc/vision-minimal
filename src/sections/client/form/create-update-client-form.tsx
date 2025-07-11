@@ -42,6 +42,8 @@ export const CONTACT_FROM_OPTIONS = [
   { value: 'Etiqueta fisica', label: 'Etiqueta fisica' },
   { value: 'Cliente recurrente', label: 'Cliente recurrente' },
   { value: 'Referido', label: 'Referido' },
+  { value: 'Enlace', label: 'Enlace' },
+  { value: 'Grupos Inmobiliarios', label: 'Grupos Inmobiliarios' },
 ];
 
 export type ClientFormSchemaType = z.infer<typeof ClientFormSchema>;

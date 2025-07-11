@@ -20,6 +20,7 @@ import { Iconify } from 'src/components/iconify';
 import { Form, Field } from 'src/components/hook-form';
 
 import { useAuthContext } from 'src/auth/hooks';
+import { isAdmin } from 'src/utils/roles.mapper';
 
 // Schema para validación
 export const MoneyMovementSchema = z.object({
@@ -122,7 +123,7 @@ export function CashflowMoneyMovementForm({ onSubmit, onCancel }: CashflowMoneyM
         }}
       >
         {/* Fecha - Solo para ADMIN y TI */}
-        {(user.role === 'ADMINISTRADOR' || user.role === 'TI') && (
+        {isAdmin(user.role) && (
           <Field.DatePicker
             name="date"
             size="small"

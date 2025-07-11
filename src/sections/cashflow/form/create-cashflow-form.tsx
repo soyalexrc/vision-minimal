@@ -40,6 +40,7 @@ import {
 } from '../../../actions/cashflow';
 
 import type { IPropertyCashFlow } from '../../../types/cashflow';
+import { isAdmin } from 'src/utils/roles.mapper';
 
 export const MONTHS = [
   'ENERO',
@@ -375,7 +376,7 @@ export function CreateCashflowForm() {
             }}
           >
          {
-          (user.role === 'ADMINISTRADOR' || user.role === 'TI') &&
+          isAdmin(user.role) &&
              <Field.DatePicker
               name="date"
                // onChange={handleDateChange}
