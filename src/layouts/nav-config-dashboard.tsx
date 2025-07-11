@@ -81,7 +81,7 @@ export const navData: NavSectionProps['data'] = [
       },
       {
         title: 'Inmuebles',
-        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO'],
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'MARKETING'],
         path: paths.dashboard.properties.root,
         icon: ICONS.building,
         children: [

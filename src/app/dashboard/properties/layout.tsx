@@ -4,6 +4,6 @@ import { RoleBasedGuard } from '../../../auth/guard';
 export const metadata = { title: `Inmuebles - ${CONFIG.appName}` };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const allowedRoles = ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO']
+  const allowedRoles = ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'MARKETING'];
   return <RoleBasedGuard hasContent allowedRoles={allowedRoles}>{children}</RoleBasedGuard>;
 }

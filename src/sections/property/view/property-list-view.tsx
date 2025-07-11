@@ -40,6 +40,7 @@ import {
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';
+import { isAdmin } from 'src/utils/roles.mapper';
 
 // ----------------------------------------------------------------------
 
@@ -361,7 +362,7 @@ export function PropertyListView() {
             }}
           >
             <DataGrid
-              checkboxSelection={user.role !== 'ASESOR_INMOBILIARIO'}
+              checkboxSelection={isAdmin(user.role)}
               localeText={esES.components.MuiDataGrid.defaultProps.localeText}
               disableRowSelectionOnClick
               getRowId={(params) => params.id}
@@ -395,7 +396,7 @@ export function PropertyListView() {
                       onClick={() => handleDownloadAssets(params.row.images, params.row.code)}
                       label="Descargar imagenes"
                     />,
-                    ...(params.row.status !== 'deleted' && (user.role !== 'ASESOR_INMOBILIARIO' || params.row.realStateAdviser == user.id)
+                    ...(params.row.status !== 'deleted' && (isAdmin(user.role) || params.row.realStateAdviser == user.id)
                         ? [
                           <GridActionsLinkItem
                             showInMenu
@@ -415,7 +416,7 @@ export function PropertyListView() {
                           />,
                         ] : []
                     ),
-                    ...(params.row.status === 'active' && user.role !== 'ASESOR_INMOBILIARIO'
+                    ...(params.row.status === 'active' && isAdmin(user.role)
                     ? [
                           <GridActionsCellItem
                             showInMenu
@@ -433,7 +434,7 @@ export function PropertyListView() {
                           />,
                         ] : []
                     ),
-                    ...(params.row.status !== 'deleted' && user.role !== 'ASESOR_INMOBILIARIO'
+                    ...(params.row.status !== 'deleted' && isAdmin(user.role)
                       ? [
                         <GridActionsCellItem
                           showInMenu
@@ -455,7 +456,7 @@ export function PropertyListView() {
                         />,
                       ]
                       : []),
-                    ...(user.role !== 'ASESOR_INMOBILIARIO' && (params.row.status !== 'deleted' && params.row.status !== 'active')
+                    ...(isAdmin(user.role) && (params.row.status !== 'deleted' && params.row.status !== 'active')
                       ? [
                         <GridActionsCellItem
                           showInMenu
