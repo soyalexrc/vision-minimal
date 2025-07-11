@@ -19,6 +19,8 @@ import { DataGrid, gridClasses, GridActionsCellItem  } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
 
+import { isAdmin } from 'src/utils/roles.mapper';
+
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { Label } from 'src/components/label';
@@ -40,7 +42,6 @@ import {
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';
-import { isAdmin } from 'src/utils/roles.mapper';
 
 // ----------------------------------------------------------------------
 

@@ -42,6 +42,8 @@ import {
   TablePaginationCustom,
 } from 'src/components/table';
 
+import { useAuthContext } from 'src/auth/hooks';
+
 import { getStatus } from '../../../utils/get-status';
 import CashFlowDashboard from '../cashflow-dashboard';
 import { CashFlowTableRow } from '../cashflow-table-row';
@@ -50,7 +52,6 @@ import { useGetCashFlows, useGetCashFlowTotals } from '../../../actions/cashflow
 
 import type { GetStatusType } from '../../../utils/get-status';
 import type { ICashFlowItem, ICashFlowTableFilters } from '../../../types/cashflow';
-import { useAuthContext } from 'src/auth/hooks';
 // import { CashFlowTableToolbar } from '../cashflow-table-toolbar';
 
 // ----------------------------------------------------------------------
