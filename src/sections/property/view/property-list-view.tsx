@@ -19,7 +19,7 @@ import { DataGrid, gridClasses, GridActionsCellItem  } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
 
-import { isAdmin } from 'src/utils/roles.mapper';
+import { isAdmin, canEditProperties, canManagePropertyStatus } from 'src/utils/roles.mapper';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -291,14 +291,16 @@ export function PropertyListView() {
             { name: 'Lista' },
           ]}
           action={
-            <Button
-              component={RouterLink}
-              href={paths.dashboard.properties.create}
-              variant="contained"
-              startIcon={<Iconify icon="mingcute:add-line" />}
-            >
-              Nuevo inmueble
-            </Button>
+            canEditProperties(user.role) && (
+              <Button
+                component={RouterLink}
+                href={paths.dashboard.properties.create}
+                variant="contained"
+                startIcon={<Iconify icon="mingcute:add-line" />}
+              >
+                Nuevo inmueble
+              </Button>
+            )
           }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
@@ -397,7 +399,7 @@ export function PropertyListView() {
                       onClick={() => handleDownloadAssets(params.row.images, params.row.code)}
                       label="Descargar imagenes"
                     />,
-                    ...(params.row.status !== 'deleted' && (isAdmin(user.role) || params.row.realStateAdviser == user.id)
+                    ...(params.row.status !== 'deleted' && (canEditProperties(user.role) || params.row.realStateAdviser == user.id)
                         ? [
                           <GridActionsLinkItem
                             showInMenu
@@ -417,7 +419,7 @@ export function PropertyListView() {
                           />,
                         ] : []
                     ),
-                    ...(params.row.status === 'active' && isAdmin(user.role)
+                    ...(params.row.status === 'active' && canManagePropertyStatus(user.role)
                     ? [
                           <GridActionsCellItem
                             showInMenu
@@ -457,7 +459,7 @@ export function PropertyListView() {
                         />,
                       ]
                       : []),
-                    ...(isAdmin(user.role) && (params.row.status !== 'deleted' && params.row.status !== 'active')
+                    ...(canManagePropertyStatus(user.role) && (params.row.status !== 'deleted' && params.row.status !== 'active')
                       ? [
                         <GridActionsCellItem
                           showInMenu

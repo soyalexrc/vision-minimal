@@ -73,7 +73,7 @@ export const navData: NavSectionProps['data'] = [
         title: 'Clientes',
         path: paths.dashboard.clients.root,
         icon: ICONS.client,
-        allowedRoles: ['ADMINISTRADOR', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'TI'],
+        allowedRoles: ['ADMINISTRADOR', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'TI', 'ASISTENTE_OFICINA'],
         children: [
           { title: 'Lista', path: paths.dashboard.clients.root },
           { title: 'Nuevo cliente ', path: paths.dashboard.clients.create },
@@ -81,12 +81,16 @@ export const navData: NavSectionProps['data'] = [
       },
       {
         title: 'Inmuebles',
-        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'MARKETING'],
+        allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'MARKETING', 'ASISTENTE_OFICINA'],
         path: paths.dashboard.properties.root,
         icon: ICONS.building,
         children: [
           { title: 'Lista', path: paths.dashboard.properties.list },
-          { title: 'Nuevo inmueble ', path: paths.dashboard.properties.create },
+          { 
+            title: 'Nuevo inmueble', 
+            path: paths.dashboard.properties.create,
+            allowedRoles: ['ADMINISTRADOR', 'TI', 'COORDINADOR_DE_SERVICIOS', 'ASESOR_INMOBILIARIO', 'MARKETING']
+          },
         ],
       },
       {
