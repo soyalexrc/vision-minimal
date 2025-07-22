@@ -332,6 +332,15 @@ export function CreateUpdateClientForm({ currentClient, isEdit = false }: Props)
           {watchedContactFrom === 'Referido' && (
             <Field.Text disabled={!isEdit} name="referrer" label="Nombre del referido" />
           )}
+          {watchedContactFrom === 'Enlace' && (
+            <Field.Text disabled={!isEdit} name="referrer" label="Detalle de enlace (Opcional)" />
+          )}
+          {(watchedContactFrom === 'Cliente recurrente' || watchedContactFrom === 'Cliente conocido') && (
+            <Field.Text disabled={!isEdit} name="referrer" label={`Detalle de ${watchedContactFrom.toLowerCase()} (Opcional)`} />
+          )}
+          {watchedContactFrom === 'Grupos Inmobiliarios' && (
+            <Field.Text disabled={!isEdit} name="referrer" label="Detalle de grupo inmobiliario (Opcional)" />
+          )}
           {
             user?.role !== 'ASESOR_INMOBILIARIO' &&
             <Field.Select
