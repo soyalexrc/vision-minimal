@@ -169,7 +169,7 @@ export function CreateUpdatePropertyForm({ currentProperty}: Props) {
     equipments: [],
     utilities: [],
     furnishedAreas: [],
-    status: 'inactive',
+    status: 'active',
     updatedby: { id: undefined, username: '', name: '', email: '' },
     createdby: { id: undefined, username: '', name: '', email: '' },
     changes: undefined,
