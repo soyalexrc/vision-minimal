@@ -41,6 +41,7 @@ export const CONTACT_FROM_OPTIONS = [
   { value: 'Pagina web', label: 'Pagina web' },
   { value: 'Etiqueta fisica', label: 'Etiqueta fisica' },
   { value: 'Cliente recurrente', label: 'Cliente recurrente' },
+  { value: 'Cliente conocido', label: 'Cliente conocido' },
   { value: 'Referido', label: 'Referido' },
   { value: 'Enlace', label: 'Enlace' },
   { value: 'Grupos Inmobiliarios', label: 'Grupos Inmobiliarios' },
