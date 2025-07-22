@@ -217,15 +217,42 @@ export function ClientListView() {
   );
 
   function onCopyInfo(row: IClientItem) {
+    // Build referrer line based on contactFrom value
+    let referrerLine = '';
+    if (row.contactFrom === 'Referido' && (row as any).referrer) {
+      referrerLine = `Referido por: ${(row as any).referrer}\n      `;
+    } else if (row.contactFrom === 'Cliente conocido' && (row as any).referrer) {
+      referrerLine = `Cliente conocido: ${(row as any).referrer}\n      `;
+    } else if (row.contactFrom === 'Cliente recurrente' && (row as any).referrer) {
+      referrerLine = `Cliente recurrente: ${(row as any).referrer}\n      `;
+    } else if (row.contactFrom === 'Grupos Inmobiliarios' && (row as any).referrer) {
+      referrerLine = `Grupo inmobiliario: ${(row as any).referrer}\n      `;
+    }
+
     const copyText = `
       Numero de cliente: ${row.id}
       Nombre: ${row.name}
+      Apellido: ${row.lastname || 'N/A'}
+      Correo electrónico: ${row.email || 'N/A'}
       Teléfono: ${row.phone}
-      Nos contacta desde: ${row.contactFrom}
+      Estado: ${row.status}
+      Nos contacta desde: ${row.contactFrom} ${referrerLine}
       Tipo de inmueble: ${row.propertytype}
-      Inmueble de interés: ${row.propertyOfInterest}
-      Requerimiento especifico: ${row.specificRequirement}
+      Inmueble de interés: ${row.propertyOfInterest || 'N/A'}
+      Requerimiento específico: ${row.specificRequirement || 'N/A'}
       Servicio: ${row.serviceName}
+      Perfil de cliente: ${row.typeOfPerson || 'N/A'}
+      Presupuesto desde: ${row.budgetfrom ? `$${row.budgetfrom.toLocaleString()}` : 'N/A'}
+      Presupuesto hasta: ${row.budgetto ? `$${row.budgetto.toLocaleString()}` : 'N/A'}
+      Permite mascotas: ${row.allowpets || 'N/A'}
+      Cantidad de mascotas: ${row.amountOfPets || 0}
+      Menores de edad: ${row.allowyounger || 'N/A'}
+      Cantidad de menores: ${row.amountOfYounger || 0}
+      Seguimiento: ${row.requestracking || 'N/A'}
+      Lista de espera: ${row.isinwaitinglist ? 'Sí' : 'No'}
+      Potencial inversor: ${row.isPotentialInvestor ? 'Sí' : 'No'}
+      Creado por: ${row.createdby?.name || 'N/A'}
+      Asignado a: ${row.assignedto?.name || 'N/A'}
     `;
 
     navigator.clipboard.writeText(copyText).then(() => {
