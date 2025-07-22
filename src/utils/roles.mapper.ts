@@ -11,21 +11,21 @@ export enum RoleType {
 // function to apply condition to just Admin
 
 export function isAdmin(role: string): boolean {
-  return role === RoleType.ADMINISTRADOR || role === RoleType.TI;
+  return role === 'ADMINISTRADOR' || role === 'TI';
 }
 
 export function canEditProperties(role: string): boolean {
-  return isAdmin(role) || role === RoleType.MARKETING;
+  return isAdmin(role) || role === 'MARKETING';
 }
 
 export function canManagePropertyStatus(role: string): boolean {
-  return isAdmin(role) || role === RoleType.MARKETING;
+  return isAdmin(role) || role === 'MARKETING';
 }
 
 export function canCreateClients(role: string): boolean {
-  return isAdmin(role) || role === RoleType.ASISTENTE_OFICINA;
+  return isAdmin(role) || role === 'ASISTENTE_OFICINA';
 }
 
 export function canViewPropertiesOnly(role: string): boolean {
-  return role === RoleType.ASISTENTE_OFICINA;
+  return role === 'ASISTENTE_OFICINA';
 }
