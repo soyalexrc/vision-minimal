@@ -306,7 +306,7 @@ export function CreateCashflowForm() {
 
   function showServices(i: number) {
     const transactionType = watch(`payments.${i}.transactionType`);
-    return transactionType !== 6 && watchedType !== 'internal_admin' && watchedType !== 'change';
+    return transactionType !== 6 && watchedType !== 'internal_admin' && watchedType !== 'change' && watchedType !== 'expense' && watchedType !== 'purchase';
   }
 
   function showSubService(i: number) {
@@ -351,10 +351,19 @@ export function CreateCashflowForm() {
   useEffect(() => {
     if (watchedType === 'internal_admin') {
       setValue('property', 16)
-      setValue('location', 'NAGUANAGUA');
+      setValue('location', 'CC PASEO LA GRANJA');
     }
     if (watchedType === 'change') {
-      setValue('property', 16)
+      setValue('property', 16);
+      setValue('location', 'CC PASEO LA GRANJA');
+    }
+    if (watchedType === 'expense') {
+      setValue('property', 16);
+      setValue('location', 'CC PASEO LA GRANJA');
+    }
+    if (watchedType === 'purchase') {
+      setValue('property', 16);
+      setValue('location', 'CC PASEO LA GRANJA');
     }
   }, [watchedType]);
 
@@ -454,6 +463,8 @@ export function CreateCashflowForm() {
               <MenuItem value="change">Cambio</MenuItem>
               <MenuItem value="return">Devolución</MenuItem>
               <MenuItem value="internal_admin">Administración Interna</MenuItem>
+              <MenuItem value="expense">Gastos</MenuItem>
+              <MenuItem value="purchase">Compras</MenuItem>
             </Field.Select>
           </Box>
         </Section>

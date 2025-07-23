@@ -64,6 +64,8 @@ const STATUS_OPTIONS = [
   { value: 'change', label: 'Cambio' },
   { value: 'return', label: 'Devolucion' },
   { value: 'internal_admin', label: 'Administración Interna' },
+  { value: 'expense', label: 'Gastos' },
+  { value: 'purchase', label: 'Compras' },
   { value: 'money_movement', label: 'Traslado de dinero' },
 ];
 
@@ -352,7 +354,7 @@ export function CashFlowListView() {
                     }
                     color={getStatus(tab.value as GetStatusType)?.variant || 'default'}
                   >
-                    {['change', 'regular', 'return', 'internal_admin', 'money_movement'].includes(tab.value)
+                    {['change', 'regular', 'return', 'internal_admin', 'money_movement', 'expense', 'purchase'].includes(tab.value)
                       ? tableData.filter((cf) => cf.type === tab.value).length
                       : tableData.length}
                   </Label>
