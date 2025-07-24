@@ -231,28 +231,20 @@ export function ClientListView() {
 
     const copyText = `
       Numero de cliente: ${row.id}
-      Nombre: ${row.name}
-      Apellido: ${row.lastname || 'N/A'}
-      Correo electrónico: ${row.email || 'N/A'}
+      Nombre: ${row.name} ${row.lastname}
       Teléfono: ${row.phone}
-      Estado: ${row.status}
-      Nos contacta desde: ${row.contactFrom} ${referrerLine}
+      Correo electrónico: ${row.email || 'N/A'}
+      Nos contacta desde: ${row.contactFrom} ${referrerLine}       
       Tipo de inmueble: ${row.propertytype}
       Inmueble de interés: ${row.propertyOfInterest || 'N/A'}
       Requerimiento específico: ${row.specificRequirement || 'N/A'}
       Servicio: ${row.serviceName}
       Perfil de cliente: ${row.typeOfPerson || 'N/A'}
-      Presupuesto desde: ${row.budgetfrom ? `$${row.budgetfrom.toLocaleString()}` : 'N/A'}
       Presupuesto hasta: ${row.budgetto ? `$${row.budgetto.toLocaleString()}` : 'N/A'}
-      Permite mascotas: ${row.allowpets || 'N/A'}
+      Mascotas: ${row.allowpets || 'N/A'}
       Cantidad de mascotas: ${row.amountOfPets || 0}
       Menores de edad: ${row.allowyounger || 'N/A'}
       Cantidad de menores: ${row.amountOfYounger || 0}
-      Seguimiento: ${row.requestracking || 'N/A'}
-      Lista de espera: ${row.isinwaitinglist ? 'Sí' : 'No'}
-      Potencial inversor: ${row.isPotentialInvestor ? 'Sí' : 'No'}
-      Creado por: ${row.createdby?.name || 'N/A'}
-      Asignado a: ${row.assignedto?.name || 'N/A'}
     `;
 
     navigator.clipboard.writeText(copyText).then(() => {
