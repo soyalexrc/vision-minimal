@@ -244,6 +244,8 @@ export function ClientListView() {
       Cantidad de mascotas: ${row.amountOfPets || 0}
       Menores de edad: ${row.allowyounger || 'N/A'}
       Cantidad de menores: ${row.amountOfYounger || 0}
+      Zona de interés: ${(Array.isArray(row.zonesOfInterest) && row.zonesOfInterest.length > 0) ? row.zonesOfInterest.join(', ') : 'N/A'}
+      Caracteristicas escenciales: ${(Array.isArray(row.essentialFeatures) && row.essentialFeatures.length > 0) ? row.essentialFeatures.join(', ') : 'N/A'}
     `;
 
     navigator.clipboard.writeText(copyText).then(() => {

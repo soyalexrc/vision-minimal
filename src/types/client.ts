@@ -47,6 +47,8 @@ export type IClientItem = {
   budgetfrom: number;
   budgetto: number;
   amountOfPets: number;
+  essentialFeatures: string[];
+  zonesOfInterest: string[];
   amountOfYounger: number;
   contactFrom: string;
   specificRequirement?: string;
