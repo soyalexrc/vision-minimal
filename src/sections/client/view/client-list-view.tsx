@@ -233,7 +233,6 @@ export function ClientListView() {
       Numero de cliente: ${row.id}
       Nombre: ${row.name} ${row.lastname || ''}
       Teléfono: ${row.phone}
-      Correo electrónico: ${row.email || 'N/A'}
       Nos contacta desde: ${row.contactFrom} ${referrerLine}       
       Tipo de inmueble: ${row.propertytype}
       Inmueble de interés: ${row.propertyOfInterest || 'N/A'}

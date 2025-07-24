@@ -1,7 +1,7 @@
 {
   "name": "@minimal-kit/starter-next-ts",
   "author": "Minimals",
-  "version": "3.1.7",
+  "version": "3.1.8",
   "description": "Next Starter & TypeScript",
   "private": true,
   "scripts": {
