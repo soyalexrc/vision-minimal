@@ -231,7 +231,7 @@ export function ClientListView() {
 
     const copyText = `
       Numero de cliente: ${row.id}
-      Nombre: ${row.name} ${row.lastname}
+      Nombre: ${row.name} ${row.lastname || ''}
       Teléfono: ${row.phone}
       Correo electrónico: ${row.email || 'N/A'}
       Nos contacta desde: ${row.contactFrom} ${referrerLine}       
