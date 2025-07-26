@@ -229,24 +229,24 @@ export function ClientListView() {
       referrerLine = `Grupo inmobiliario: ${(row as any).referrer}\n      `;
     }
 
-    const copyText = `
-      Numero de cliente: ${row.id}
-      Nombre: ${row.name} ${row.lastname || ''}
-      Teléfono: ${row.phone}
-      Nos contacta desde: ${row.contactFrom} ${referrerLine}       
-      Tipo de inmueble: ${row.propertytype}
-      Inmueble de interés: ${row.propertyOfInterest || 'N/A'}
-      Requerimiento específico: ${row.specificRequirement || 'N/A'}
-      Servicio: ${row.serviceName}
-      Perfil de cliente: ${row.typeOfPerson || 'N/A'}
-      Presupuesto hasta: ${row.budgetto ? `$${row.budgetto.toLocaleString()}` : 'N/A'}
-      Mascotas: ${row.allowpets || 'N/A'}
-      Cantidad de mascotas: ${row.amountOfPets || 0}
-      Menores de edad: ${row.allowyounger || 'N/A'}
-      Cantidad de menores: ${row.amountOfYounger || 0}
-      Zona de interés: ${(Array.isArray(row.zonesOfInterest) && row.zonesOfInterest.length > 0) ? row.zonesOfInterest.join(', ') : 'N/A'}
-      Caracteristicas escenciales: ${(Array.isArray(row.essentialFeatures) && row.essentialFeatures.length > 0) ? row.essentialFeatures.join(', ') : 'N/A'}
-    `;
+    const copyText = [
+      `Numero de cliente: ${row.id}`,
+      `Nombre: ${row.name} ${row.lastname || ''}`,
+      row.phone && `Teléfono: ${row.phone}`,
+      row.contactFrom && `Nos contacta desde: ${row.contactFrom} ${referrerLine}`,
+      row.propertytype && `Tipo de inmueble: ${row.propertytype}`,
+      row.propertyOfInterest && `Inmueble de interés: ${row.propertyOfInterest}`,
+      row.specificRequirement && `Requerimiento específico: ${row.specificRequirement}`,
+      row.serviceName && `Servicio: ${row.serviceName}`,
+      row.typeOfPerson && `Perfil de cliente: ${row.typeOfPerson}`,
+      row.budgetto && `Presupuesto hasta: $${row.budgetto.toLocaleString()}`,
+      row.allowpets && row.allowpets !== 'N/A' && `Mascotas: ${row.allowpets}`,
+      row.amountOfPets && row.amountOfPets > 0 && `Cantidad de mascotas: ${row.amountOfPets}`,
+      row.allowyounger && row.allowyounger !== 'N/A' && `Menores de edad: ${row.allowyounger}`,
+      row.amountOfYounger && row.amountOfYounger > 0 && `Cantidad de menores: ${row.amountOfYounger}`,
+      Array.isArray(row.zonesOfInterest) && row.zonesOfInterest.length > 0 && `Zona de interés: ${row.zonesOfInterest.join(', ')}`,
+      Array.isArray(row.essentialFeatures) && row.essentialFeatures.length > 0 && `Caracteristicas escenciales: ${row.essentialFeatures.join(', ')}`
+    ].filter(Boolean).join('\n');
 
     navigator.clipboard.writeText(copyText).then(() => {
       toast.success('Información del cliente copiada al portapapeles');
