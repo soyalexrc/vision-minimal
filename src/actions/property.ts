@@ -69,6 +69,27 @@ export function useGetProperties() {
   return memoizedValue;
 }
 
+export function useGetPropertiesForCommission() {
+  const url = endpoints.property.listCommission;
+
+  const { data, isLoading, error, isValidating } = useSWR<PropertiesData>(url, fetcher, swrOptions);
+
+  const memoizedValue = useMemo(
+    () => ({
+      properties: data?.data || [],
+      propertiesLoading: isLoading,
+      propertiesError: error,
+      propertiesValidating: isValidating,
+      propertiesEmpty: !isLoading && !isValidating && !data?.data?.length,
+      count: data?.total || 0,
+      refresh: () => mutate(url)
+    }),
+    [data?.data, error, isLoading, isValidating]
+  );
+
+  return memoizedValue;
+}
+
 // ----------------------------------------------------------------------
 
 

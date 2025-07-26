@@ -91,6 +91,7 @@ export const paths = {
       internal: `${ROOTS.DASHBOARD}/admin-internal`,
       cashFlow: `${ROOTS.DASHBOARD}/cashFlow`,
       commissions: `${ROOTS.DASHBOARD}/commissions`,
+      commissionsCalculate: (id: number | string) => `${ROOTS.DASHBOARD}/commissions/calculate/${id}`,
       fileManager: `${ROOTS.DASHBOARD}/fileManager`,
       systemSupport: `${ROOTS.DASHBOARD}/system-support`,
     },

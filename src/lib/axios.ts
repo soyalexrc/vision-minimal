@@ -105,6 +105,7 @@ export const endpoints = {
       delete: '/category',
     },
     list: '/property',
+    listCommission: '/property/commission',
     create: '/property',
     edit: '/property/edit',
     editStatus: '/property/status',

@@ -145,7 +145,11 @@ export function fData(inputValue: InputNumberValue) {
   return fm;
 }
 
-export const parseCurrency = (value: string): number => {
+export const parseCurrency = (value: string | number | any): number => {
   if (!value) return 0;
-  return Number(value?.replace(/[^0-9.-]+/g, ''));
+  // Handle if value is already a number
+  if (typeof value === 'number') return value;
+  // Convert to string and remove currency formatting
+  const stringValue = String(value);
+  return Number(stringValue.replace(/[^0-9.-]+/g, '')) || 0;
 };

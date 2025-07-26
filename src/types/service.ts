@@ -3,6 +3,9 @@
 export type IServiceItem = {
   id?: number;
   title: string;
+  enabled: boolean;
+  commissionPercentage: number;
+  order: number;
 };
 
 

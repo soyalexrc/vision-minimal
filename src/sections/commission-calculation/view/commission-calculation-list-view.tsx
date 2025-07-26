@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { AxiosResponse } from 'axios';
@@ -31,14 +30,13 @@ import { useTable, getComparator } from 'src/components/table';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
 import { useAuthContext } from '../../../auth/hooks';
-import { RouterLink } from '../../../routes/components';
 import { GridActionsLinkItem } from '../../product/view';
 import { EmptyContent } from '../../../components/empty-content';
-import { PropertyGridTableToolbar } from '../property-table-toolbar';
 import { propertyColumns } from '../../../utils/columns/property-columns';
+import { PropertyGridTableToolbar } from '../../property/property-table-toolbar';
 import {
   deleteProperty, restoreProperty,
-  useGetProperties, deleteManyProperties, updatePropertyStatus, updatePropertyFeatured,
+  useGetPropertiesForCommission, deleteManyProperties, updatePropertyStatus, updatePropertyFeatured,
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';
@@ -51,18 +49,17 @@ const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
-  { value: 'active', label: 'Activo' },
-  { value: 'inactive', label: 'Inactivo' },
-  // { value: 'deleted', label: 'Eliminado' },
+  { value: 'concretized', label: 'Concretado' },
+  { value: 'concretized_fulfill', label: 'Concretado calculado' },
 ];
 
 // ----------------------------------------------------------------------
 
-export function PropertyListView() {
+export function CommissionCalculationListView() {
   const table = useTable({ defaultDense: true, defaultRowsPerPage: 25, defaultOrderBy: 'id' });
   const confirmDialog = useBoolean();
   const downloadImagesLoading = useBoolean();
-  const { properties, refresh, propertiesLoading } = useGetProperties();
+  const { properties, refresh, propertiesLoading } = useGetPropertiesForCommission  ();
   const [selectedRowIds, setSelectedRowIds] = useState<GridRowSelectionModel>([]);
   const [columnVisibilityModel, setColumnVisibilityModel] =
     useState<GridColumnVisibilityModel>(HIDE_COLUMNS);
@@ -108,25 +105,6 @@ export function PropertyListView() {
 
   const canReset = !!currentFilters.name || currentFilters.status !== 'all';
 
-  const handleDeleteRow = async (id: string) => {
-    const promise = await (async () => {
-      const response: AxiosResponse<any> = await deleteProperty(id);
-      if (response.status === 200 || response.status === 201) {
-        return response.data?.message;
-      } else {
-        throw new Error(response.data?.message);
-      }
-    })();
-
-    toast.promise(promise, {
-      loading: 'Cargando...',
-      success: (message: string) => message || 'Registro eliminado!',
-      error: (error) => error || 'Error al eliminar el registro!',
-    });
-
-    refresh();
-  };
-
   const handleActiveInactiveProperty = async (id: string, status: 'active' | 'inactive') => {
     const promise = await (async () => {
       const response: AxiosResponse<any> = await updatePropertyStatus(id, status);
@@ -146,9 +124,9 @@ export function PropertyListView() {
     refresh();
   };
 
-  const handleConcreteProperty = async (id: string) => {
+  const handleReturnRowToListing = async (id: string) => {
     const promise = await (async () => {
-      const response: AxiosResponse<any> = await updatePropertyStatus(id, 'concretized');
+      const response: AxiosResponse<any> = await updatePropertyStatus(id, 'active');
       if (response.status === 200 || response.status === 201) {
         return response.data?.message;
       } else {
@@ -303,24 +281,11 @@ export function PropertyListView() {
     <>
       <DashboardContent>
         <CustomBreadcrumbs
-          heading="Inmuebles"
+          heading="Calculo de comisiones"
           links={[
             { name: 'Inicio', href: paths.dashboard.root },
-            { name: 'Inmuebles', href: paths.dashboard.properties.root },
-            { name: 'Lista' },
+            { name: 'Calculo de comisiones' },
           ]}
-          action={
-            canEditProperties(user.role) && (
-              <Button
-                component={RouterLink}
-                href={paths.dashboard.properties.create}
-                variant="contained"
-                startIcon={<Iconify icon="mingcute:add-line" />}
-              >
-                Nuevo inmueble
-              </Button>
-            )
-          }
           sx={{ mb: { xs: 3, md: 5 } }}
         />
 
@@ -348,30 +313,18 @@ export function PropertyListView() {
                       'soft'
                     }
                     color={
-                      (tab.value === 'concreted' && 'info') ||
-                      (tab.value === 'active' && 'success') ||
-                      (tab.value === 'deleted' && 'error') ||
+                      (tab.value === 'concretized' && 'info') ||
+                      (tab.value === 'concretized_fulfill' && 'success') ||
                       'default'
                     }
                   >
-                    {['active', 'concreted', 'inactive', 'rejected', 'deleted'].includes(tab.value)
+                    {['concretized', 'concretized_fulfill'].includes(tab.value)
                       ? tableData.filter((property) => property.status === tab.value).length
                       : tableData.length}
                   </Label>
                 }
               />
             ))}
-            <Tab value="featured" label="Destacado" iconPosition="end"  icon={
-              <Label
-                variant={
-                  ((currentFilters.isFeatured) && 'filled') ||
-                  'soft'
-                }
-                color="warning"
-              >
-                {tableData.filter((property) => property.isFeatured).length}
-              </Label>
-            }/>
           </Tabs>
 
           <Card
@@ -418,81 +371,40 @@ export function PropertyListView() {
                       onClick={() => handleDownloadAssets(params.row.images, params.row.code)}
                       label="Descargar imagenes"
                     />,
-                    ...(params.row.status !== 'deleted' && (canEditProperties(user.role) || params.row.realStateAdviser == user.id)
-                        ? [
-                          <GridActionsLinkItem
-                            showInMenu
-                            icon={<Iconify icon="eva:edit-2-fill" />}
-                            label="Editar"
-                            href={paths.dashboard.properties.edit(params.row.id)}
-                          />
-                        ] : []
-                    ),
-                    ...(params.row.status === 'active'
-                    ? [
-                          <GridActionsCellItem
-                            showInMenu
-                            icon={<Iconify icon="material-symbols:share" />}
-                            onClick={() => handleShareContent(params.row.slug, params.row.publicationTitle)}
-                            label="Compartir"
-                          />,
-                        ] : []
-                    ),
-                    ...(params.row.status === 'active' && canManagePropertyStatus(user.role)
-                    ? [
-                          <GridActionsCellItem
-                            showInMenu
-                            icon={<Iconify icon={params.row.isFeatured ? 'uis:favorite' : "uit:favorite"} />}
-                            label={params.row.isFeatured ? 'Desmarcar destacado' : 'Marcar destacado'}
-                            onClick={() => handleMarkFeaturedProperty(params.row.id, !params.row.isFeatured)}
-                            sx={{ color: 'warning.main' }}
-                          />,
-                          <GridActionsCellItem
-                            showInMenu
-                            icon={<Iconify icon="lsicon:disable-outline" />}
-                            label="Desactivar"
-                            onClick={() => handleActiveInactiveProperty(params.row.id, 'inactive')}
-                            sx={{ color: 'gray' }}
-                          />,
-                        ] : []
-                    ),
-                    ...(params.row.status !== 'deleted' && isAdmin(user.role)
+                    // ...(params.row.status !== 'deleted' && (canEditProperties(user.role) || params.row.realStateAdviser == user.id)
+                    //     ? [
+                    //       <GridActionsLinkItem
+                    //         showInMenu
+                    //         icon={<Iconify icon="eva:edit-2-fill" />}
+                    //         label="Editar"
+                    //         href={paths.dashboard.properties.edit(params.row.id)}
+                    //       />
+                    //     ] : []
+                    // ),
+                    // ...(params.row.status === 'active'
+                    // ? [
+                    //       <GridActionsCellItem
+                    //         showInMenu
+                    //         icon={<Iconify icon="material-symbols:share" />}
+                    //         onClick={() => handleShareContent(params.row.slug, params.row.publicationTitle)}
+                    //         label="Compartir"
+                    //       />,
+                    //     ] : []
+                    // ),
+                    ...(isAdmin(user.role)
                       ? [
-                        <GridActionsCellItem
+                        <GridActionsLinkItem
                           showInMenu
-                          icon={<Iconify icon="rivet-icons:money" />}
-                          label="Marcar concretado"
-                          onClick={() => handleConcreteProperty(params.row.id)}
-                          sx={{ color: 'success.main' }}
+                          icon={<Iconify icon="material-symbols:calculate" />}
+                          label="Calcular comision"
+                          href={paths.dashboard.admin.commissionsCalculate(params.row.id)}
                         />,
                         <GridActionsCellItem
                           showInMenu
-                          icon={<Iconify icon="solar:trash-bin-trash-bold" />}
-                          label="Eliminar"
-                          onClick={() => handleDeleteRow(params.row.id)}
+                          icon={<Iconify icon="lets-icons:back" />}
+                          label="Cancelar concretado"
+                          onClick={() => handleReturnRowToListing(params.row.id)}
                           sx={{ color: 'error.main' }}
-                        />,
-                      ]
-                      : []),
-                    ...(params.row.status === 'deleted'
-                      ? [
-                        <GridActionsCellItem
-                          showInMenu
-                          icon={<Iconify icon="solar:trash-bin-trash-bold" />}
-                          label="Restaurar"
-                          onClick={() => handleRestoreRow(params.row.id)}
-                          sx={{ color: 'info.main' }}
-                        />,
-                      ]
-                      : []),
-                    ...(canManagePropertyStatus(user.role) && (params.row.status !== 'deleted' && params.row.status !== 'active')
-                      ? [
-                        <GridActionsCellItem
-                          showInMenu
-                          icon={<Iconify icon="lets-icons:check-fill" />}
-                          label="Activar"
-                          onClick={() => handleActiveInactiveProperty(params.row.id, 'active')}
-                          sx={{ color: 'success.main' }}
                         />,
                       ]
                       : []),
@@ -522,90 +434,6 @@ export function PropertyListView() {
               sx={{ [`& .${gridClasses.cell}`]: { alignItems: 'center', display: 'inline-flex' } }}
             />
           </Card>
-
-          {/*<Box sx={{ position: 'relative' }}>*/}
-          {/*  <TableSelectedAction*/}
-          {/*    dense={table.dense}*/}
-          {/*    numSelected={table.selected.length}*/}
-          {/*    rowCount={dataFiltered.length}*/}
-          {/*    onSelectAllRows={(checked) =>*/}
-          {/*      table.onSelectAllRows(*/}
-          {/*        checked,*/}
-          {/*        dataFiltered.map((row) => row.id!.toString())*/}
-          {/*      )*/}
-          {/*    }*/}
-          {/*    action={*/}
-          {/*      <Tooltip title="Delete">*/}
-          {/*        <IconButton color="primary" onClick={confirmDialog.onTrue}>*/}
-          {/*          <Iconify icon="solar:trash-bin-trash-bold" />*/}
-          {/*        </IconButton>*/}
-          {/*      </Tooltip>*/}
-          {/*    }*/}
-          {/*  />*/}
-
-          {/*  {*/}
-          {/*    propertiesLoading &&*/}
-          {/*    <Box sx={{ height: 400, justifyContent: 'center', alignItems: 'center' }}>*/}
-          {/*      <LoadingScreen />*/}
-          {/*    </Box>*/}
-          {/*  }*/}
-
-          {/*  {*/}
-          {/*    !propertiesLoading && properties.length > 0 &&*/}
-          {/*    <Scrollbar>*/}
-          {/*      <Table size={table.dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>*/}
-          {/*        <TableHeadCustom*/}
-          {/*          order={table.order}*/}
-          {/*          orderBy={table.orderBy}*/}
-          {/*          headCells={TABLE_HEAD}*/}
-          {/*          rowCount={dataFiltered.length}*/}
-          {/*          numSelected={table.selected.length}*/}
-          {/*          onSort={table.onSort}*/}
-          {/*          onSelectAllRows={(checked) =>*/}
-          {/*            table.onSelectAllRows(*/}
-          {/*              checked,*/}
-          {/*              dataFiltered.map((row) => row.id!.toString())*/}
-          {/*            )*/}
-          {/*          }*/}
-          {/*        />*/}
-          {/*        <TableBody>*/}
-          {/*          {dataFiltered*/}
-          {/*            .slice(*/}
-          {/*              table.page * table.rowsPerPage,*/}
-          {/*              table.page * table.rowsPerPage + table.rowsPerPage*/}
-          {/*            )*/}
-          {/*            .map((row) => (*/}
-          {/*              <PropertyTableRow*/}
-          {/*                key={row.id}*/}
-          {/*                row={row}*/}
-          {/*                selected={table.selected.includes(row.id!.toString())}*/}
-          {/*                onSelectRow={() => table.onSelectRow(row.id!.toString())}*/}
-          {/*                onDeleteRow={() => handleDeleteRow(row.id!.toString())}*/}
-          {/*                editHref={paths.dashboard.properties.edit(row.id!)}*/}
-          {/*              />*/}
-          {/*            ))}*/}
-
-          {/*          <TableEmptyRows*/}
-          {/*            height={table.dense ? 56 : 56 + 20}*/}
-          {/*            emptyRows={emptyRows(table.page, table.rowsPerPage, dataFiltered.length)}*/}
-          {/*          />*/}
-
-          {/*          <TableNoData notFound={notFound} />*/}
-          {/*        </TableBody>*/}
-          {/*      </Table>*/}
-          {/*    </Scrollbar>*/}
-          {/*  }*/}
-          {/*</Box>*/}
-
-          {/*<TablePaginationCustom*/}
-          {/*  page={table.page}*/}
-          {/*  dense={table.dense}*/}
-          {/*  count={dataFiltered.length}*/}
-          {/*  rowsPerPage={table.rowsPerPage}*/}
-          {/*  onPageChange={table.onChangePage}*/}
-          {/*  onChangeDense={table.onChangeDense}*/}
-          {/*  onRowsPerPageChange={table.onChangeRowsPerPage}*/}
-          {/*/>*/}
         </Card>
       </DashboardContent>
 
@@ -639,7 +467,7 @@ function applyFilter({ inputData, comparator, filters }: ApplyFilterProps) {
     inputData = inputData.filter((user) => user.publicationTitle.toLowerCase().includes(name.toLowerCase()));
   }
 
-  if (status !== 'all' && status !== 'featured') {
+  if (status !== 'all') {
     inputData = inputData.filter((user) => user.status === status);
   }
 
