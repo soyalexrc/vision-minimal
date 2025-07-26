@@ -83,6 +83,10 @@ export type IUserItem = {
   status: string;
   imageurl?: string;
   phonenumber: string;
+  metadata: {
+    adviser_level_title?: string;
+    adviser_level_percentage?: number;
+  },
   isactive: boolean
   password: string;
   permissions: any;

@@ -81,7 +81,7 @@ const CommissionFormSchema = z.object({
   technicalFees: z.any(), // For servicio tecnico (ID 13)
   cleaningStaffFees: z.any(), // For cleaning service (ID 7)
 
-  // Real estate specific fields (only required for services 10, 11, 16, 17)
+  // Real estate specific fields (only required for services 10, 11, 16, 19)
   tip: z.any().optional(),
   hasExternalAdvisor: z.boolean().default(false),
   externalAdvisor: z.string().optional(),
@@ -100,6 +100,17 @@ const CommissionFormSchema = z.object({
   rentalCommission: z.any().optional(),
   realEstateCommission: z.any(),
   realEstateCommissionDetail: z.string().optional(),
+
+  // Advisor level fields
+  advisorLevelTitle: z.string().optional(),
+  advisorLevelPercentage: z.number().optional(),
+
+  // Property owner percentage (for rentals)
+  propertyOwnerPercentage: z.number().default(50),
+
+  // Daily stay specific
+  dailyRate: z.any().optional(),
+  numberOfDays: z.number().optional(),
 
   // Dynamic deductibles array
   deductibles: z.array(z.object({
@@ -184,6 +195,11 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     rentalCommission: '',
     realEstateCommission: '',
     realEstateCommissionDetail: '',
+    advisorLevelTitle: '',
+    advisorLevelPercentage: 0,
+    propertyOwnerPercentage: 50,
+    dailyRate: '',
+    numberOfDays: 0,
     deductibles: [],
     visionAdvisorSubtotalFees: '',
     propertyTipAmount: '',
@@ -225,6 +241,11 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
   const watchedTip = watch('tip');
   const watchedRealEstateCommission = watch('realEstateCommission');
   const watchedDeductibles = watch('deductibles');
+  const watchedAdvisorId = watch('advisorId');
+  const watchedAdvisorLevelPercentage = watch('advisorLevelPercentage');
+  const watchedPropertyOwnerPercentage = watch('propertyOwnerPercentage');
+  const watchedDailyRate = watch('dailyRate');
+  const watchedNumberOfDays = watch('numberOfDays');
   const watchedPropertyTipPercentage = watch('propertyTipPercentage');
   const watchedClientTipPercentage = watch('clientTipPercentage');
   const watchedLawyerFees = watch('lawyerFees');
@@ -239,6 +260,30 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     const selectedService = services.find(s => s.title === watchedServiceType);
     return selectedService && [10, 11, 16, 19].includes(selectedService.id);
   }, [watchedServiceType, services]);
+
+  // Get current service ID
+  const currentServiceId = useMemo(() => {
+    if (!watchedServiceType || !services) return null;
+    const selectedService = services.find(s => s.title === watchedServiceType);
+    return selectedService?.id || null;
+  }, [watchedServiceType, services]);
+
+  // Extract advisor metadata when advisor is selected
+  useEffect(() => {
+    if (watchedAdvisorId && advisors.length > 0) {
+      const selectedAdvisor = advisors.find(advisor => advisor.id?.toString() === watchedAdvisorId);
+      if (selectedAdvisor?.metadata) {
+        const metadata = typeof selectedAdvisor.metadata === 'string' 
+          ? JSON.parse(selectedAdvisor.metadata) 
+          : selectedAdvisor.metadata;
+        
+        if (metadata.adviser_level_title && metadata.adviser_level_percentage) {
+          setValue('advisorLevelTitle', metadata.adviser_level_title);
+          setValue('advisorLevelPercentage', metadata.adviser_level_percentage);
+        }
+      }
+    }
+  }, [watchedAdvisorId, advisors, setValue]);
 
   // Check if current service is legal service
   const isLegalService = useMemo(() => {
@@ -361,37 +406,102 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     }
   }, [watchedTransactionAmount, watchedDeductibleAmount, watchedServicePercentage, isLegalService, isAccountingService, isRemodelacionService, isTechnicalService, isCleaningService, watchedMaterialFees, watchedTechnicalFees, watchedCleaningStaffFees, setValue]);
 
-  // Calculate tip amounts and final calculations
+  // Calculate real estate specific amounts and final calculations
   useEffect(() => {
-    if (watchedTip && watchedRealEstateCommission) {
-      const generalCommission = parseCurrency(watchedRealEstateCommission);
-      const propertyTipPct = watchedPropertyTipPercentage / 100;
-      const clientTipPct = watchedClientTipPercentage / 100;
+    if (!showRealEstateInfo || !watchedTransactionAmount || !watchedAdvisorLevelPercentage) return;
 
-      if (watchedTip === 'punta_inmueble') {
-        const propertyTipAmount = generalCommission * propertyTipPct;
-        setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
-        setValue('clientTipAmount', '0');
-        setValue('doubleTipAmount', '0');
-      } else if (watchedTip === 'punta_cliente') {
-        const clientTipAmount = generalCommission * clientTipPct;
-        setValue('clientTipAmount', clientTipAmount.toFixed(2));
-        setValue('propertyTipAmount', '0');
-        setValue('doubleTipAmount', '0');
-      } else if (watchedTip === 'doble_punta') {
-        const propertyTipAmount = generalCommission * propertyTipPct;
-        const clientTipAmount = generalCommission * clientTipPct;
-        const doubleTipAmount = propertyTipAmount + clientTipAmount;
-        setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
-        setValue('clientTipAmount', clientTipAmount.toFixed(2));
-        setValue('doubleTipAmount', doubleTipAmount.toFixed(2));
+    const transactionAmount = parseCurrency(watchedTransactionAmount);
+    const deductible = parseCurrency(watchedDeductibleAmount);
+    const totalDeductibles = watchedDeductibles?.reduce((sum, deductibleItem) => {
+      return sum + parseCurrency(deductibleItem.amount);
+    }, 0) || 0;
+
+    // Calculate base for commission: Transaction - main deductible - additional deductibles
+    const baseForCommission = transactionAmount - deductible - totalDeductibles;
+    const advisorLevelPct = watchedAdvisorLevelPercentage / 100;
+
+    if (currentServiceId === 11) { // COMPRAVENTA
+      if (watchedTip) {
+        if (watchedTip === 'punta_cliente') {
+          const clientTipAmount = baseForCommission * advisorLevelPct;
+          setValue('clientTipAmount', clientTipAmount.toFixed(2));
+          setValue('propertyTipAmount', '0');
+          setValue('doubleTipAmount', '0');
+        } else if (watchedTip === 'punta_inmueble') {
+          const propertyTipAmount = baseForCommission * advisorLevelPct;
+          setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
+          setValue('clientTipAmount', '0');
+          setValue('doubleTipAmount', '0');
+        } else if (watchedTip === 'doble_punta') {
+          const clientTipAmount = baseForCommission * advisorLevelPct;
+          const propertyTipAmount = baseForCommission * advisorLevelPct;
+          const doubleTipAmount = clientTipAmount + propertyTipAmount;
+          setValue('clientTipAmount', clientTipAmount.toFixed(2));
+          setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
+          setValue('doubleTipAmount', doubleTipAmount.toFixed(2));
+        }
+      }
+    } else if (currentServiceId === 10) { // ALQUILER
+      const rentalTotal = watchedRealEstateCommission ? parseCurrency(watchedRealEstateCommission) : 0;
+      const adjustedBase = rentalTotal - totalDeductibles;
+      
+      const propertyOwnerAmount = adjustedBase * (watchedPropertyOwnerPercentage / 100);
+      const advisorAmount = adjustedBase * advisorLevelPct;
+      const companyAmount = adjustedBase - propertyOwnerAmount - advisorAmount;
+      
+      setValue('propertyTipAmount', propertyOwnerAmount.toFixed(2));
+      setValue('clientTipAmount', advisorAmount.toFixed(2));
+      setValue('doubleTipAmount', companyAmount.toFixed(2));
+    } else if (currentServiceId === 19) { // ESTADIA POR DIA
+      const dailyRate = parseCurrency(watchedDailyRate);
+      const days = watchedNumberOfDays || 0;
+      const totalStay = dailyRate * days;
+      const adjustedBase = totalStay - totalDeductibles;
+      
+      const propertyOwnerAmount = adjustedBase * (watchedPropertyOwnerPercentage / 100);
+      const advisorAmount = adjustedBase * advisorLevelPct;
+      const companyAmount = adjustedBase - propertyOwnerAmount - advisorAmount;
+      
+      setValue('propertyTipAmount', propertyOwnerAmount.toFixed(2));
+      setValue('clientTipAmount', advisorAmount.toFixed(2));
+      setValue('doubleTipAmount', companyAmount.toFixed(2));
+    } else if (currentServiceId === 16) { // TRASPASO FONDO COMERCIO (combines compraventa + rental logic)
+      if (watchedTip && watchedRealEstateCommission) {
+        const rentalCommission = parseCurrency(watchedRealEstateCommission);
+        const combinedBase = baseForCommission + rentalCommission - totalDeductibles;
+        
+        if (watchedTip === 'punta_cliente') {
+          const clientTipAmount = combinedBase * advisorLevelPct;
+          setValue('clientTipAmount', clientTipAmount.toFixed(2));
+          setValue('propertyTipAmount', '0');
+          setValue('doubleTipAmount', '0');
+        } else if (watchedTip === 'punta_inmueble') {
+          const propertyTipAmount = combinedBase * advisorLevelPct;
+          setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
+          setValue('clientTipAmount', '0');
+          setValue('doubleTipAmount', '0');
+        } else if (watchedTip === 'doble_punta') {
+          const clientTipAmount = combinedBase * advisorLevelPct;
+          const propertyTipAmount = combinedBase * advisorLevelPct;
+          const doubleTipAmount = clientTipAmount + propertyTipAmount;
+          setValue('clientTipAmount', clientTipAmount.toFixed(2));
+          setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
+          setValue('doubleTipAmount', doubleTipAmount.toFixed(2));
+        }
       }
     }
   }, [
+    showRealEstateInfo,
+    watchedTransactionAmount,
+    watchedDeductibleAmount,
+    watchedDeductibles,
+    watchedAdvisorLevelPercentage,
     watchedTip,
     watchedRealEstateCommission,
-    watchedPropertyTipPercentage,
-    watchedClientTipPercentage,
+    watchedPropertyOwnerPercentage,
+    watchedDailyRate,
+    watchedNumberOfDays,
+    currentServiceId,
     setValue
   ]);
 
@@ -632,115 +742,161 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
             {/* Real Estate Specific Section - Only for services 10, 11, 16, 19 */}
             {showRealEstateInfo && (
               <Section title="Información inmobiliaria">
-                <Box
-                  sx={{
-                    rowGap: 3,
-                    columnGap: 2,
-                    display: 'grid',
-                    gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
-                  }}
-                >
-                  <Field.Select name="tip" label="Punta">
-                    {PUNTA_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Field.Select>
+                <Stack spacing={3}>
+                  {/* Advisor Level Information */}
+                  <Box
+                    sx={{
+                      p: 2,
+                      bgcolor: 'background.neutral',
+                      borderRadius: 1,
+                      display: 'grid',
+                      gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+                      gap: 2,
+                    }}
+                  >
+                    <Field.Text
+                      name="advisorLevelTitle"
+                      label="Nivel del asesor"
+                      disabled
+                    />
+                    <Field.Text
+                      name="advisorLevelPercentage"
+                      label="Porcentaje por nivel (%)"
+                      type="number"
+                      disabled
+                    />
+                  </Box>
 
-                  <Field.Checkbox
-                    name="hasExternalAdvisor"
-                    label="¿Hay asesor externo?"
-                  />
-
-                  {watchedHasExternalAdvisor && (
-                    <>
-                      <Field.Text
-                        name="externalAdvisor"
-                        label="Asesor externo"
-                      />
-                      <Field.Text
-                        name="externalAdvisorRealEstate"
-                        label="Inmobiliaria del asesor externo"
-                      />
-                      <Field.Select name="externalAdvisorTip" label="Punta asesor externo">
-                        <MenuItem value="punta_inmueble">Punta inmueble</MenuItem>
-                        <MenuItem value="punta_cliente">Punta cliente</MenuItem>
+                  <Box
+                    sx={{
+                      rowGap: 3,
+                      columnGap: 2,
+                      display: 'grid',
+                      gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
+                    }}
+                  >
+                    {/* Show tip selection for COMPRAVENTA and TRASPASO FONDO COMERCIO */}
+                    {(currentServiceId === 11 || currentServiceId === 16) && (
+                      <Field.Select name="tip" label="Punta" required>
+                        {PUNTA_OPTIONS.map((option) => (
+                          <MenuItem key={option.value} value={option.value}>
+                            {option.label}
+                          </MenuItem>
+                        ))}
                       </Field.Select>
-                    </>
-                  )}
+                    )}
 
-                  <Field.Select name="link" label="Enlace">
-                    {ENLACE_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Field.Select>
+                    {/* Show rental commission for ALQUILER */}
+                    {currentServiceId === 10 && (
+                      <>
+                        <Field.Select name="rentalCommission" label="Modalidad de comisión" required>
+                          {RENTAL_COMMISSION_OPTIONS.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                              {option.label}
+                            </MenuItem>
+                          ))}
+                        </Field.Select>
+                        <Field.Currency
+                          name="realEstateCommission"
+                          label="Monto del alquiler mensual"
+                          required
+                        />
+                        <Field.Text
+                          name="propertyOwnerPercentage"
+                          label="Porcentaje propietario (%)"
+                          type="number"
+                        />
+                      </>
+                    )}
 
-                  {watchedLink === 'asesor_vision' && (
-                    <Field.Select name="visionAdvisorLink" label="Asesor Vision">
-                      {advisors.map((advisor) => (
-                        <MenuItem key={advisor.id} value={advisor.id?.toString() || ''}>
-                          {advisor.firstname} {advisor.lastname}
+                    {/* Show daily rate fields for ESTADIA POR DIA */}
+                    {currentServiceId === 19 && (
+                      <>
+                        <Field.Currency
+                          name="dailyRate"
+                          label="Tarifa diaria"
+                          required
+                        />
+                        <Field.Text
+                          name="numberOfDays"
+                          label="Número de días"
+                          type="number"
+                          required
+                        />
+                        <Field.Text
+                          name="propertyOwnerPercentage"
+                          label="Porcentaje propietario (%)"
+                          type="number"
+                        />
+                      </>
+                    )}
+
+                    {/* Show rental commission for TRASPASO FONDO COMERCIO */}
+                    {currentServiceId === 16 && (
+                      <>
+                        <Field.Currency
+                          name="realEstateCommission"
+                          label="Comisión adicional (modalidad alquiler)"
+                        />
+                      </>
+                    )}
+
+                    <Field.Checkbox
+                      name="hasExternalAdvisor"
+                      label="¿Hay asesor externo?"
+                    />
+
+                    {watchedHasExternalAdvisor && (
+                      <>
+                        <Field.Text
+                          name="externalAdvisor"
+                          label="Asesor externo"
+                        />
+                        <Field.Text
+                          name="externalAdvisorRealEstate"
+                          label="Inmobiliaria del asesor externo"
+                        />
+                        <Field.Select name="externalAdvisorTip" label="Punta asesor externo">
+                          <MenuItem value="punta_inmueble">Punta inmueble</MenuItem>
+                          <MenuItem value="punta_cliente">Punta cliente</MenuItem>
+                        </Field.Select>
+                      </>
+                    )}
+
+                    <Field.Select name="link" label="Enlace">
+                      {ENLACE_OPTIONS.map((option) => (
+                        <MenuItem key={option.value} value={option.value}>
+                          {option.label}
                         </MenuItem>
                       ))}
                     </Field.Select>
-                  )}
 
-                  {watchedLink === 'asesor_externo' && (
-                    <Field.Text
-                      name="externalLink"
-                      label="Asesor externo"
+                    {watchedLink === 'asesor_vision' && (
+                      <Field.Select name="visionAdvisorLink" label="Asesor Vision">
+                        {advisors.map((advisor) => (
+                          <MenuItem key={advisor.id} value={advisor.id?.toString() || ''}>
+                            {advisor.firstname} {advisor.lastname}
+                          </MenuItem>
+                        ))}
+                      </Field.Select>
+                    )}
+
+                    {watchedLink === 'asesor_externo' && (
+                      <Field.Text
+                        name="externalLink"
+                        label="Asesor externo"
+                      />
+                    )}
+
+                    <Field.Checkbox
+                      name="ally"
+                      label="Aliado"
                     />
-                  )}
-
-                  <Field.Checkbox
-                    name="ally"
-                    label="Aliado"
-                  />
-
-                  <Field.Select name="operationType" label="Tipo de operación">
-                    <MenuItem value="venta">Venta</MenuItem>
-                    <MenuItem value="alquiler">Alquiler</MenuItem>
-                    <MenuItem value="traspaso">Traspaso</MenuItem>
-                  </Field.Select>
-                </Box>
+                  </Box>
+                </Stack>
               </Section>
             )}
 
-            {/* Rental Commission Section */}
-            {watchedOperationType === 'alquiler' && (
-              <Section title="Comisión de alquiler">
-                <Box
-                  sx={{
-                    rowGap: 3,
-                    columnGap: 2,
-                    display: 'grid',
-                    gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
-                  }}
-                >
-                  <Field.Select name="rentalCommission" label="Comisión alquiler">
-                    {RENTAL_COMMISSION_OPTIONS.map((option) => (
-                      <MenuItem key={option.value} value={option.value}>
-                        {option.label}
-                      </MenuItem>
-                    ))}
-                  </Field.Select>
-
-                  <Field.Currency
-                    name="realEstateCommission"
-                    label="Comisión inmobiliaria (General)"
-                  />
-
-                  <Field.Text
-                    name="realEstateCommissionDetail"
-                    label="Detalle de comisión inmobiliaria"
-                    sx={{ gridColumn: '1 / -1' }}
-                  />
-                </Box>
-              </Section>
-            )}
 
             {/* Deductibles Section */}
             <Section title="Deducibles y gastos">
@@ -822,8 +978,8 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
             </Section>
 
             {/* Final Calculations Section */}
-            {watchedTip && (
-              <Section title="Cálculos finales">
+            {(showRealEstateInfo && watchedAdvisorLevelPercentage) && (
+              <Section title="Distribución final">
                 <Box
                   sx={{
                     rowGap: 3,
@@ -832,31 +988,58 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                     gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
                   }}
                 >
+                  {/* COMPRAVENTA and TRASPASO FONDO COMERCIO labels */}
+                  {(currentServiceId === 11 || currentServiceId === 16) && (
+                    <>
+                      <Field.Currency
+                        size="medium"
+                        name="propertyTipAmount"
+                        label="Punta inmueble ($)"
+                        disabled
+                      />
+                      <Field.Currency
+                        size="medium"
+                        name="clientTipAmount"
+                        label="Punta cliente ($)"
+                        disabled
+                      />
+                      <Field.Currency
+                        size="medium"
+                        name="doubleTipAmount"
+                        label="Doble punta ($)"
+                        disabled
+                      />
+                    </>
+                  )}
+
+                  {/* ALQUILER and ESTADIA POR DIA labels */}
+                  {(currentServiceId === 10 || currentServiceId === 19) && (
+                    <>
+                      <Field.Currency
+                        size="medium"
+                        name="propertyTipAmount"
+                        label="Comisión propietario ($)"
+                        disabled
+                      />
+                      <Field.Currency
+                        size="medium"
+                        name="clientTipAmount"
+                        label="Comisión asesor ($)"
+                        disabled
+                      />
+                      <Field.Currency
+                        size="medium"
+                        name="doubleTipAmount"
+                        label="Comisión empresa ($)"
+                        disabled
+                      />
+                    </>
+                  )}
+
                   <Field.Currency
                     size="medium"
                     name="visionAdvisorSubtotalFees"
                     label="Subtotal honorarios asesor Vision"
-                    disabled
-                  />
-
-                  <Field.Currency
-                    size="medium"
-                    name="propertyTipAmount"
-                    label="Punta inmueble ($)"
-                    disabled
-                  />
-
-                  <Field.Currency
-                    size="medium"
-                    name="clientTipAmount"
-                    label="Punta cliente ($)"
-                    disabled
-                  />
-
-                  <Field.Currency
-                    size="medium"
-                    name="doubleTipAmount"
-                    label="Doble punta ($)"
                     disabled
                   />
 
