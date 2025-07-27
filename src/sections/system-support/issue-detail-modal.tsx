@@ -1,22 +1,22 @@
 import React from 'react';
 
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import Grid from '@mui/material/Grid';
-import Avatar from '@mui/material/Avatar';
 import Card from '@mui/material/Card';
-import CardContent from '@mui/material/CardContent';
-import IconButton from '@mui/material/IconButton';
-import Paper from '@mui/material/Paper';
 import List from '@mui/material/List';
+import Paper from '@mui/material/Paper';
+import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
 import ListItem from '@mui/material/ListItem';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import DialogTitle from '@mui/material/DialogTitle';
+import CardContent from '@mui/material/CardContent';
 import ListItemText from '@mui/material/ListItemText';
+import DialogContent from '@mui/material/DialogContent';
+import DialogActions from '@mui/material/DialogActions';
 import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
@@ -181,19 +181,17 @@ export function IssueDetailModal({
       'IN_PROGRESS': 'primary',
       'READY': 'success',
     };
-    
+
     return labelColors[label.toUpperCase()] || 'default';
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('es-ES', {
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleString('es-ES', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit',
     });
-  };
 
   const extractCommentText = (content: any[]): string => {
     let text = '';
@@ -210,8 +208,7 @@ export function IssueDetailModal({
     return text.trim();
   };
 
-  const renderDescriptionContent = (content: any[]): React.ReactNode => {
-    return content.map((item, index) => {
+  const renderDescriptionContent = (content: any[]): React.ReactNode => content.map((item, index) => {
       switch (item.type) {
         case 'paragraph':
           if (!item.content || item.content.length === 0) {
@@ -220,8 +217,8 @@ export function IssueDetailModal({
           return (
             <Typography key={index} variant="body2" paragraph>
               {item.content.map((textItem: any, textIndex: number) => {
-                let text = textItem.text || '';
-                let style: React.CSSProperties = {};
+                const text = textItem.text || '';
+                const style: React.CSSProperties = {};
 
                 if (textItem.marks) {
                   textItem.marks.forEach((mark: any) => {
@@ -320,7 +317,6 @@ export function IssueDetailModal({
           return null;
       }
     });
-  };
 
   if (!issue && !loading) {
     return null;
@@ -379,14 +375,14 @@ export function IssueDetailModal({
           <DialogContent dividers>
             <Grid container spacing={3}>
               {/* Detalles del Issue */}
-              <Grid item xs={12}>
-                <Card variant="outlined" sx={{ width: '100%' }}>
+              <Grid size={{ xs: 12 }} >
+              <Card variant="outlined" sx={{ width: '100%' }}>
                   <CardContent>
                     <Typography variant="subtitle2" gutterBottom color="primary">
                       Detalles del Issue
                     </Typography>
                     <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }} >
                         <Box display="flex" alignItems="center" gap={1} mb={1}>
                           <Iconify icon="solar:document-bold" width={16} />
                           <Typography variant="body2" color="text.secondary">
@@ -419,7 +415,7 @@ export function IssueDetailModal({
                           </Box>
                         )}
                       </Grid>
-                      <Grid item xs={12} sm={6}>
+                      <Grid size={{ xs: 12, sm: 6 }} >
                         <Box display="flex" alignItems="center" gap={1} mb={1}>
                           <Iconify icon="solar:calendar-bold" width={16} />
                           <Typography variant="body2" color="text.secondary">
@@ -434,7 +430,7 @@ export function IssueDetailModal({
                         </Box>
                       </Grid>
                       {issue.fields.labels && issue.fields.labels.length > 0 && (
-                        <Grid item xs={12}>
+                        <Grid size={{ xs: 12 }} >
                           <Box display="flex" alignItems="center" gap={1} mb={1}>
                             <Iconify icon="solar:tag-bold" width={16} />
                             <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
@@ -446,7 +442,7 @@ export function IssueDetailModal({
                                   key={index}
                                   label={label}
                                   size="small"
-                                  color={getLabelColor(label)}
+                                  color={getLabelColor(label) as any}
                                   variant="filled"
                                   sx={{ height: 20, fontSize: '0.7rem' }}
                                 />
@@ -462,7 +458,7 @@ export function IssueDetailModal({
 
               {/* Información del Asignado */}
               {issue.fields.assignee && (
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }} >
                   <Card variant="outlined" sx={{ width: '100%' }}>
                     <CardContent>
                       <Typography variant="subtitle2" gutterBottom color="primary">
@@ -495,8 +491,8 @@ export function IssueDetailModal({
 
               {/* Descripción */}
               {issue.fields.description && (
-                <Grid item xs={12}>
-                  <Card variant="outlined" sx={{ width: '100%' }}>
+                <Grid size={{ xs: 12 }} >
+                <Card variant="outlined" sx={{ width: '100%' }}>
                     <CardContent>
                       <Typography variant="subtitle2" gutterBottom color="primary">
                         Descripción
@@ -510,7 +506,7 @@ export function IssueDetailModal({
               )}
 
               {/* Sección de Comentarios */}
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }} >
                 <Card variant="outlined" sx={{ width: '100%' }}>
                   <CardContent>
                     <Box display="flex" alignItems="center" gap={1} mb={2}>

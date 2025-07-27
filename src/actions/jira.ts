@@ -198,7 +198,7 @@ interface CreateIssueResponse {
     key: string;
     self: string;
   };
-  error?: string;
+  error?: any;
 }
 
 interface EditIssuePayload {
@@ -213,7 +213,7 @@ interface EditIssueResponse {
   success: boolean;
   issue?: JiraIssueDetail;
   message?: string;
-  error?: string;
+  error?: any;
 }
 
 interface JiraFilters {

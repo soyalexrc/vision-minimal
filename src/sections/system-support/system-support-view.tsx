@@ -1,57 +1,48 @@
 'use client';
 
 import React, { useState } from 'react';
+import { varAlpha } from 'minimal-shared/utils';
 
 import Tab from '@mui/material/Tab';
+import Box from '@mui/material/Box';
 import Tabs from '@mui/material/Tabs';
 import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
 import Chip from '@mui/material/Chip';
 import Alert from '@mui/material/Alert';
-import Button from '@mui/material/Button';
-import Container from '@mui/material/Container';
-import TextField from '@mui/material/TextField';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Tooltip from '@mui/material/Tooltip';
-import CircularProgress from '@mui/material/CircularProgress';
-import Box from '@mui/material/Box';
 import Paper from '@mui/material/Paper';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
+import Button from '@mui/material/Button';
+import Avatar from '@mui/material/Avatar';
+import Tooltip from '@mui/material/Tooltip';
+import TableRow from '@mui/material/TableRow';
+import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Avatar from '@mui/material/Avatar';
-
-import { varAlpha } from 'minimal-shared/utils';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
+import TableContainer from '@mui/material/TableContainer';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { Iconify } from 'src/components/iconify';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
-import { Label } from 'src/components/label';
 
 import { paths } from '../../routes/paths';
-import { DashboardContent } from '../../layouts/dashboard';
-import {
-  type JiraIssue,
-  useGetJiraBacklog,
-  useGetJiraSprint,
-  useGetJiraIssues,
-  useGetIssue,
-  useGetProjectMetadata,
-  createIssue,
-  editIssue,
-  refreshAllJiraData,
-} from '../../actions/jira';
+import { EditIssueModal } from './edit-issue-modal';
 import { IssueDetailModal } from './issue-detail-modal';
 import { CreateIssueModal } from './create-issue-modal';
-import { EditIssueModal } from './edit-issue-modal';
+import { DashboardContent } from '../../layouts/dashboard';
+import {
+  editIssue,
+  useGetIssue,
+  createIssue,
+  type JiraIssue,
+  useGetJiraSprint,
+  useGetJiraBacklog,
+  refreshAllJiraData,
+  useGetProjectMetadata,
+} from '../../actions/jira';
 
 // ----------------------------------------------------------------------
 
@@ -120,7 +111,7 @@ export function SystemSupportView() {
     metadataError,
   } = useGetProjectMetadata();
 
-  const loading = backlogLoading || sprintLoading; // || allIssuesLoading;
+  const allIssuesLoading = backlogLoading || sprintLoading; // || allIssuesLoading;
   const error = backlogError || sprintError; // || allIssuesError;
 
   const handleRefreshAll = () => {
@@ -151,10 +142,12 @@ export function SystemSupportView() {
       const response = await createIssue(payload);
       if (!response.success) {
         // Create a more detailed error object
+        // eslint-disable-next-line @typescript-eslint/no-shadow
         const error: any = new Error(response.error?.message || 'Error al crear el issue');
         error.details = response.error?.details;
         throw error;
       }
+      // eslint-disable-next-line @typescript-eslint/no-shadow
     } catch (error: any) {
       // If it's an axios error, extract the response data
       if (error.response?.data) {
@@ -189,10 +182,12 @@ export function SystemSupportView() {
       const response = await editIssue(issueKey, payload);
       if (!response.success) {
         // Create a more detailed error object
+        // eslint-disable-next-line @typescript-eslint/no-shadow
         const error: any = new Error(response.error?.message || 'Error al actualizar el issue');
         error.details = response.error?.details;
         throw error;
       }
+      // eslint-disable-next-line @typescript-eslint/no-shadow
     } catch (error: any) {
       // If it's an axios error, extract the response data
       if (error.response?.data) {
@@ -262,17 +257,15 @@ export function SystemSupportView() {
       'IN_PROGRESS': 'primary',
       'READY': 'success',
     };
-    
+
     return labelColors[label.toUpperCase()] || 'default';
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('es-ES', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',
     });
-  };
 
   const IssueTable: React.FC<{
     issues: JiraIssue[];
@@ -397,10 +390,10 @@ export function SystemSupportView() {
                             key={index}
                             label={label}
                             size="small"
-                            color={getLabelColor(label)}
+                            color={getLabelColor(label) as any}
                             variant="outlined"
-                            sx={{ 
-                              height: 18, 
+                            sx={{
+                              height: 18,
                               fontSize: '0.6rem',
                               '& .MuiChip-label': { px: 0.5 }
                             }}
@@ -411,8 +404,8 @@ export function SystemSupportView() {
                             label={`+${issue.fields.labels.length - 3}`}
                             size="small"
                             variant="outlined"
-                            sx={{ 
-                              height: 18, 
+                            sx={{
+                              height: 18,
                               fontSize: '0.6rem',
                               '& .MuiChip-label': { px: 0.5 }
                             }}
@@ -529,7 +522,7 @@ export function SystemSupportView() {
               Crear Issue
             </Button>
             <Tooltip title="Actualizar datos">
-              <IconButton onClick={handleRefreshAll} disabled={loading}>
+              <IconButton onClick={handleRefreshAll} disabled={allIssuesLoading}>
                 <Iconify icon="solar:refresh-bold" />
               </IconButton>
             </Tooltip>
@@ -580,7 +573,7 @@ export function SystemSupportView() {
             {/* <Tab label={`Todos los Issues (0)`} /> */}
           </Tabs>
 
-          {loading && (
+          {allIssuesLoading && (
             <Box display="flex" justifyContent="center" py={4}>
               <CircularProgress />
             </Box>
