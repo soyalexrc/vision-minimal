@@ -43,6 +43,7 @@ export interface JiraIssue {
     updated: string;
     description?: any;
     customfield_10016?: number; // Story Points
+    labels?: string[];
   };
 }
 
@@ -134,6 +135,7 @@ export interface JiraIssueDetail {
       total: number;
     };
     customfield_10016?: number; // Story Points
+    labels?: string[];
   };
 }
 

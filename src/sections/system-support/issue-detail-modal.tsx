@@ -111,6 +111,7 @@ export interface JiraIssueDetail {
       total: number;
     };
     customfield_10016?: number; // Story Points
+    labels?: string[];
   };
 }
 
@@ -163,6 +164,25 @@ export function IssueDetailModal({
       default:
         return '#757575';
     }
+  };
+
+  const getLabelColor = (label: string) => {
+    // Define colors for common labels
+    const labelColors: { [key: string]: string } = {
+      'UNPAID': 'error',
+      'PAID': 'success',
+      'PENDING': 'warning',
+      'URGENT': 'error',
+      'REVIEW': 'info',
+      'BUG': 'error',
+      'FEATURE': 'primary',
+      'IMPROVEMENT': 'info',
+      'BLOCKED': 'error',
+      'IN_PROGRESS': 'primary',
+      'READY': 'success',
+    };
+    
+    return labelColors[label.toUpperCase()] || 'default';
   };
 
   const formatDate = (dateString: string) => {
@@ -360,7 +380,7 @@ export function IssueDetailModal({
             <Grid container spacing={3}>
               {/* Detalles del Issue */}
               <Grid item xs={12}>
-                <Card variant="outlined">
+                <Card variant="outlined" sx={{ width: '100%' }}>
                   <CardContent>
                     <Typography variant="subtitle2" gutterBottom color="primary">
                       Detalles del Issue
@@ -413,6 +433,28 @@ export function IssueDetailModal({
                           </Typography>
                         </Box>
                       </Grid>
+                      {issue.fields.labels && issue.fields.labels.length > 0 && (
+                        <Grid item xs={12}>
+                          <Box display="flex" alignItems="center" gap={1} mb={1}>
+                            <Iconify icon="solar:tag-bold" width={16} />
+                            <Typography variant="body2" color="text.secondary" sx={{ mr: 1 }}>
+                              Etiquetas:
+                            </Typography>
+                            <Box display="flex" gap={0.5} flexWrap="wrap">
+                              {issue.fields.labels.map((label, index) => (
+                                <Chip
+                                  key={index}
+                                  label={label}
+                                  size="small"
+                                  color={getLabelColor(label)}
+                                  variant="filled"
+                                  sx={{ height: 20, fontSize: '0.7rem' }}
+                                />
+                              ))}
+                            </Box>
+                          </Box>
+                        </Grid>
+                      )}
                     </Grid>
                   </CardContent>
                 </Card>
@@ -421,7 +463,7 @@ export function IssueDetailModal({
               {/* Información del Asignado */}
               {issue.fields.assignee && (
                 <Grid item xs={12}>
-                  <Card variant="outlined">
+                  <Card variant="outlined" sx={{ width: '100%' }}>
                     <CardContent>
                       <Typography variant="subtitle2" gutterBottom color="primary">
                         Asignado a
@@ -454,7 +496,7 @@ export function IssueDetailModal({
               {/* Descripción */}
               {issue.fields.description && (
                 <Grid item xs={12}>
-                  <Card variant="outlined">
+                  <Card variant="outlined" sx={{ width: '100%' }}>
                     <CardContent>
                       <Typography variant="subtitle2" gutterBottom color="primary">
                         Descripción
@@ -468,6 +510,7 @@ export function IssueDetailModal({
               )}
 
               {/* Sección de Comentarios */}
+              <Grid item xs={12}>
                 <Card variant="outlined" sx={{ width: '100%' }}>
                   <CardContent>
                     <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -507,6 +550,7 @@ export function IssueDetailModal({
                     )}
                   </CardContent>
                 </Card>
+              </Grid>
 
               {/* Enlaces y Referencias */}
               {/*<Grid item xs={12}>*/}

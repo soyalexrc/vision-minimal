@@ -70,11 +70,11 @@ export function CreateIssueModal({
   const [formData, setFormData] = useState({
     summary: '',
     description: '',
-    issueType: 'Task',
+    issueType: 'Story',
     priority: '',
     assignee: ''
   });
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -87,7 +87,7 @@ export function CreateIssueModal({
       setFormData({
         summary: '',
         description: '',
-        issueType: 'Task',
+        issueType: 'Story', // Default to 'Story' or first issue type
         priority: '',
         assignee: ''
       });
@@ -97,9 +97,12 @@ export function CreateIssueModal({
   // Set default issue type when metadata loads
   useEffect(() => {
     if (metadata?.issueTypes.length) {
-      const defaultType = metadata.issueTypes.find(type => type.name === 'Task') 
-        || metadata.issueTypes[0];
-      setFormData(prev => ({ ...prev, issueType: defaultType.name }));
+      const nonEpicTypes = metadata.issueTypes.filter(type => type.name !== 'Epic');
+      const defaultType = nonEpicTypes.find(type => type.name === 'Story')
+        || nonEpicTypes[0];
+      if (defaultType) {
+        setFormData(prev => ({ ...prev, issueType: defaultType.name }));
+      }
     }
   }, [metadata]);
 
@@ -117,7 +120,7 @@ export function CreateIssueModal({
 
     setSubmitting(true);
     setError(null);
-    
+
     try {
       // Create payload with only the fields that are filled
       const payload: any = {
@@ -152,7 +155,7 @@ export function CreateIssueModal({
 
       await onCreateIssue(payload);
       setSuccess('Issue creado exitosamente!');
-      
+
       // Auto-close after 2 seconds
       setTimeout(() => {
         onIssueCreated();
@@ -160,11 +163,11 @@ export function CreateIssueModal({
     } catch (err: any) {
       // Extract more detailed error information
       let errorMessage = 'Error al crear el issue';
-      
+
       if (err.message) {
         errorMessage = err.message;
       }
-      
+
       // If there are field errors, show them
       if (err.details?.fieldErrors) {
         const fieldErrors = Object.entries(err.details.fieldErrors)
@@ -172,7 +175,7 @@ export function CreateIssueModal({
           .join(', ');
         errorMessage = `Error en campos: ${fieldErrors}`;
       }
-      
+
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -191,10 +194,10 @@ export function CreateIssueModal({
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={handleClose}
-      maxWidth="md" 
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: { minHeight: '60vh' }
@@ -231,7 +234,7 @@ export function CreateIssueModal({
                 {error}
               </Alert>
             )}
-            
+
             {success && (
               <Alert severity="success">
                 {success}
@@ -273,14 +276,14 @@ export function CreateIssueModal({
                   onChange={(e) => handleInputChange('issueType', e.target.value)}
                   disabled={submitting}
                 >
-                  {metadata.issueTypes.map((type) => (
+                  {metadata.issueTypes.filter(type => type.name !== 'Epic').map((type) => (
                     <MenuItem key={type.id} value={type.name}>
                       <Box display="flex" alignItems="center" gap={1}>
-                        <img 
-                          src={type.iconUrl} 
+                        <img
+                          src={type.iconUrl}
                           alt={type.name}
-                          width={16} 
-                          height={16} 
+                          width={16}
+                          height={16}
                         />
                         <span>{type.name}</span>
                       </Box>
@@ -306,11 +309,11 @@ export function CreateIssueModal({
                   {metadata.priorities.map((priority) => (
                     <MenuItem key={priority.id} value={priority.name}>
                       <Box display="flex" alignItems="center" gap={1}>
-                        <img 
-                          src={priority.iconUrl} 
+                        <img
+                          src={priority.iconUrl}
                           alt={priority.name}
-                          width={16} 
-                          height={16} 
+                          width={16}
+                          height={16}
                         />
                         <span>{priority.name}</span>
                       </Box>
@@ -359,13 +362,13 @@ export function CreateIssueModal({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button 
+        <Button
           onClick={handleClose}
           disabled={submitting}
         >
           Cancelar
         </Button>
-        <Button 
+        <Button
           variant="contained"
           onClick={handleSubmit}
           disabled={metadataLoading || submitting || !formData.summary.trim()}

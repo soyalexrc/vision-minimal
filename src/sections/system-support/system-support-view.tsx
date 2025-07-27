@@ -76,19 +76,23 @@ export function SystemSupportView() {
 
   // SWR hooks for data fetching
   const {
-    backlogIssues,
+    backlogIssues: rawBacklogIssues,
     backlogLoading,
     backlogError,
     refreshBacklog,
   } = useGetJiraBacklog();
 
   const {
-    sprintIssues,
+    sprintIssues: rawSprintIssues,
     sprintLoading,
     sprintError,
     currentSprint,
     refreshSprint,
   } = useGetJiraSprint();
+
+  // Filter out Epic type issues
+  const backlogIssues = rawBacklogIssues.filter(issue => issue.fields.issuetype.name !== 'Epic');
+  const sprintIssues = rawSprintIssues.filter(issue => issue.fields.issuetype.name !== 'Epic');
 
   // Commented out "Todos los issues" functionality
   // const {
@@ -243,6 +247,25 @@ export function SystemSupportView() {
     }
   };
 
+  const getLabelColor = (label: string) => {
+    // Define colors for common labels
+    const labelColors: { [key: string]: string } = {
+      'UNPAID': 'error',
+      'PAID': 'success',
+      'PENDING': 'warning',
+      'URGENT': 'error',
+      'REVIEW': 'info',
+      'BUG': 'error',
+      'FEATURE': 'primary',
+      'IMPROVEMENT': 'info',
+      'BLOCKED': 'error',
+      'IN_PROGRESS': 'primary',
+      'READY': 'success',
+    };
+    
+    return labelColors[label.toUpperCase()] || 'default';
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('es-ES', {
       month: 'short',
@@ -363,9 +386,41 @@ export function SystemSupportView() {
                   </Stack>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="body2" noWrap sx={{ maxWidth: 300 }}>
-                    {issue.fields.summary}
-                  </Typography>
+                  <Box>
+                    <Typography variant="body2" noWrap sx={{ maxWidth: 300, mb: 0.5 }}>
+                      {issue.fields.summary}
+                    </Typography>
+                    {issue.fields.labels && issue.fields.labels.length > 0 && (
+                      <Box display="flex" gap={0.5} flexWrap="wrap">
+                        {issue.fields.labels.slice(0, 3).map((label, index) => (
+                          <Chip
+                            key={index}
+                            label={label}
+                            size="small"
+                            color={getLabelColor(label)}
+                            variant="outlined"
+                            sx={{ 
+                              height: 18, 
+                              fontSize: '0.6rem',
+                              '& .MuiChip-label': { px: 0.5 }
+                            }}
+                          />
+                        ))}
+                        {issue.fields.labels.length > 3 && (
+                          <Chip
+                            label={`+${issue.fields.labels.length - 3}`}
+                            size="small"
+                            variant="outlined"
+                            sx={{ 
+                              height: 18, 
+                              fontSize: '0.6rem',
+                              '& .MuiChip-label': { px: 0.5 }
+                            }}
+                          />
+                        )}
+                      </Box>
+                    )}
+                  </Box>
                 </TableCell>
                 <TableCell align="center">
                   <Chip
@@ -551,7 +606,6 @@ export function SystemSupportView() {
                 variant="sprint"
                 loading={sprintLoading}
                 emptyMessage="No hay issues en el sprint actual"
-                onEditIssue={handleEditIssue}
               />
             </Box>
           </TabPanel>
