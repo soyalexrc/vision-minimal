@@ -82,12 +82,13 @@ export function SystemSupportView() {
     refreshSprint,
   } = useGetJiraSprint();
 
-  const {
-    allIssues,
-    allIssuesLoading,
-    allIssuesError,
-    refreshAllIssues,
-  } = useGetJiraIssues({ statusFilter });
+  // Commented out "Todos los issues" functionality
+  // const {
+  //   allIssues,
+  //   allIssuesLoading,
+  //   allIssuesError,
+  //   refreshAllIssues,
+  // } = useGetJiraIssues({ statusFilter });
 
   const {
     issue: selectedIssue,
@@ -95,8 +96,8 @@ export function SystemSupportView() {
     issueError,
   } = useGetIssue(selectedIssueKey);
 
-  const loading = backlogLoading || sprintLoading || allIssuesLoading;
-  const error = backlogError || sprintError || allIssuesError;
+  const loading = backlogLoading || sprintLoading; // || allIssuesLoading;
+  const error = backlogError || sprintError; // || allIssuesError;
 
   const handleRefreshAll = () => {
     refreshAllJiraData({ statusFilter });
@@ -355,7 +356,8 @@ export function SystemSupportView() {
           </Tooltip>
         </Box>
 
-        <Box mb={3}>
+        {/* Commented out status filter - only used for "Todos los issues" */}
+        {/* <Box mb={3}>
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} sm={6} md={4}>
               <FormControl fullWidth size="small">
@@ -374,7 +376,7 @@ export function SystemSupportView() {
               </FormControl>
             </Grid>
           </Grid>
-        </Box>
+        </Box> */}
 
         {error && (
           <Alert severity="error" sx={{ mb: 3 }}>
@@ -395,7 +397,7 @@ export function SystemSupportView() {
           >
             <Tab label={`Sprint Actual (${sprintIssues.length})`} />
             <Tab label={`Backlog (${backlogIssues.length})`} />
-            <Tab label={`Todos los Issues (${allIssues.length})`} />
+            {/* <Tab label={`Todos los Issues (0)`} /> */}
           </Tabs>
 
           {loading && (
@@ -439,7 +441,8 @@ export function SystemSupportView() {
             </Box>
           </TabPanel>
 
-          <TabPanel value={activeTab} index={2}>
+          {/* Commented out "Todos los issues" tab */}
+          {/* <TabPanel value={activeTab} index={2}>
             <Box sx={{ p: 3 }}>
               <IssueTable
                 issues={allIssues}
@@ -448,7 +451,7 @@ export function SystemSupportView() {
                 emptyMessage="No se encontraron issues"
               />
             </Box>
-          </TabPanel>
+          </TabPanel> */}
         </Card>
       </Container>
 
