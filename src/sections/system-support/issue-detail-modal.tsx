@@ -80,9 +80,37 @@ export interface JiraIssueDetail {
       };
     };
     comment?: {
-      comments: any[];
+      comments: Array<{
+        id: string;
+        author: {
+          accountId: string;
+          displayName: string;
+          emailAddress: string;
+          avatarUrls: {
+            '48x48': string;
+            '24x24': string;
+            '16x16': string;
+            '32x32': string;
+          };
+          timeZone: string;
+        };
+        body: {
+          type: string;
+          version: number;
+          content: Array<{
+            type: string;
+            content?: Array<{
+              type: string;
+              text?: string;
+            }>;
+          }>;
+        };
+        created: string;
+        updated: string;
+      }>;
       total: number;
     };
+    customfield_10016?: number; // Story Points
   };
 }
 
@@ -145,6 +173,21 @@ export function IssueDetailModal({
       hour: '2-digit',
       minute: '2-digit',
     });
+  };
+
+  const extractCommentText = (content: any[]): string => {
+    let text = '';
+    content.forEach(item => {
+      if (item.type === 'paragraph' && item.content) {
+        item.content.forEach((textItem: any) => {
+          if (textItem.type === 'text' && textItem.text) {
+            text += textItem.text;
+          }
+        });
+        text += '\n';
+      }
+    });
+    return text.trim();
   };
 
   const renderDescriptionContent = (content: any[]): React.ReactNode => {
@@ -340,6 +383,21 @@ export function IssueDetailModal({
                             Prioridad: {issue.fields.priority.name}
                           </Typography>
                         </Box>
+                        {issue.fields.customfield_10016 && (
+                          <Box display="flex" alignItems="center" gap={1} mb={1}>
+                            <Iconify
+                              icon="solar:star-bold"
+                              width={16}
+                              sx={{ color: 'primary.main' }}
+                            />
+                            <Typography variant="body2" color="text.secondary">
+                              Story Points:
+                              <Typography component="span" color="primary.main" fontWeight="medium" sx={{ ml: 0.5 }}>
+                                {issue.fields.customfield_10016}
+                              </Typography>
+                            </Typography>
+                          </Box>
+                        )}
                       </Grid>
                       <Grid item xs={12} sm={6}>
                         <Box display="flex" alignItems="center" gap={1} mb={1}>
@@ -410,7 +468,6 @@ export function IssueDetailModal({
               )}
 
               {/* Sección de Comentarios */}
-              {/*<Grid item xs={24}>*/}
                 <Card variant="outlined" sx={{ width: '100%' }}>
                   <CardContent>
                     <Box display="flex" alignItems="center" gap={1} mb={2}>
@@ -424,13 +481,32 @@ export function IssueDetailModal({
                         No hay comentarios todavía
                       </Typography>
                     ) : (
-                      <Typography variant="body2" color="text.secondary">
-                        Los comentarios se mostrarían aquí
-                      </Typography>
+                      <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
+                        {issue.fields.comment?.comments.map((comment, index) => (
+                          <Box key={comment.id} sx={{ mb: 2, pb: 2, borderBottom: index < issue.fields.comment!.comments.length - 1 ? '1px solid' : 'none', borderColor: 'divider' }}>
+                            <Box display="flex" alignItems="center" gap={1} mb={1}>
+                              <Avatar
+                                src={comment.author.avatarUrls['24x24']}
+                                sx={{ width: 24, height: 24 }}
+                              >
+                                {comment.author.displayName.charAt(0)}
+                              </Avatar>
+                              <Typography variant="body2" fontWeight="medium">
+                                {comment.author.displayName}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {formatDate(comment.created)}
+                              </Typography>
+                            </Box>
+                            <Typography variant="body2" sx={{ ml: 4 }}>
+                              {extractCommentText(comment.body.content)}
+                            </Typography>
+                          </Box>
+                        ))}
+                      </Box>
                     )}
                   </CardContent>
                 </Card>
-              {/*</Grid>*/}
 
               {/* Enlaces y Referencias */}
               {/*<Grid item xs={12}>*/}

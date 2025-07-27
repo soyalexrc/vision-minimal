@@ -56,6 +56,9 @@ export const endpoints = {
     issues: '/scrum/issues',
     getIssue: (issueKey: string) => `/scrum/issues/${issueKey}`,
     projectInfo: '/scrum/project',
+    createIssue: '/scrum/issues',
+    editIssue: (issueKey: string) => `/scrum/issues/${issueKey}`,
+    projectMetadata: '/scrum/project/metadata',
   },
   cashflow: {
     list: '/cashflow',

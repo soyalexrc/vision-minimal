@@ -44,9 +44,14 @@ import {
   useGetJiraSprint,
   useGetJiraIssues,
   useGetIssue,
+  useGetProjectMetadata,
+  createIssue,
+  editIssue,
   refreshAllJiraData,
 } from '../../actions/jira';
 import { IssueDetailModal } from './issue-detail-modal';
+import { CreateIssueModal } from './create-issue-modal';
+import { EditIssueModal } from './edit-issue-modal';
 
 // ----------------------------------------------------------------------
 
@@ -65,6 +70,9 @@ export function SystemSupportView() {
   const [statusFilter, setStatusFilter] = useState('');
   const [selectedIssueKey, setSelectedIssueKey] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [editingIssueKey, setEditingIssueKey] = useState<string | null>(null);
 
   // SWR hooks for data fetching
   const {
@@ -96,6 +104,18 @@ export function SystemSupportView() {
     issueError,
   } = useGetIssue(selectedIssueKey);
 
+  const {
+    issue: editingIssue,
+    issueLoading: editingIssueLoading,
+    issueError: editingIssueError,
+  } = useGetIssue(editingIssueKey);
+
+  const {
+    metadata,
+    metadataLoading,
+    metadataError,
+  } = useGetProjectMetadata();
+
   const loading = backlogLoading || sprintLoading; // || allIssuesLoading;
   const error = backlogError || sprintError; // || allIssuesError;
 
@@ -112,6 +132,79 @@ export function SystemSupportView() {
     setModalOpen(false);
     // Small delay to allow modal to close smoothly before clearing the key
     setTimeout(() => setSelectedIssueKey(null), 300);
+  };
+
+  const handleCreateIssue = () => {
+    setCreateModalOpen(true);
+  };
+
+  const handleCloseCreateModal = () => {
+    setCreateModalOpen(false);
+  };
+
+  const handleCreateIssueSubmit = async (payload: any) => {
+    try {
+      const response = await createIssue(payload);
+      if (!response.success) {
+        // Create a more detailed error object
+        const error: any = new Error(response.error?.message || 'Error al crear el issue');
+        error.details = response.error?.details;
+        throw error;
+      }
+    } catch (error: any) {
+      // If it's an axios error, extract the response data
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        const detailedError: any = new Error(errorData.error?.message || 'Error al crear el issue');
+        detailedError.details = errorData.error?.details;
+        throw detailedError;
+      }
+      throw error;
+    }
+  };
+
+  const handleIssueCreated = async () => {
+    // Refresh the data after creating an issue
+    refreshAllJiraData();
+    handleCloseCreateModal();
+  };
+
+  const handleEditIssue = (issueKey: string) => {
+    setEditingIssueKey(issueKey);
+    setEditModalOpen(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalOpen(false);
+    // Small delay to allow modal to close smoothly before clearing the key
+    setTimeout(() => setEditingIssueKey(null), 300);
+  };
+
+  const handleEditIssueSubmit = async (issueKey: string, payload: any) => {
+    try {
+      const response = await editIssue(issueKey, payload);
+      if (!response.success) {
+        // Create a more detailed error object
+        const error: any = new Error(response.error?.message || 'Error al actualizar el issue');
+        error.details = response.error?.details;
+        throw error;
+      }
+    } catch (error: any) {
+      // If it's an axios error, extract the response data
+      if (error.response?.data) {
+        const errorData = error.response.data;
+        const detailedError: any = new Error(errorData.error?.message || 'Error al actualizar el issue');
+        detailedError.details = errorData.error?.details;
+        throw detailedError;
+      }
+      throw error;
+    }
+  };
+
+  const handleIssueUpdated = async () => {
+    // Refresh the data after updating an issue
+    refreshAllJiraData();
+    handleCloseEditModal();
   };
 
   const getStatusColor = (statusCategory: string) => {
@@ -163,11 +256,13 @@ export function SystemSupportView() {
     variant?: 'sprint' | 'backlog' | 'default';
     loading?: boolean;
     emptyMessage?: string;
+    onEditIssue?: (issueKey: string) => void;
   }> = ({
     issues,
     variant = 'default',
     loading = false,
-    emptyMessage = 'No se encontraron issues'
+    emptyMessage = 'No se encontraron issues',
+    onEditIssue
   }) => {
     if (loading) {
       return (
@@ -212,9 +307,10 @@ export function SystemSupportView() {
               <TableCell sx={{ minWidth: 100 }}>Clave</TableCell>
               <TableCell>Resumen</TableCell>
               <TableCell align="center">Estado</TableCell>
-              {/*<TableCell align="center">Prioridad</TableCell>*/}
+              <TableCell align="center">Puntos</TableCell>
               <TableCell>Asignado a</TableCell>
               <TableCell>Creado</TableCell>
+              {onEditIssue && <TableCell align="center">Acciones</TableCell>}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -279,17 +375,23 @@ export function SystemSupportView() {
                     sx={{ height: 24 }}
                   />
                 </TableCell>
-                {/*<TableCell align="center">*/}
-                {/*  <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>*/}
-                {/*    <Iconify*/}
-                {/*      icon="material-symbols:flag"*/}
-                {/*      sx={{ fontSize: 16, color: getPriorityColor(issue.fields.priority.name) }}*/}
-                {/*    />*/}
-                {/*    <Typography variant="caption" color="text.secondary">*/}
-                {/*      {issue.fields.priority.name}*/}
-                {/*    </Typography>*/}
-                {/*  </Box>*/}
-                {/*</TableCell>*/}
+                <TableCell align="center">
+                  {issue.fields.customfield_10016 ? (
+                    <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                      <Iconify
+                        icon="solar:star-bold"
+                        sx={{ fontSize: 16, color: 'primary.main' }}
+                      />
+                      <Typography variant="body2" fontWeight="medium" color="primary.main">
+                        {issue.fields.customfield_10016}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Typography variant="caption" color="text.disabled">
+                      -
+                    </Typography>
+                  )}
+                </TableCell>
                 <TableCell>
                   {issue.fields.assignee ? (
                     <Stack direction="row" spacing={1} alignItems="center">
@@ -314,6 +416,20 @@ export function SystemSupportView() {
                     {formatDate(issue.fields.created)}
                   </Typography>
                 </TableCell>
+                {onEditIssue && (
+                  <TableCell align="center">
+                    <IconButton
+                      size="small"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onEditIssue(issue.key);
+                      }}
+                      sx={{ color: 'primary.main' }}
+                    >
+                      <Iconify icon="solar:pen-bold" width={16} />
+                    </IconButton>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>
@@ -349,11 +465,20 @@ export function SystemSupportView() {
           <Typography variant="h4" component="h1">
             Panel de Jira
           </Typography>
-          <Tooltip title="Actualizar datos">
-            <IconButton onClick={handleRefreshAll} disabled={loading}>
-              <Iconify icon="solar:refresh-bold" />
-            </IconButton>
-          </Tooltip>
+          <Box display="flex" alignItems="center" gap={1}>
+            <Button
+              variant="contained"
+              onClick={handleCreateIssue}
+              startIcon={<Iconify icon="solar:add-circle-bold" />}
+            >
+              Crear Issue
+            </Button>
+            <Tooltip title="Actualizar datos">
+              <IconButton onClick={handleRefreshAll} disabled={loading}>
+                <Iconify icon="solar:refresh-bold" />
+              </IconButton>
+            </Tooltip>
+          </Box>
         </Box>
 
         {/* Commented out status filter - only used for "Todos los issues" */}
@@ -426,6 +551,7 @@ export function SystemSupportView() {
                 variant="sprint"
                 loading={sprintLoading}
                 emptyMessage="No hay issues en el sprint actual"
+                onEditIssue={handleEditIssue}
               />
             </Box>
           </TabPanel>
@@ -437,6 +563,7 @@ export function SystemSupportView() {
                 variant="backlog"
                 loading={backlogLoading}
                 emptyMessage="No hay issues en el backlog"
+                onEditIssue={handleEditIssue}
               />
             </Box>
           </TabPanel>
@@ -461,6 +588,29 @@ export function SystemSupportView() {
         onClose={handleCloseModal}
         issue={selectedIssue}
         loading={issueLoading}
+      />
+
+      {/* Create Issue Modal */}
+      <CreateIssueModal
+        open={createModalOpen}
+        onClose={handleCloseCreateModal}
+        onIssueCreated={handleIssueCreated}
+        metadata={metadata}
+        metadataLoading={metadataLoading}
+        metadataError={metadataError}
+        onCreateIssue={handleCreateIssueSubmit}
+      />
+
+      {/* Edit Issue Modal */}
+      <EditIssueModal
+        open={editModalOpen}
+        onClose={handleCloseEditModal}
+        onIssueUpdated={handleIssueUpdated}
+        issue={editingIssue}
+        metadata={metadata}
+        metadataLoading={metadataLoading}
+        metadataError={metadataError}
+        onEditIssue={handleEditIssueSubmit}
       />
     </DashboardContent>
   );

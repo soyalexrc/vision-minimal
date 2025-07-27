@@ -42,6 +42,7 @@ export interface JiraIssue {
     created: string;
     updated: string;
     description?: any;
+    customfield_10016?: number; // Story Points
   };
 }
 
@@ -102,9 +103,37 @@ export interface JiraIssueDetail {
       };
     };
     comment?: {
-      comments: any[];
+      comments: Array<{
+        id: string;
+        author: {
+          accountId: string;
+          displayName: string;
+          emailAddress: string;
+          avatarUrls: {
+            '48x48': string;
+            '24x24': string;
+            '16x16': string;
+            '32x32': string;
+          };
+          timeZone: string;
+        };
+        body: {
+          type: string;
+          version: number;
+          content: Array<{
+            type: string;
+            content?: Array<{
+              type: string;
+              text?: string;
+            }>;
+          }>;
+        };
+        created: string;
+        updated: string;
+      }>;
       total: number;
     };
+    customfield_10016?: number; // Story Points
   };
 }
 
@@ -122,6 +151,69 @@ interface IssueDetailResponse {
   error?: string;
 }
 
+interface ProjectMetadata {
+  project: {
+    key: string;
+    name: string;
+  };
+  issueTypes: Array<{
+    id: string;
+    name: string;
+    description: string;
+    iconUrl: string;
+  }>;
+  priorities: Array<{
+    id: string;
+    name: string;
+    iconUrl: string;
+  }>;
+  users: Array<{
+    accountId: string;
+    displayName: string;
+    emailAddress: string;
+    avatarUrls: any;
+  }>;
+}
+
+interface MetadataResponse {
+  success: boolean;
+  metadata?: ProjectMetadata;
+  error?: string;
+}
+
+interface CreateIssuePayload {
+  summary: string;
+  description?: string;
+  issueType?: string;
+  priority?: string;
+  assignee?: string;
+}
+
+interface CreateIssueResponse {
+  success: boolean;
+  issue?: {
+    id: string;
+    key: string;
+    self: string;
+  };
+  error?: string;
+}
+
+interface EditIssuePayload {
+  summary?: string;
+  description?: string;
+  issueType?: string;
+  priority?: string;
+  assignee?: string;
+}
+
+interface EditIssueResponse {
+  success: boolean;
+  issue?: JiraIssueDetail;
+  message?: string;
+  error?: string;
+}
+
 interface JiraFilters {
   statusFilter: string;
 }
@@ -133,6 +225,11 @@ const jiraFetcher = async (url: string): Promise<ApiResponse> => {
 };
 
 const issueDetailFetcher = async (url: string): Promise<IssueDetailResponse> => {
+  const response = await axios.get(url);
+  return response.data;
+};
+
+const metadataFetcher = async (url: string): Promise<MetadataResponse> => {
   const response = await axios.get(url);
   return response.data;
 };
@@ -240,6 +337,42 @@ export function useGetIssue(issueKey: string | null) {
 
   return memoizedValue;
 }
+
+// Hook to get project metadata
+export function useGetProjectMetadata() {
+  const url = endpoints.scrum.projectMetadata;
+
+  const { data, isLoading, error, isValidating } = useSWR<MetadataResponse>(
+    url,
+    metadataFetcher,
+    swrOptions
+  );
+
+  const memoizedValue = useMemo(
+    () => ({
+      metadata: data?.metadata || null,
+      metadataLoading: isLoading,
+      metadataError: error,
+      metadataValidating: isValidating,
+      refreshMetadata: () => mutate(url),
+    }),
+    [data, error, isLoading, isValidating, url]
+  );
+
+  return memoizedValue;
+}
+
+// Function to create a new issue
+export const createIssue = async (payload: CreateIssuePayload): Promise<CreateIssueResponse> => {
+  const response = await axios.post(endpoints.scrum.createIssue, payload);
+  return response.data;
+};
+
+// Function to edit an existing issue
+export const editIssue = async (issueKey: string, payload: EditIssuePayload): Promise<EditIssueResponse> => {
+  const response = await axios.put(endpoints.scrum.editIssue(issueKey), payload);
+  return response.data;
+};
 
 // Utility function to refresh all Jira data
 export const refreshAllJiraData = (filters?: JiraFilters) => {
