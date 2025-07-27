@@ -272,7 +272,7 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
   const showRealEstateInfo = useMemo(() => {
     if (!watchedServiceType || !services) return false;
     const selectedService = services.find(s => s.title === watchedServiceType);
-    return selectedService && [10, 11, 16, 19].includes(selectedService.id);
+    return selectedService && [10, 11, 16, 19].includes(selectedService.id!);
   }, [watchedServiceType, services]);
 
   // Get current service ID
@@ -448,16 +448,16 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     if (currentServiceId === 11) { // COMPRAVENTA
       // COMPRAVENTA Calculation:
       // 1. Base para comisión = Monto operación - suma de todos los deducibles
-      // 2. Honorarios Asesor = (Monto operación - deducible principal) × % del servicio  
+      // 2. Honorarios Asesor = (Monto operación - deducible principal) × % del servicio
       // 3. Honorarios empresa = monto operación - deducible principal - monto asesor
       // 4. Tips are calculated from the advisor level % on the base after deductibles
-      
+
       const baseForCommissionAfterDeductibles = transactionAmount - deductible - totalDeductibles;
-      
+
       // Advisor fees = (Transaction - main deductible) × service percentage
       const advisorBaseFees = netAmount * (watchedServicePercentage / 100);
       setValue('advisorFees', advisorBaseFees.toFixed(2));
-      
+
       // Company fees = Transaction - main deductible - advisor fees
       const companyBaseFees = netAmount - advisorBaseFees;
       setValue('companyFees', companyBaseFees.toFixed(2));
@@ -510,30 +510,30 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
       // Propietario = Base × 70%
       // Asesor = Base × 30% × advisor level percentage from metadata
       // Empresa = Total estadía - garantía - propietario - asesor - personal limpieza
-      
+
       const dailyRate = parseCurrency(watchedDailyRate);
       const days = watchedNumberOfDays || 0;
       const guaranteeAmount = parseCurrency(watchedGuaranteeAmount);
       const administrativeFee = parseCurrency(watchedAdministrativeFee);
       const cleaningStaffAmount = parseCurrency(watchedCleaningStaffFeesAmount);
-      
+
       const totalStay = dailyRate * days;
       const baseAmount = totalStay - guaranteeAmount - administrativeFee;
-      
+
       // Property owner gets 70%
       const propertyOwnerAmount = baseAmount * 0.7;
-      
+
       // Advisor gets 30% of base × advisor level percentage
       const advisorBaseAmount = baseAmount * 0.3;
       const advisorFinalAmount = advisorBaseAmount * advisorLevelPct;
-      
+
       // Company gets remainder
       const companyAmount = totalStay - guaranteeAmount - propertyOwnerAmount - advisorFinalAmount - cleaningStaffAmount;
-      
+
       setValue('propertyTipAmount', propertyOwnerAmount.toFixed(2));
       setValue('clientTipAmount', advisorFinalAmount.toFixed(2));
       setValue('doubleTipAmount', companyAmount.toFixed(2));
-      
+
       // Update basic financial fields
       setValue('advisorFees', advisorFinalAmount.toFixed(2));
       setValue('companyFees', companyAmount.toFixed(2));
@@ -612,11 +612,11 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
           const days = watchedNumberOfDays || 0;
           const guaranteeAmount = parseCurrency(watchedGuaranteeAmount);
           const administrativeFee = parseCurrency(watchedAdministrativeFee);
-          
+
           const totalStay = dailyRate * days;
           const baseAmount = totalStay - guaranteeAmount - administrativeFee;
           const advisorBaseAmount = baseAmount * 0.3; // 30% before advisor level percentage
-          
+
           setValue('visionAdvisorSubtotalFees', advisorBaseAmount.toFixed(2));
           setValue('visionAdvisorTotalFees', currentAdvisorFees.toFixed(2)); // Final amount after advisor level %
         } else {
@@ -800,7 +800,6 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                       size="medium"
                       name="dailyRate"
                       label="Tarifa diaria"
-                      required
                     />
                     <Field.Text
                       name="numberOfDays"
@@ -944,7 +943,6 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                         <Field.Currency
                           name="realEstateCommission"
                           label="Monto del alquiler mensual"
-                          required
                         />
                         <Field.Text
                           name="propertyOwnerPercentage"
@@ -1026,12 +1024,12 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                 <Stack direction="row" spacing={2}>
                   <Button
                     variant="contained"
-                    onClick={() => appendDeductible({ 
-                      title: '', 
-                      amount: '', 
-                      description: '', 
-                      advisorPercentage: 50, 
-                      companyPercentage: 50 
+                    onClick={() => appendDeductible({
+                      title: '',
+                      amount: '',
+                      description: '',
+                      advisorPercentage: 50,
+                      companyPercentage: 50
                     })}
                     startIcon={<Iconify icon="eva:plus-fill" />}
                   >
@@ -1088,7 +1086,7 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                         label="Monto"
                         size="medium"
                       />
-                      
+
                       <Field.Text
                         name={`deductibles.${index}.advisorPercentage`}
                         label="% Asesor"
@@ -1105,7 +1103,7 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                           htmlInput: { min: 0, max: 100 }
                         }}
                       />
-                      
+
                       <Field.Text
                         name={`deductibles.${index}.description`}
                         label="Descripción"
@@ -1117,7 +1115,7 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
 
                 {deductibleFields.length === 0 && (
                   <Typography variant="body2" color="text.secondary" textAlign="center" py={2}>
-                    No hay deducibles agregados. Haz clic en "Agregar deducible" para comenzar.
+                    No hay deducibles agregados. Haz clic en &quotAgregar deducible&quot para comenzar.
                   </Typography>
                 )}
               </Stack>

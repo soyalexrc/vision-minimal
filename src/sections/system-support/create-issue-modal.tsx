@@ -171,6 +171,7 @@ export function CreateIssueModal({
       // If there are field errors, show them
       if (err.details?.fieldErrors) {
         const fieldErrors = Object.entries(err.details.fieldErrors)
+          // eslint-disable-next-line @typescript-eslint/no-shadow
           .map(([field, error]) => `${field}: ${error}`)
           .join(', ');
         errorMessage = `Error en campos: ${fieldErrors}`;
