@@ -18,7 +18,7 @@ import { DataGrid, gridClasses, GridActionsCellItem  } from '@mui/x-data-grid';
 
 import { paths } from 'src/routes/paths';
 
-import { isAdmin, canEditProperties, canManagePropertyStatus } from 'src/utils/roles.mapper';
+import { isAdmin } from 'src/utils/roles.mapper';
 
 import { DashboardContent } from 'src/layouts/dashboard';
 
@@ -34,9 +34,8 @@ import { GridActionsLinkItem } from '../../product/view';
 import { EmptyContent } from '../../../components/empty-content';
 import { propertyColumns } from '../../../utils/columns/property-columns';
 import { PropertyGridTableToolbar } from '../../property/property-table-toolbar';
-import {
-  deleteProperty, restoreProperty,
-  useGetPropertiesForCommission, deleteManyProperties, updatePropertyStatus, updatePropertyFeatured,
+import { restoreProperty,
+  deleteManyProperties, updatePropertyStatus, updatePropertyFeatured, useGetPropertiesForCommission,
 } from '../../../actions/property';
 
 import type { IPropertyItemPreview, IPropertyDataFilters } from '../../../types/property';

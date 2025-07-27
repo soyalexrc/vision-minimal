@@ -1,22 +1,22 @@
 import React, { useState, useEffect } from 'react';
 
+import Box from '@mui/material/Box';
+import Alert from '@mui/material/Alert';
 import Dialog from '@mui/material/Dialog';
+import Button from '@mui/material/Button';
+import Select from '@mui/material/Select';
+import Avatar from '@mui/material/Avatar';
+import MenuItem from '@mui/material/MenuItem';
+import TextField from '@mui/material/TextField';
+import InputLabel from '@mui/material/InputLabel';
+import Typography from '@mui/material/Typography';
+import IconButton from '@mui/material/IconButton';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
+import Autocomplete from '@mui/material/Autocomplete';
 import DialogContent from '@mui/material/DialogContent';
 import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import TextField from '@mui/material/TextField';
-import FormControl from '@mui/material/FormControl';
-import InputLabel from '@mui/material/InputLabel';
-import Select from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
-import IconButton from '@mui/material/IconButton';
-import Autocomplete from '@mui/material/Autocomplete';
-import Avatar from '@mui/material/Avatar';
 
 import { Iconify } from 'src/components/iconify';
 
@@ -78,7 +78,7 @@ export function EditIssueModal({
     priority: '',
     assignee: ''
   });
-  
+
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -135,7 +135,7 @@ export function EditIssueModal({
 
   const handleSubmit = async () => {
     if (!issue) return;
-    
+
     if (!formData.summary.trim()) {
       setError('El resumen es obligatorio');
       return;
@@ -143,19 +143,19 @@ export function EditIssueModal({
 
     setSubmitting(true);
     setError(null);
-    
+
     try {
       // Create payload with only changed fields
       const payload: any = {};
-      
+
       // Always include summary if it's different
       if (formData.summary.trim() !== issue.fields.summary) {
         payload.summary = formData.summary.trim();
       }
 
       // Include description if changed
-      const currentDescription = issue.fields.description?.content 
-        ? extractTextFromContent(issue.fields.description.content) 
+      const currentDescription = issue.fields.description?.content
+        ? extractTextFromContent(issue.fields.description.content)
         : '';
       if (formData.description.trim() !== currentDescription) {
         payload.description = formData.description.trim();
@@ -195,7 +195,7 @@ export function EditIssueModal({
 
       await onEditIssue(issue.key, payload);
       setSuccess('Issue actualizado exitosamente!');
-      
+
       // Auto-close after 2 seconds
       setTimeout(() => {
         onIssueUpdated();
@@ -203,19 +203,20 @@ export function EditIssueModal({
     } catch (err: any) {
       // Extract more detailed error information
       let errorMessage = 'Error al actualizar el issue';
-      
+
       if (err.message) {
         errorMessage = err.message;
       }
-      
+
       // If there are field errors, show them
       if (err.details?.fieldErrors) {
         const fieldErrors = Object.entries(err.details.fieldErrors)
+          // eslint-disable-next-line @typescript-eslint/no-shadow
           .map(([field, error]) => `${field}: ${error}`)
           .join(', ');
         errorMessage = `Error en campos: ${fieldErrors}`;
       }
-      
+
       setError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -234,10 +235,10 @@ export function EditIssueModal({
   };
 
   return (
-    <Dialog 
-      open={open} 
+    <Dialog
+      open={open}
       onClose={handleClose}
-      maxWidth="md" 
+      maxWidth="md"
       fullWidth
       PaperProps={{
         sx: { minHeight: '60vh' }
@@ -276,7 +277,7 @@ export function EditIssueModal({
                 {error}
               </Alert>
             )}
-            
+
             {success && (
               <Alert severity="success">
                 {success}
@@ -321,11 +322,11 @@ export function EditIssueModal({
                   {metadata.issueTypes.map((type) => (
                     <MenuItem key={type.id} value={type.name}>
                       <Box display="flex" alignItems="center" gap={1}>
-                        <img 
-                          src={type.iconUrl} 
+                        <img
+                          src={type.iconUrl}
                           alt={type.name}
-                          width={16} 
-                          height={16} 
+                          width={16}
+                          height={16}
                         />
                         <span>{type.name}</span>
                       </Box>
@@ -351,11 +352,11 @@ export function EditIssueModal({
                   {metadata.priorities.map((priority) => (
                     <MenuItem key={priority.id} value={priority.name}>
                       <Box display="flex" alignItems="center" gap={1}>
-                        <img 
-                          src={priority.iconUrl} 
+                        <img
+                          src={priority.iconUrl}
                           alt={priority.name}
-                          width={16} 
-                          height={16} 
+                          width={16}
+                          height={16}
                         />
                         <span>{priority.name}</span>
                       </Box>
@@ -404,13 +405,13 @@ export function EditIssueModal({
       </DialogContent>
 
       <DialogActions sx={{ px: 3, py: 2 }}>
-        <Button 
+        <Button
           onClick={handleClose}
           disabled={submitting}
         >
           Cancelar
         </Button>
-        <Button 
+        <Button
           variant="contained"
           onClick={handleSubmit}
           disabled={metadataLoading || submitting || !formData.summary.trim()}

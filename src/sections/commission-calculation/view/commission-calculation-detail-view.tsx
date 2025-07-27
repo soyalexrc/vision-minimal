@@ -1,9 +1,9 @@
 'use client';
 
 import { z } from 'zod';
-import { useForm, useFieldArray } from 'react-hook-form';
 import { useMemo, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm, useFieldArray } from 'react-hook-form';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -12,8 +12,8 @@ import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
-import CardContent from '@mui/material/CardContent';
 import IconButton from '@mui/material/IconButton';
+import CardContent from '@mui/material/CardContent';
 
 import { paths } from 'src/routes/paths';
 import { useParams } from 'src/routes/hooks';
@@ -431,9 +431,7 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
 
     const transactionAmount = parseCurrency(watchedTransactionAmount);
     const deductible = parseCurrency(watchedDeductibleAmount);
-    const totalDeductibles = watchedDeductibles?.reduce((sum, deductibleItem) => {
-      return sum + parseCurrency(deductibleItem.amount);
-    }, 0) || 0;
+    const totalDeductibles = watchedDeductibles?.reduce((sum, deductibleItem) => sum + parseCurrency(deductibleItem.amount), 0) || 0;
 
     // Calculate base for commission: Transaction - main deductible - additional deductibles
     const netAmount = transactionAmount - deductible;
@@ -605,9 +603,7 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
       const currentAdvisorFees = parseCurrency(watchedAdvisorFees);
 
       // Calculate total deductibles from array
-      const totalDeductibles = watchedDeductibles?.reduce((sum, deductibleItem) => {
-        return sum + parseCurrency(deductibleItem.amount);
-      }, 0) || 0;
+      const totalDeductibles = watchedDeductibles?.reduce((sum, deductibleItem) => sum + parseCurrency(deductibleItem.amount), 0) || 0;
 
       if (showRealEstateInfo) {
         if (currentServiceId === 19) { // ESTADIA POR DIA special case
@@ -961,12 +957,10 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
 
                     {/* Show rental commission for TRASPASO FONDO COMERCIO */}
                     {currentServiceId === 16 && (
-                      <>
-                        <Field.Currency
+                      <Field.Currency
                           name="realEstateCommission"
                           label="Comisión adicional (modalidad alquiler)"
                         />
-                      </>
                     )}
 
                     <Field.Checkbox

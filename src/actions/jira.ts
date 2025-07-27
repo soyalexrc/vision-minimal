@@ -87,6 +87,7 @@ export interface JiraIssueDetail {
         '32x32': string;
       };
       accountType: string;
+      accountId?: string;
       timeZone: string;
     };
     priority: {
