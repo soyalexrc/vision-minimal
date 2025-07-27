@@ -52,6 +52,7 @@ const HIDE_COLUMNS_TOGGLABLE = ['category', 'actions'];
 const STATUS_OPTIONS = [
   { value: 'all', label: 'Todos' },
   { value: 'active', label: 'Activo' },
+  { value: 'reserved', label: 'Reservado' },
   { value: 'inactive', label: 'Inactivo' },
   // { value: 'deleted', label: 'Eliminado' },
 ];
@@ -350,11 +351,11 @@ export function PropertyListView() {
                     color={
                       (tab.value === 'concreted' && 'info') ||
                       (tab.value === 'active' && 'success') ||
-                      (tab.value === 'deleted' && 'error') ||
+                      (tab.value === 'reserved' && 'error') ||
                       'default'
                     }
                   >
-                    {['active', 'concreted', 'inactive', 'rejected', 'deleted'].includes(tab.value)
+                    {['active', 'concreted', 'inactive', 'reserved'].includes(tab.value)
                       ? tableData.filter((property) => property.status === tab.value).length
                       : tableData.length}
                   </Label>
@@ -460,18 +461,33 @@ export function PropertyListView() {
                       ? [
                         <GridActionsCellItem
                           showInMenu
-                          icon={<Iconify icon="rivet-icons:money" />}
-                          label="Marcar concretado"
-                          onClick={() => handleConcreteProperty(params.row.id)}
-                          sx={{ color: 'success.main' }}
-                        />,
-                        <GridActionsCellItem
-                          showInMenu
                           icon={<Iconify icon="solar:trash-bin-trash-bold" />}
                           label="Eliminar"
                           onClick={() => handleDeleteRow(params.row.id)}
                           sx={{ color: 'error.main' }}
                         />,
+                      ]
+                      : []),
+                    ...(params.row.status === 'active' && isAdmin(user.role)
+                      ? [
+                        <GridActionsCellItem
+                          showInMenu
+                          icon={<Iconify icon="tabler:reserved-line" />}
+                          label="Marcar reservado"
+                          onClick={() => handleConcreteProperty(params.row.id)}
+                          sx={{ color: 'purple' }}
+                        />,
+                      ]
+                      : []),
+                    ...(params.row.status === 'reserved' && isAdmin(user.role)
+                      ? [
+                        <GridActionsCellItem
+                          showInMenu
+                          icon={<Iconify icon="rivet-icons:money" />}
+                          label="Marcar concretado"
+                          onClick={() => handleConcreteProperty(params.row.id)}
+                          sx={{ color: 'success.main' }}
+                        />
                       ]
                       : []),
                     ...(params.row.status === 'deleted'

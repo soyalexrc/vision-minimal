@@ -111,6 +111,7 @@ export interface JiraIssueDetail {
       total: number;
     };
     customfield_10016?: number; // Story Points
+    customfield_10091?: number | null; // Pricing
     labels?: string[];
   };
 }
@@ -410,6 +411,21 @@ export function IssueDetailModal({
                               Story Points:
                               <Typography component="span" color="primary.main" fontWeight="medium" sx={{ ml: 0.5 }}>
                                 {issue.fields.customfield_10016}
+                              </Typography>
+                            </Typography>
+                          </Box>
+                        )}
+                        {issue.fields.customfield_10091 && (
+                          <Box display="flex" alignItems="center" gap={1} mb={1}>
+                            <Iconify
+                              icon="solar:dollar-bold"
+                              width={16}
+                              sx={{ color: 'success.main' }}
+                            />
+                            <Typography variant="body2" color="text.secondary">
+                              Precio:
+                              <Typography component="span" color="success.main" fontWeight="medium" sx={{ ml: 0.5 }}>
+                                ${issue.fields.customfield_10091.toLocaleString()}
                               </Typography>
                             </Typography>
                           </Box>

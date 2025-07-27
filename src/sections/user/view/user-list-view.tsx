@@ -127,6 +127,7 @@ export function UserListView() {
       currentUser={{
         id: undefined,
         email: '',
+        metadata: {},
         role: '',
         firstname: '',
         lastname: '',

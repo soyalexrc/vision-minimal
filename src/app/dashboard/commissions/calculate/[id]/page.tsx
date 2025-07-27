@@ -8,9 +8,7 @@ import { CommissionCalculationDetailView } from '../../../../../sections/commiss
 
 export const metadata = { title: `Calcular comision - ${CONFIG.appName}` };
 
-type Props = {
-  params: { id: string };
-};
+type Props = any
 
 export default function Page({ params }: Props) {
   const { id } = params;

@@ -324,6 +324,7 @@ export function SystemSupportView() {
               <TableCell>Resumen</TableCell>
               <TableCell align="center">Estado</TableCell>
               <TableCell align="center">Puntos</TableCell>
+              <TableCell align="center">Precio</TableCell>
               <TableCell>Asignado a</TableCell>
               <TableCell>Creado</TableCell>
               {onEditIssue && <TableCell align="center">Acciones</TableCell>}
@@ -440,6 +441,23 @@ export function SystemSupportView() {
                     </Typography>
                   )}
                 </TableCell>
+                <TableCell align="center">
+                  {issue.fields.customfield_10091 ? (
+                    <Box display="flex" alignItems="center" justifyContent="center" gap={0.5}>
+                      <Iconify
+                        icon="solar:dollar-bold"
+                        sx={{ fontSize: 16, color: 'success.main' }}
+                      />
+                      <Typography variant="body2" fontWeight="medium" color="success.main">
+                        {issue.fields.customfield_10091.toLocaleString()}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Typography variant="caption" color="text.disabled">
+                      -
+                    </Typography>
+                  )}
+                </TableCell>
                 <TableCell>
                   {issue.fields.assignee ? (
                     <Stack direction="row" spacing={1} alignItems="center">
@@ -464,7 +482,7 @@ export function SystemSupportView() {
                     {formatDate(issue.fields.created)}
                   </Typography>
                 </TableCell>
-                {onEditIssue && (
+                {onEditIssue && issue.fields.issuetype.name !== 'Subtask' && (
                   <TableCell align="center">
                     <IconButton
                       size="small"
@@ -581,9 +599,8 @@ export function SystemSupportView() {
 
           <TabPanel value={activeTab} index={0}>
             {currentSprint && (
-              <Alert severity="info" sx={{ mb: 3, mx: 3, mt: 3 }}>
+              <Alert severity="info" icon={<Iconify icon="solar:clock-circle-bold" sx={{ mt: 2, color: '#003768' }} />} sx={{ mb: 3, mx: 3, mt: 3 }}>
                 <Stack direction="row" alignItems="center" spacing={1}>
-                  <Iconify icon="solar:clock-circle-bold" />
                   <Box>
                     <Typography variant="h6">{currentSprint.name}</Typography>
                     <Typography variant="body2">
