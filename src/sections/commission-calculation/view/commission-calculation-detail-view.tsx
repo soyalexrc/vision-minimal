@@ -610,13 +610,25 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
       }, 0) || 0;
 
       if (showRealEstateInfo) {
-        // For real estate services, the advisor fees are already calculated correctly
-        // Subtotal = what advisor would get based on service percentage before deductibles
-        const subtotal = (transactionAmount - deductible) * (watchedServicePercentage / 100);
-        setValue('visionAdvisorSubtotalFees', subtotal.toFixed(2));
-
-        // Total advisor fees = actual calculated advisor fees (already includes deductible calculations)
-        setValue('visionAdvisorTotalFees', currentAdvisorFees.toFixed(2));
+        if (currentServiceId === 19) { // ESTADIA POR DIA special case
+          // For ESTADIA POR DIA, subtotal is the base amount * 30% (before advisor level percentage)
+          const dailyRate = parseCurrency(watchedDailyRate);
+          const days = watchedNumberOfDays || 0;
+          const guaranteeAmount = parseCurrency(watchedGuaranteeAmount);
+          const administrativeFee = parseCurrency(watchedAdministrativeFee);
+          
+          const totalStay = dailyRate * days;
+          const baseAmount = totalStay - guaranteeAmount - administrativeFee;
+          const advisorBaseAmount = baseAmount * 0.3; // 30% before advisor level percentage
+          
+          setValue('visionAdvisorSubtotalFees', advisorBaseAmount.toFixed(2));
+          setValue('visionAdvisorTotalFees', currentAdvisorFees.toFixed(2)); // Final amount after advisor level %
+        } else {
+          // For other real estate services, use service percentage calculation
+          const subtotal = (transactionAmount - deductible) * (watchedServicePercentage / 100);
+          setValue('visionAdvisorSubtotalFees', subtotal.toFixed(2));
+          setValue('visionAdvisorTotalFees', currentAdvisorFees.toFixed(2));
+        }
 
         // Company fees final = already calculated in real estate logic
         const currentCompanyFees = parseCurrency(watchedCompanyFees);
@@ -648,6 +660,11 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     watchedTechnicalFees,
     watchedCleaningStaffFees,
     showRealEstateInfo,
+    currentServiceId,
+    watchedDailyRate,
+    watchedNumberOfDays,
+    watchedGuaranteeAmount,
+    watchedAdministrativeFee,
     setValue
   ]);
 
