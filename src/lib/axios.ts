@@ -50,6 +50,13 @@ export const endpoints = {
     search: '/ally/search',
     delete: '/ally'
   },
+  scrum: {
+    issuesOnBacklog: '/scrum/issues/backlog',
+    issuesOnCurrentSprint: '/scrum/issues/current-sprint',
+    issues: '/scrum/issues',
+    getIssue: (issueKey: string) => `/scrum/issues/${issueKey}`,
+    projectInfo: '/scrum/project',
+  },
   cashflow: {
     list: '/cashflow',
     totals: '/cashflow/totals',
