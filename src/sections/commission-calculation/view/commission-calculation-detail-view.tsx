@@ -108,15 +108,20 @@ const CommissionFormSchema = z.object({
   // Property owner percentage (for rentals)
   propertyOwnerPercentage: z.number().default(50),
 
-  // Daily stay specific
+  // Daily stay specific (ESTADIA POR DIA)
   dailyRate: z.any().optional(),
   numberOfDays: z.number().optional(),
+  guaranteeAmount: z.any().optional(), // Garantía
+  administrativeFee: z.any().optional(), // Tarifa administrativa
+  cleaningStaffFeesAmount: z.any().optional(), // Personal de limpieza amount
 
   // Dynamic deductibles array
   deductibles: z.array(z.object({
     title: z.string().min(1, 'Título es requerido'),
     amount: z.any(),
     description: z.string().optional(),
+    advisorPercentage: z.number().min(0).max(100).default(50), // % that goes to advisor
+    companyPercentage: z.number().min(0).max(100).default(50), // % that goes to company
   })).default([]),
 
   // Final calculations
@@ -200,6 +205,9 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     propertyOwnerPercentage: 50,
     dailyRate: '',
     numberOfDays: 0,
+    guaranteeAmount: '',
+    administrativeFee: '',
+    cleaningStaffFeesAmount: '',
     deductibles: [],
     visionAdvisorSubtotalFees: '',
     propertyTipAmount: '',
@@ -240,12 +248,18 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
   const watchedOperationType = watch('operationType');
   const watchedTip = watch('tip');
   const watchedRealEstateCommission = watch('realEstateCommission');
+  const watchedRentalCommission = watch('rentalCommission');
   const watchedDeductibles = watch('deductibles');
   const watchedAdvisorId = watch('advisorId');
   const watchedAdvisorLevelPercentage = watch('advisorLevelPercentage');
   const watchedPropertyOwnerPercentage = watch('propertyOwnerPercentage');
   const watchedDailyRate = watch('dailyRate');
   const watchedNumberOfDays = watch('numberOfDays');
+  const watchedGuaranteeAmount = watch('guaranteeAmount');
+  const watchedAdministrativeFee = watch('administrativeFee');
+  const watchedCleaningStaffFeesAmount = watch('cleaningStaffFeesAmount');
+  const watchedAdvisorFees = watch('advisorFees');
+  const watchedCompanyFees = watch('companyFees');
   const watchedPropertyTipPercentage = watch('propertyTipPercentage');
   const watchedClientTipPercentage = watch('clientTipPercentage');
   const watchedLawyerFees = watch('lawyerFees');
@@ -273,10 +287,10 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     if (watchedAdvisorId && advisors.length > 0) {
       const selectedAdvisor = advisors.find(advisor => advisor.id?.toString() === watchedAdvisorId);
       if (selectedAdvisor?.metadata) {
-        const metadata = typeof selectedAdvisor.metadata === 'string' 
-          ? JSON.parse(selectedAdvisor.metadata) 
+        const metadata = typeof selectedAdvisor.metadata === 'string'
+          ? JSON.parse(selectedAdvisor.metadata)
           : selectedAdvisor.metadata;
-        
+
         if (metadata.adviser_level_title && metadata.adviser_level_percentage) {
           setValue('advisorLevelTitle', metadata.adviser_level_title);
           setValue('advisorLevelPercentage', metadata.adviser_level_percentage);
@@ -325,12 +339,17 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     if (watchedServiceType && services) {
       const selectedService = services.find(s => s.title === watchedServiceType);
       if (selectedService) {
-        const commisionPercentage = selectedService.commissionPercentage || 0;
-        // Assuming commission_percentage field exists or use default
-        setValue('servicePercentage', commisionPercentage); // Default percentage, should come from service
+        // For real estate services, use advisor level percentage
+        if (showRealEstateInfo && watchedAdvisorLevelPercentage) {
+          setValue('servicePercentage', watchedAdvisorLevelPercentage);
+        } else {
+          // For other services, use service commission percentage
+          const commisionPercentage = selectedService.commissionPercentage || 0;
+          setValue('servicePercentage', commisionPercentage);
+        }
       }
     }
-  }, [watchedServiceType, services, setValue]);
+  }, [watchedServiceType, services, showRealEstateInfo, watchedAdvisorLevelPercentage, setValue]);
 
   // Clear real estate fields when service doesn't require them
   useEffect(() => {
@@ -387,7 +406,7 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
       } else if (isRemodelacionService || isTechnicalService || isCleaningService) {
         setValue('lawyerFees', '0');
         setValue('accountantFees', '0');
-        
+
         // For remodelacion, technical, and cleaning services, fees are manually entered
         const materialFees = parseCurrency(watchedMaterialFees);
         const technicalFees = parseCurrency(watchedTechnicalFees);
@@ -417,24 +436,49 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     }, 0) || 0;
 
     // Calculate base for commission: Transaction - main deductible - additional deductibles
-    const baseForCommission = transactionAmount - deductible - totalDeductibles;
+    const netAmount = transactionAmount - deductible;
+    const baseForCommission = netAmount - totalDeductibles;
     const advisorLevelPct = watchedAdvisorLevelPercentage / 100;
 
+    // Clear other service fees for real estate
+    setValue('lawyerFees', '0');
+    setValue('accountantFees', '0');
+    setValue('materialFees', '0');
+    setValue('technicalFees', '0');
+    setValue('cleaningStaffFees', '0');
+
     if (currentServiceId === 11) { // COMPRAVENTA
+      // COMPRAVENTA Calculation:
+      // 1. Base para comisión = Monto operación - suma de todos los deducibles
+      // 2. Honorarios Asesor = (Monto operación - deducible principal) × % del servicio  
+      // 3. Honorarios empresa = monto operación - deducible principal - monto asesor
+      // 4. Tips are calculated from the advisor level % on the base after deductibles
+      
+      const baseForCommissionAfterDeductibles = transactionAmount - deductible - totalDeductibles;
+      
+      // Advisor fees = (Transaction - main deductible) × service percentage
+      const advisorBaseFees = netAmount * (watchedServicePercentage / 100);
+      setValue('advisorFees', advisorBaseFees.toFixed(2));
+      
+      // Company fees = Transaction - main deductible - advisor fees
+      const companyBaseFees = netAmount - advisorBaseFees;
+      setValue('companyFees', companyBaseFees.toFixed(2));
+
       if (watchedTip) {
+        // Tips are calculated from the base after all deductibles using advisor level %
         if (watchedTip === 'punta_cliente') {
-          const clientTipAmount = baseForCommission * advisorLevelPct;
+          const clientTipAmount = baseForCommissionAfterDeductibles * advisorLevelPct;
           setValue('clientTipAmount', clientTipAmount.toFixed(2));
           setValue('propertyTipAmount', '0');
           setValue('doubleTipAmount', '0');
         } else if (watchedTip === 'punta_inmueble') {
-          const propertyTipAmount = baseForCommission * advisorLevelPct;
+          const propertyTipAmount = baseForCommissionAfterDeductibles * advisorLevelPct;
           setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
           setValue('clientTipAmount', '0');
           setValue('doubleTipAmount', '0');
         } else if (watchedTip === 'doble_punta') {
-          const clientTipAmount = baseForCommission * advisorLevelPct;
-          const propertyTipAmount = baseForCommission * advisorLevelPct;
+          const clientTipAmount = baseForCommissionAfterDeductibles * advisorLevelPct;
+          const propertyTipAmount = baseForCommissionAfterDeductibles * advisorLevelPct;
           const doubleTipAmount = clientTipAmount + propertyTipAmount;
           setValue('clientTipAmount', clientTipAmount.toFixed(2));
           setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
@@ -442,41 +486,74 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
         }
       }
     } else if (currentServiceId === 10) { // ALQUILER
-      const rentalTotal = watchedRealEstateCommission ? parseCurrency(watchedRealEstateCommission) : 0;
-      const adjustedBase = rentalTotal - totalDeductibles;
-      
+      let rentalAmount = watchedRealEstateCommission ? parseCurrency(watchedRealEstateCommission) : 0;
+
+      // Apply rental commission multiplier
+      if (watchedRentalCommission === 'doble_comision') {
+        rentalAmount *= 2;
+      }
+
+      const adjustedBase = rentalAmount - totalDeductibles;
       const propertyOwnerAmount = adjustedBase * (watchedPropertyOwnerPercentage / 100);
       const advisorAmount = adjustedBase * advisorLevelPct;
       const companyAmount = adjustedBase - propertyOwnerAmount - advisorAmount;
-      
+
       setValue('propertyTipAmount', propertyOwnerAmount.toFixed(2));
       setValue('clientTipAmount', advisorAmount.toFixed(2));
       setValue('doubleTipAmount', companyAmount.toFixed(2));
+
+      // Update basic financial fields
+      setValue('advisorFees', advisorAmount.toFixed(2));
+      setValue('companyFees', companyAmount.toFixed(2));
     } else if (currentServiceId === 19) { // ESTADIA POR DIA
+      // ESTADIA POR DIA Calculation:
+      // Total estadía = Daily rate × Number of days
+      // Base = Total estadía - garantía - tarifa administrativa
+      // Propietario = Base × 70%
+      // Asesor = Base × 30% × advisor level percentage from metadata
+      // Empresa = Total estadía - garantía - propietario - asesor - personal limpieza
+      
       const dailyRate = parseCurrency(watchedDailyRate);
       const days = watchedNumberOfDays || 0;
-      const totalStay = dailyRate * days;
-      const adjustedBase = totalStay - totalDeductibles;
+      const guaranteeAmount = parseCurrency(watchedGuaranteeAmount);
+      const administrativeFee = parseCurrency(watchedAdministrativeFee);
+      const cleaningStaffAmount = parseCurrency(watchedCleaningStaffFeesAmount);
       
-      const propertyOwnerAmount = adjustedBase * (watchedPropertyOwnerPercentage / 100);
-      const advisorAmount = adjustedBase * advisorLevelPct;
-      const companyAmount = adjustedBase - propertyOwnerAmount - advisorAmount;
+      const totalStay = dailyRate * days;
+      const baseAmount = totalStay - guaranteeAmount - administrativeFee;
+      
+      // Property owner gets 70%
+      const propertyOwnerAmount = baseAmount * 0.7;
+      
+      // Advisor gets 30% of base × advisor level percentage
+      const advisorBaseAmount = baseAmount * 0.3;
+      const advisorFinalAmount = advisorBaseAmount * advisorLevelPct;
+      
+      // Company gets remainder
+      const companyAmount = totalStay - guaranteeAmount - propertyOwnerAmount - advisorFinalAmount - cleaningStaffAmount;
       
       setValue('propertyTipAmount', propertyOwnerAmount.toFixed(2));
-      setValue('clientTipAmount', advisorAmount.toFixed(2));
+      setValue('clientTipAmount', advisorFinalAmount.toFixed(2));
       setValue('doubleTipAmount', companyAmount.toFixed(2));
+      
+      // Update basic financial fields
+      setValue('advisorFees', advisorFinalAmount.toFixed(2));
+      setValue('companyFees', companyAmount.toFixed(2));
     } else if (currentServiceId === 16) { // TRASPASO FONDO COMERCIO (combines compraventa + rental logic)
-      if (watchedTip && watchedRealEstateCommission) {
-        const rentalCommission = parseCurrency(watchedRealEstateCommission);
-        const combinedBase = baseForCommission + rentalCommission - totalDeductibles;
-        
+      if (watchedTip) {
+        const rentalCommission = watchedRealEstateCommission ? parseCurrency(watchedRealEstateCommission) : 0;
+        const combinedBase = baseForCommission + rentalCommission;
+
+        let advisorFees = 0;
         if (watchedTip === 'punta_cliente') {
           const clientTipAmount = combinedBase * advisorLevelPct;
+          advisorFees = clientTipAmount;
           setValue('clientTipAmount', clientTipAmount.toFixed(2));
           setValue('propertyTipAmount', '0');
           setValue('doubleTipAmount', '0');
         } else if (watchedTip === 'punta_inmueble') {
           const propertyTipAmount = combinedBase * advisorLevelPct;
+          advisorFees = propertyTipAmount;
           setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
           setValue('clientTipAmount', '0');
           setValue('doubleTipAmount', '0');
@@ -484,10 +561,16 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
           const clientTipAmount = combinedBase * advisorLevelPct;
           const propertyTipAmount = combinedBase * advisorLevelPct;
           const doubleTipAmount = clientTipAmount + propertyTipAmount;
+          advisorFees = doubleTipAmount;
           setValue('clientTipAmount', clientTipAmount.toFixed(2));
           setValue('propertyTipAmount', propertyTipAmount.toFixed(2));
           setValue('doubleTipAmount', doubleTipAmount.toFixed(2));
         }
+
+        // Update basic financial fields
+        setValue('advisorFees', advisorFees.toFixed(2));
+        const companyFees = (netAmount + rentalCommission) - advisorFees;
+        setValue('companyFees', companyFees.toFixed(2));
       }
     }
   }, [
@@ -498,9 +581,13 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
     watchedAdvisorLevelPercentage,
     watchedTip,
     watchedRealEstateCommission,
+    watchedRentalCommission,
     watchedPropertyOwnerPercentage,
     watchedDailyRate,
     watchedNumberOfDays,
+    watchedGuaranteeAmount,
+    watchedAdministrativeFee,
+    watchedCleaningStaffFeesAmount,
     currentServiceId,
     setValue
   ]);
@@ -515,40 +602,52 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
       const materialFees = parseCurrency(watchedMaterialFees);
       const technicalFees = parseCurrency(watchedTechnicalFees);
       const cleaningStaffFees = parseCurrency(watchedCleaningStaffFees);
+      const currentAdvisorFees = parseCurrency(watchedAdvisorFees);
 
       // Calculate total deductibles from array
       const totalDeductibles = watchedDeductibles?.reduce((sum, deductibleItem) => {
         return sum + parseCurrency(deductibleItem.amount);
       }, 0) || 0;
 
-      // Calculate subtotal Vision advisor fees
-      const subtotal = (transactionAmount - deductible) * (watchedServicePercentage / 100);
-      setValue('visionAdvisorSubtotalFees', subtotal.toFixed(2));
+      if (showRealEstateInfo) {
+        // For real estate services, the advisor fees are already calculated correctly
+        // Subtotal = what advisor would get based on service percentage before deductibles
+        const subtotal = (transactionAmount - deductible) * (watchedServicePercentage / 100);
+        setValue('visionAdvisorSubtotalFees', subtotal.toFixed(2));
 
-      // Calculate total Vision advisor fees (subtract total deductibles)
-      const totalAdvisorFees = subtotal - totalDeductibles;
-      setValue('visionAdvisorTotalFees', totalAdvisorFees.toFixed(2));
+        // Total advisor fees = actual calculated advisor fees (already includes deductible calculations)
+        setValue('visionAdvisorTotalFees', currentAdvisorFees.toFixed(2));
 
-      // Calculate final company fees
-      // Company fees = total - deductible - advisor - lawyer - accountant - material - technical - cleaning
-      const finalCompanyFees = transactionAmount - deductible - totalAdvisorFees - lawyerFees - accountantFees - materialFees - technicalFees - cleaningStaffFees;
-      setValue('companyFeesFinal', finalCompanyFees.toFixed(2));
+        // Company fees final = already calculated in real estate logic
+        const currentCompanyFees = parseCurrency(watchedCompanyFees);
+        setValue('companyFeesFinal', currentCompanyFees.toFixed(2));
+      } else {
+        // For non-real estate services, use the old logic
+        const subtotal = (transactionAmount - deductible) * (watchedServicePercentage / 100);
+        setValue('visionAdvisorSubtotalFees', subtotal.toFixed(2));
+
+        // Calculate total Vision advisor fees (subtract total deductibles)
+        const totalAdvisorFees = subtotal - totalDeductibles;
+        setValue('visionAdvisorTotalFees', totalAdvisorFees.toFixed(2));
+
+        // Calculate final company fees
+        const finalCompanyFees = transactionAmount - deductible - totalAdvisorFees - lawyerFees - accountantFees - materialFees - technicalFees - cleaningStaffFees;
+        setValue('companyFeesFinal', finalCompanyFees.toFixed(2));
+      }
     }
   }, [
     watchedTransactionAmount,
     watchedDeductibleAmount,
     watchedServicePercentage,
     watchedDeductibles,
+    watchedAdvisorFees,
+    watchedCompanyFees,
     watchedLawyerFees,
     watchedAccountantFees,
     watchedMaterialFees,
     watchedTechnicalFees,
     watchedCleaningStaffFees,
-    isLegalService,
-    isAccountingService,
-    isRemodelacionService,
-    isTechnicalService,
-    isCleaningService,
+    showRealEstateInfo,
     setValue
   ]);
 
@@ -681,6 +780,39 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                   sx={{ gridColumn: '1 / -1' }}
                 />
 
+                {/* ESTADIA POR DIA specific fields */}
+                {currentServiceId === 19 && (
+                  <>
+                    <Field.Currency
+                      size="medium"
+                      name="dailyRate"
+                      label="Tarifa diaria"
+                      required
+                    />
+                    <Field.Text
+                      name="numberOfDays"
+                      label="Número de días"
+                      type="number"
+                      required
+                    />
+                    <Field.Currency
+                      size="medium"
+                      name="guaranteeAmount"
+                      label="Garantía"
+                    />
+                    <Field.Currency
+                      size="medium"
+                      name="administrativeFee"
+                      label="Tarifa administrativa"
+                    />
+                    <Field.Currency
+                      size="medium"
+                      name="cleaningStaffFeesAmount"
+                      label="Personal de limpieza"
+                    />
+                  </>
+                )}
+
                 <Field.Currency
                   size="medium"
                   name="advisorFees"
@@ -809,27 +941,6 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                       </>
                     )}
 
-                    {/* Show daily rate fields for ESTADIA POR DIA */}
-                    {currentServiceId === 19 && (
-                      <>
-                        <Field.Currency
-                          name="dailyRate"
-                          label="Tarifa diaria"
-                          required
-                        />
-                        <Field.Text
-                          name="numberOfDays"
-                          label="Número de días"
-                          type="number"
-                          required
-                        />
-                        <Field.Text
-                          name="propertyOwnerPercentage"
-                          label="Porcentaje propietario (%)"
-                          type="number"
-                        />
-                      </>
-                    )}
 
                     {/* Show rental commission for TRASPASO FONDO COMERCIO */}
                     {currentServiceId === 16 && (
@@ -904,7 +1015,13 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                 <Stack direction="row" spacing={2}>
                   <Button
                     variant="contained"
-                    onClick={() => appendDeductible({ title: '', amount: '', description: '' })}
+                    onClick={() => appendDeductible({ 
+                      title: '', 
+                      amount: '', 
+                      description: '', 
+                      advisorPercentage: 50, 
+                      companyPercentage: 50 
+                    })}
                     startIcon={<Iconify icon="eva:plus-fill" />}
                   >
                     Agregar deducible
@@ -940,13 +1057,13 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                     >
                       <Iconify icon="eva:trash-2-outline" />
                     </IconButton>
-                    
+
                     <Box
                       sx={{
                         rowGap: 2,
                         columnGap: 2,
                         display: 'grid',
-                        gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(3, 1fr)' },
+                        gridTemplateColumns: { xs: 'repeat(1, 1fr)', md: 'repeat(2, 1fr)' },
                         pr: 5, // Space for delete button
                       }}
                     >
@@ -960,10 +1077,28 @@ export function CommissionCalculationDetailView({ id: propId }: Props) {
                         label="Monto"
                         size="medium"
                       />
+                      
+                      <Field.Text
+                        name={`deductibles.${index}.advisorPercentage`}
+                        label="% Asesor"
+                        type="number"
+                        slotProps={{
+                          htmlInput: { min: 0, max: 100 }
+                        }}
+                      />
+                      <Field.Text
+                        name={`deductibles.${index}.companyPercentage`}
+                        label="% Empresa"
+                        type="number"
+                        slotProps={{
+                          htmlInput: { min: 0, max: 100 }
+                        }}
+                      />
+                      
                       <Field.Text
                         name={`deductibles.${index}.description`}
                         label="Descripción"
-                        sx={{ gridColumn: { md: '1 / -1' } }}
+                        sx={{ gridColumn: '1 / -1' }}
                       />
                     </Box>
                   </Box>
