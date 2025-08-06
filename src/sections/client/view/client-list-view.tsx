@@ -244,6 +244,7 @@ export function ClientListView() {
       row.amountOfPets && row.amountOfPets > 0 && `Cantidad de mascotas: ${row.amountOfPets}`,
       row.allowyounger && row.allowyounger !== 'N/A' && `Menores de edad: ${row.allowyounger}`,
       row.amountOfYounger && row.amountOfYounger > 0 && `Cantidad de menores: ${row.amountOfYounger}`,
+      row.assignedto?.id && `Asignado a: ${row.assignedto.name}`,
       Array.isArray(row.zonesOfInterest) && row.zonesOfInterest.length > 0 && `Zona de interés: ${row.zonesOfInterest.join(', ')}`,
       Array.isArray(row.essentialFeatures) && row.essentialFeatures.length > 0 && `Caracteristicas escenciales: ${row.essentialFeatures.join(', ')}`
     ].filter(Boolean).join('\n');
