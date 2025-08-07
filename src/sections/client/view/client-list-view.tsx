@@ -26,6 +26,7 @@ import { useTable, getComparator } from 'src/components/table';
 import { CustomBreadcrumbs } from 'src/components/custom-breadcrumbs';
 
 import { useAuthContext } from '../../../auth/hooks';
+import { isAdmin } from '../../../utils/roles.mapper';
 import { RouterLink } from '../../../routes/components';
 import { GridActionsLinkItem } from '../../product/view';
 import { EmptyContent } from '../../../components/empty-content';
@@ -379,7 +380,7 @@ export function ClientListView() {
                           />,
                     ...(params.row.status !== 'deleted' &&
                     params.row.status !== 'concreted' &&
-                    (user.role !== 'ASESOR_INMOBILIARIO' || params.row.createdby?.id == user.id || params.row.assignedto?.id == user.id)
+                    (isAdmin(user.role) || params.row.createdby?.id == user.id || params.row.assignedto?.id == user.id)
                       ? [
                           <GridActionsCellItem
                             showInMenu
@@ -402,16 +403,20 @@ export function ClientListView() {
                             label="Marcar como reservado"
                             sx={{ color: 'purple' }}
                           />,
-                          <GridActionsCellItem
-                            showInMenu
-                            icon={<Iconify icon="solar:trash-bin-trash-bold" />}
-                            label="Eliminar"
-                            onClick={() => handleDeleteRow(params.row.id)}
-                            sx={{ color: 'error.main' }}
-                          />,
                         ]
                       : []),
-
+                    ...(params.row.status !== 'deleted' &&
+                    params.row.status !== 'concreted' && isAdmin(user.role)
+                      ? [
+                        <GridActionsCellItem
+                          showInMenu
+                          icon={<Iconify icon="solar:trash-bin-trash-bold" />}
+                          label="Eliminar"
+                          onClick={() => handleDeleteRow(params.row.id)}
+                          sx={{ color: 'error.main' }}
+                        />,
+                      ]
+                      : []),
                     ...(params.row.status === 'deleted' &&
                     (user.role !== 'ASESOR_INMOBILIARIO' || params.row.createdby?.id === user.id || params.row.assignedto?.id === user.id)
                       ? [
