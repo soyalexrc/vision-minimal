@@ -232,7 +232,8 @@ export function ClientListView() {
 
     const copyText = [
       `Numero de cliente: ${row.id}`,
-      `Nombre: ${row.name} ${row.lastname || ''}`,
+      `Nombre de cliente: ${row.name} ${row.lastname || ''}`,
+      row.assignedto?.id && `Nombre de asesor asignado: ${row.assignedto.name}`,
       row.phone && `Teléfono: ${row.phone}`,
       row.contactFrom && `Nos contacta desde: ${row.contactFrom} ${referrerLine}`,
       row.propertytype && `Tipo de inmueble: ${row.propertytype}`,
@@ -245,7 +246,6 @@ export function ClientListView() {
       row.amountOfPets && row.amountOfPets > 0 && `Cantidad de mascotas: ${row.amountOfPets}`,
       row.allowyounger && row.allowyounger !== 'N/A' && `Menores de edad: ${row.allowyounger}`,
       row.amountOfYounger && row.amountOfYounger > 0 && `Cantidad de menores: ${row.amountOfYounger}`,
-      row.assignedto?.id && `Asignado a: ${row.assignedto.name}`,
       Array.isArray(row.zonesOfInterest) && row.zonesOfInterest.length > 0 && `Zona de interés: ${row.zonesOfInterest.join(', ')}`,
       Array.isArray(row.essentialFeatures) && row.essentialFeatures.length > 0 && `Caracteristicas escenciales: ${row.essentialFeatures.join(', ')}`
     ].filter(Boolean).join('\n');
