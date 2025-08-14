@@ -1,6 +1,6 @@
 import type { LabelColor } from '../components/label';
 
-export type GetStatusType = 'active' | 'concretized' | 'concretized_fulfill' | 'refund' | 'internal_admin' | 'money_movement' | 'return' | 'regular' | 'change' | 'featured' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
+export type GetStatusType = 'active' | 'reserved' | 'concretized' | 'concretized_fulfill' | 'refund' | 'internal_admin' | 'money_movement' | 'return' | 'regular' | 'change' | 'featured' | 'yes' | 'no' |'inactive' | 'concreted' | 'created' | 'pending' | 'banned' | 'approved' | 'finished' | 'blocked' | 'unassigned' | 'billed' | 'started' | 'notBilled' | 'discounted' | 'notDiscounted' | 'paid' | 'rejected' | 'expired' | 'expiredWithoutMail' | 'deleted' | 'canceled' | 'pendingDocuments' | 'pendingPay' | 'reviewing' | 'sent' | 'completed' | 'draft';
 
 export type GetStatusReturnType = {
   color: string;
@@ -51,6 +51,13 @@ export const getStatus = (status: GetStatusType): GetStatusReturnType => {
         color: '#E90532',
         backgroundColor: '#FFE3E0',
         name: "Bloqueado",
+        variant: "error"
+      };
+    case 'reserved':
+      return {
+        color: '#E90532',
+        backgroundColor: '#FFE3E0',
+        name: "Reservado8",
         variant: "error"
       };
     case 'no':

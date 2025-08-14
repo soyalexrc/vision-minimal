@@ -166,6 +166,25 @@ export function PropertyListView() {
     refresh();
   };
 
+  const handleReservedProperty = async (id: string) => {
+    const promise = await (async () => {
+      const response: AxiosResponse<any> = await updatePropertyStatus(id, 'reserved');
+      if (response.status === 200 || response.status === 201) {
+        return response.data?.message;
+      } else {
+        throw new Error(response.data?.message);
+      }
+    })();
+
+    toast.promise(promise, {
+      loading: 'Cargando...',
+      success: (message: string) => message || 'Registro actualizado!',
+      error: (error) => error || 'Error al actualizar el registro!',
+    });
+
+    refresh();
+  };
+
   const handleShareContent = async (slug: string, title : string) => {
     if (navigator.share) {
       navigator
@@ -474,7 +493,7 @@ export function PropertyListView() {
                           showInMenu
                           icon={<Iconify icon="tabler:reserved-line" />}
                           label="Marcar reservado"
-                          onClick={() => handleConcreteProperty(params.row.id)}
+                          onClick={() => handleReservedProperty(params.row.id)}
                           sx={{ color: 'purple' }}
                         />,
                       ]
