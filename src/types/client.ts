@@ -29,6 +29,10 @@ export type IClientItem = {
   serviceName: string;
   propertytype: string;
   typeOfPerson: string;
+  occupation: string;
+  headquarters: string;
+  personEntry: string;
+  location: string;
   allowpets: string;
   createdby?: {
     name: string;

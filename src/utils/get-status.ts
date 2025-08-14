@@ -57,7 +57,7 @@ export const getStatus = (status: GetStatusType): GetStatusReturnType => {
       return {
         color: '#E90532',
         backgroundColor: '#FFE3E0',
-        name: "Reservado8",
+        name: "Reservado",
         variant: "error"
       };
     case 'no':

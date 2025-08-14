@@ -241,6 +241,10 @@ export function ClientListView() {
       row.specificRequirement && `Requerimiento específico: ${row.specificRequirement}`,
       row.serviceName && `Servicio: ${row.serviceName}`,
       row.typeOfPerson && `Perfil de cliente: ${row.typeOfPerson}`,
+      row.occupation && `Ocupacion: ${row.occupation}`,
+      row.personEntry && `Rubro: ${row.personEntry}`, // personEntry
+      row.headquarters && `Sede: ${row.headquarters}`, // personHeadquarters
+      row.location && `Ubicacion de sede: ${row.location}`, // personLocation
       row.budgetto && `Presupuesto hasta: $${row.budgetto.toLocaleString()}`,
       row.allowpets && row.allowpets !== 'N/A' && `Mascotas: ${row.allowpets}`,
       row.amountOfPets && row.amountOfPets > 0 && `Cantidad de mascotas: ${row.amountOfPets}`,

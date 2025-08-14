@@ -505,7 +505,7 @@ export function PropertyListView() {
                           icon={<Iconify icon="rivet-icons:money" />}
                           label="Marcar concretado"
                           onClick={() => handleConcreteProperty(params.row.id)}
-                          sx={{ color: 'success.main' }}
+                          sx={{ color: 'info.main' }}
                         />
                       ]
                       : []),
